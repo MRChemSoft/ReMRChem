@@ -1,0 +1,2 @@
+# ReMRChem
+Python relativistic implementation
