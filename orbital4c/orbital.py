@@ -19,9 +19,7 @@ class orbital4c:
     def __init__(self, name, mra):
         self.name = name
         self.mra = mra
-        print("init comp")
         self.initComponents()
-        print("set zero")
         self.setZero()
         
     def __getitem__(self, key):
@@ -50,7 +48,7 @@ class orbital4c:
     def normalize(self):
         norm_sq, imag1 = scalar_product(self, self)
         norm = np.sqrt(norm_sq)
-        rescale_orbital(self, 1.0/norm)
+        self.rescale(1.0/norm)
     
     def init_large_components(self, Lar=None, Lai=None, Lbr=None, Lbi=None):
         nr_of_functions = 0

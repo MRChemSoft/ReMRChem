@@ -134,10 +134,10 @@ def init_1s_orbital(k,Z,alpha,origin):
         idx += 1
     return orbital
 
-def normalize_orbital(orbital):
-    norm_sq, imag1 = scalar_product(orbital, orbital)
-    norm = np.sqrt(norm_sq)
-    rescale_orbital(orbital, 1.0/norm)
+#def normalize_orbital(orbital):
+#    norm_sq, imag1 = scalar_product(orbital, orbital)
+#    norm = np.sqrt(norm_sq)
+#    rescale_orbital(orbital, 1.0/norm)
 
 def apply_helmholtz(orbital, energy, c, prec):
     out_orbital = init_empty_orbital()
@@ -149,18 +149,18 @@ def apply_helmholtz(orbital, energy, c, prec):
             out_orbital[comp] *= (-1.0/(2*np.pi))
     return out_orbital
 
-def rescale_orbital(orbital, factor):
-    for key in orbital.components.keys():
-        if(orbital.components[key].squaredNorm() > 0):
-            orbital.components[key] *= factor
+#def rescale_orbital(orbital, factor):
+#    for key in orbital.components.keys():
+#        if(orbital.components[key].squaredNorm() > 0):
+#            orbital.components[key] *= factor
             
-def compute_density(orbital):
-    density = vp.FunctionTree(mra)
-    add_vector = []
-    for comp, func in orbital.items():
-        if(func.squaredNorm() > 0):
-            temp = vp.FunctionTree(mra)
-            vp.advanced.multiply(prec, temp, 1.0, func, func)
-            add_vector.append((1.0,temp))
-    vp.advanced.add(prec/10, density, add_vector)
-    return density
+#def compute_density(orbital):
+#    density = vp.FunctionTree(mra)
+#    add_vector = []
+#    for comp, func in orbital.items():
+#        if(func.squaredNorm() > 0):
+#            temp = vp.FunctionTree(mra)
+#            vp.advanced.multiply(prec, temp, 1.0, func, func)
+#            add_vector.append((1.0,temp))
+#    vp.advanced.add(prec/10, density, add_vector)
+#    return density
