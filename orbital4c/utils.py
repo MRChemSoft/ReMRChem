@@ -1,5 +1,6 @@
 from vampyr import vampyr3d as vp
 import numpy as np
+from .orbital import *
 
 c = 137
 
@@ -63,8 +64,8 @@ def assemble_vectors(orb, orb_grad, shift = 0.0):
     return add_orbitals
 
 def apply_dirac_hamiltonian(orbital, shift = 0.0):
-    out_orbital = init_empty_orbital()
-    orb_grad = compute_orbital_gradient(orbital)
+    out_orbital = orb.orbital4c("Hpsi",orbital.mra)
+    orb_grad = out_orbital.gradient()
     add_vectors = assemble_vectors(orbital, orb_grad, shift)
     for comp, func in out_orbital.items():
         vp.advanced.add(prec/10, func, add_vectors[comp])
