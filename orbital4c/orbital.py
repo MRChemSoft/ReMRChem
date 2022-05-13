@@ -23,12 +23,7 @@ class orbital4c:
         self.comp_array[self.comp_dict[key]] = val
 
     def __str__(self):
-        return ("Large components\n" + 
-                "alpha\n{}" +
-                "beta\n{}" +
-                "Small components\n" +
-                "alpha\n{}" +
-                "beta\n{}".format(self["La"],
+        return ('Large components\n alpha\n{} beta\n{} Small components\n alpha\n{} beta\n{}'.format(self["La"],
                                   self["Lb"],
                                   self["Sa"],
                                   self["Sb"]))
@@ -53,7 +48,7 @@ class orbital4c:
             func.setZero()
 
     def rescale(self, factor):
-            self.comp_array *= factor
+        self.comp_array *= factor
             
     def copy_component(self, func, component='La'):
         self[component].copy_fcns(func.real, func.imag)
@@ -89,16 +84,20 @@ class orbital4c:
         plx = np.array([grad_a[0],grad_b[0]])
         ply = np.array([grad_a[1],grad_b[1]])
         plz = np.array([grad_a[2],grad_b[2]])
-        sigma_x = np.array([[0,1],  [1,0]])
-        sigma_y = np.array([[0,-1j],[1j,0]])
-        sigma_z = np.array([[1,0],  [0,-1]])
+        sigma_x = np.array([[0,1],  
+                            [1,0]])
+        sigma_y = np.array([[0,-1j],
+                            [1j,0]])
+        sigma_z = np.array([[1,0],  
+                            [0,-1]])
+
         sLx = sigma_x@plx
         sLy = sigma_y@ply
         sLz = sigma_z@plz
         
         sigma_p_L = sLx + sLy + sLz
 
-        sigma_p_L *= 0.5/c
+        sigma_p_L *= -0.5j/c
         self['Sa'] = sigma_p_L[0]
         self['Sb'] = sigma_p_L[1]
         
@@ -133,7 +132,7 @@ class orbital4c:
         return density
 
     def alpha(self,index):
-        out_orb = orbital4c("alpha",self.mra)
+        out_orb = orbital4c()
         alpha = np.array([[[0, 0, 0, 1],  
                            [0, 0, 1, 0],
                            [0, 1, 0, 0],
@@ -150,7 +149,7 @@ class orbital4c:
         return out_orb
     
     def beta(self, shift = 0):
-        out_orb = orbital4c("beta",self.mra)
+        out_orb = orbital4c()
         beta = np.array([[c**2 + shift, 0, 0, 0  ],
                          [0, c**2 + shift, 0, 0  ],
                          [0, 0, -c**2 + shift, 0 ],
@@ -161,7 +160,7 @@ class orbital4c:
     def dot(self, other):
         out_real = 0
         out_imag = 0
-        for comp in comp_dict.keys():
+        for comp in self.comp_dict.keys():
             factor = 1
 #            if('S' in comp) factor = c**2
             cr, ci = self[comp].dot(other[comp])
@@ -237,7 +236,7 @@ def apply_dirac_hamiltonian(orbital, prec, shift = 0.0):
     return beta_phi + alpx_phi + alpy_phi + alpz_phi
 
 def apply_potential(factor, potential, orbital, prec):
-    out_orbital = orbital4c("Vpsi",orbital.mra)
+    out_orbital = orbital4c()
     for comp in orbital.comp_dict:
         if orbital[comp].squaredNorm() > 0:
             out_orbital[comp] = cf.apply_potential(factor, potential, orbital[comp], prec)
@@ -263,22 +262,22 @@ def apply_potential(factor, potential, orbital, prec):
 def apply_helmholtz(orbital, energy, c, prec):
     out_orbital = orbital4c()
     for comp in orbital.comp_dict.keys():
-        out_orbital[comp] = cp.apply_helmholtz(orbital[comp], energy, c, prec)
-    out_orbital *= (-1.0/(2*np.pi))
+        out_orbital[comp] = cf.apply_helmholtz(orbital[comp], energy, c, prec)
+    out_orbital.rescale(-1.0/(2*np.pi))
     return out_orbital
 
 def init_1s_orbital(orbital,k,Z,n,alpha,origin,prec):
     gamma_factor = compute_gamma(k,Z,alpha)
     norm_const = compute_norm_const(n, gamma_factor)
     idx = 0
-    for comp in orbital:
+    for comp in orbital.comp_array:
         print('Now projecting component ',comp,idx,alpha,gamma_factor,norm_const)
         func_real = lambda x: one_s_alpha_comp([x[0]-origin[0], x[1]-origin[1], x[2]-origin[2]],
                                                 Z, alpha, gamma_factor, norm_const, idx)
         func_imag = lambda x: one_s_alpha_comp([x[0]-origin[0], x[1]-origin[1], x[2]-origin[2]],
                                                 Z, alpha, gamma_factor, norm_const, idx+1 )
         vp.advanced.project(prec, comp.real, func_real)
-        vp.advanced.project(prec, comp.imag, func_real)
+        vp.advanced.project(prec, comp.imag, func_imag)
         idx += 2
     orbital.normalize()
     return orbital

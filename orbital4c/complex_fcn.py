@@ -7,6 +7,8 @@ class complex_fcn:
     """Complex function trees as pairs of real and imaginary trees"""
     mra = None
     def __init__(self):
+        if(self.mra == None):
+            print("WTF!")
         self.real = vp.FunctionTree(self.mra)
         self.imag = vp.FunctionTree(self.mra)
         self.setZero()
@@ -36,6 +38,15 @@ class complex_fcn:
 
     def __add__(self, other):
         output = complex_fcn()
+        if(self.real == None):
+            print("self real none")
+        if(self.imag == None):
+            print("self imag none")
+        if(other.real == None):
+            print("other real none")
+        if(other.imag == None):
+            print("other imag none")
+            
         output.real = self.real + other.real
         output.imag = self.imag + other.imag
         return output
@@ -73,11 +84,11 @@ class complex_fcn:
         grad = []
         for i in range(3):
             comp = complex_fcn()
-            comp.copy_fcns(real=grad_re[0], imag=grad_im[0])
+            comp.copy_fcns(real=grad_re[i], imag=grad_im[i])
             grad.append(comp)
         return grad
 
-    def derivative(self,dir=0):
+    def derivative(self, dir=0):
         D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
         re_der = D(self.real, dir)
         im_der = D(self.imag, dir)
@@ -104,18 +115,18 @@ class complex_fcn:
     def dot(self, other):
         out_real = 0
         out_imag = 0
-        func_a = self.real_comp
-        func_b = self.imag_comp
-        func_c = other.real_comp
-        func_d = other.imag_comp
+        func_a = self.real
+        func_b = self.imag
+        func_c = other.real
+        func_d = other.imag
         if(func_a.squaredNorm() > 0 and func_c.squaredNorm() > 0):
            out_real += vp.dot(func_a, func_c)
         if(func_b.squaredNorm() > 0 and func_d.squaredNorm() > 0):
-           out_real -= vp.dot(func_b, func_d)
+           out_real += vp.dot(func_b, func_d)
         if(func_a.squaredNorm() > 0 and func_d.squaredNorm() > 0):
            out_imag += vp.dot(func_a, func_d)
         if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
-           out_imag += vp.dot(func_b, func_c)
+           out_imag -= vp.dot(func_b, func_c)
         return out_real, out_imag
 
 
@@ -124,9 +135,10 @@ def apply_potential(factor, potential, func, prec):
     output = complex_fcn()
     vp.advanced.multiply(prec, output.real, factor, potential, func.real)
     vp.advanced.multiply(prec, output.imag, factor, potential, func.imag)
+    return output
 
 def apply_helmholtz(func, energy, c, prec):
-    out_func = orbital4c()
+    out_func = complex_fcn()
     mu = np.sqrt((c**4-energy**2)/c**2)
     print("mu",mu)
     H = vp.HelmholtzOperator(func.mra, mu, prec)
