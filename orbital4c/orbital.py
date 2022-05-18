@@ -106,7 +106,7 @@ class orbital4c:
         for comp,func in self.components.items():
             orb_der[comp] = func.derivative(dir) 
         return orb_der
-        
+    
     def gradient(self):
         orb_grad = {}
         for key in self.comp_dict.keys():
@@ -167,7 +167,32 @@ class orbital4c:
             out_real += cr
             out_imag += ci
         return out_real, out_imag
-
+#Rifare
+    def exchange(self, other, prec):
+        exchange = vp.FunctionTree(self.mra)
+        add_vector = []
+        for zip_comp in zip (self.components.items(), other.components.items()):
+            if((zip_comp[0][1].squaredNorm() > 0) and (zip_comp[1][1].squaredNorm() > 0)):
+                temp = vp.FunctionTree(self.mra)
+                vp.advanced.multiply(prec, temp, 1.0, zip_comp[0][1], zip_comp[1][1])
+                add_vector.append((1.0,temp))
+        vp.advanced.add(prec/10, exchange, add_vector)
+        return exchange
+    
+    def __rmul__(self, value):
+        out_orbital = orbital4c("k*vec",self.mra)
+        real_v = value[0]
+        imag_v = value[1]
+        for comp in ['La','Lb','Sa','Sb']:
+            real_comp = comp + 'r'
+            imag_comp = comp + 'i'
+            func_c = self[real_comp]
+            func_d = self[imag_comp]
+            out_orbital[real_comp] = real_v * func_c - imag_v * func_d
+            out_orbital[imag_comp] = real_v * func_d + imag_v * func_c
+        return out_orbital
+ # end
+    
 def grab_sign(comp, derivative):
     grab_table = {
         'Lar': ( 1, -1,  1), 
@@ -177,8 +202,7 @@ def grab_sign(comp, derivative):
         'Sar': ( 1, -1,  1), 
         'Sai': (-1, -1, -1), 
         'Sbr': ( 1,  1, -1), 
-        'Sbi': (-1,  1,  1), 
-    }
+        'Sbi': (-1,  1,  1)}
     return grab_table[comp][derivative]
     
 def grab_coefficient(comp, derivative, global_factor = 1.0):
@@ -204,7 +228,7 @@ def grab_component(comp, derivative):
         'Sar': ('Lbi', 'Lbr', 'Lai'), 
         'Sai': ('Lbr', 'Lbi', 'Lar'), 
         'Sbr': ('Lai', 'Lar', 'Lbi'), 
-        'Sbi': ('Lar', 'Lai', 'Lbr'), 
+        'Sbi': ('Lar', 'Lai', 'Lbr')
     }
     return grab_table[comp][derivative]
     
@@ -308,4 +332,3 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
     tmp3 = np.exp(-Z*r)
     values = one_s_alpha(x,Z,alpha,gamma_factor)
     return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
-                
