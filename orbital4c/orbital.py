@@ -2,146 +2,172 @@ from vampyr import vampyr3d as vp
 import numpy as np
 import copy as cp
 from scipy.special import gamma
+from orbital4c import complex_fcn as cf
 
 c = 137
 
 class orbital4c:
     """Four components orbital."""
-    def __init__(self, name, mra):
-        self.name = name
-        self.mra = mra
-        self.components = {'Lar': None,
-                          'Lai': None,
-                          'Lbr': None,
-                          'Lbi': None,
-                          'Sar': None,
-                          'Sai': None,
-                          'Sbr': None,
-                          'Sbi': None}
-        self.initComponents()
-        self.setZero()
+    mra = None
+    comp_dict = {'La': 0, 'Lb': 1, 'Sa': 2, 'Sb': 3}
+    def __init__(self):
+        self.comp_array = np.array([cf.complex_fcn(),
+                                    cf.complex_fcn(),
+                                    cf.complex_fcn(),
+                                    cf.complex_fcn()])
         
     def __getitem__(self, key):
-        return self.components[key]
+        return self.comp_array[self.comp_dict[key]]
     
     def __setitem__(self, key, val):
-        self.components[key] = val
-        
-    def print_components(self):
-        print("Large components")
-        print("alpha real")
-        print(self["Lar"])
-        print("alpha imaginary")
-        print(self["Lai"])
-        print("beta real")
-        print(self["Lbr"])
-        print("beta imaginary")
-        print(self["Lbi"])
-        print("Small components")
-        print("alpha real")
-        print(self["Sar"])
-        print("alpha imaginary")
-        print(self["Sai"])
-        print("beta real")
-        print(self["Sbr"])
-        print("beta imaginary")
-        print(self["Sbi"])
+        self.comp_array[self.comp_dict[key]] = val
 
-    def initComponents(self):
-        for key in self.components.keys():
-            self.components[key] = vp.FunctionTree(self.mra)
-            
+    def __str__(self):
+        return ('Large components\n alpha\n{} beta\n{} Small components\n alpha\n{} beta\n{}'.format(self["La"],
+                                  self["Lb"],
+                                  self["Sa"],
+                                  self["Sb"]))
+    
+    def __add__(self, other):
+        output = orbital4c()
+        output.comp_array = self.comp_array + other.comp_array
+        return output
+
+    def __sub__(self, other):
+        output = orbital4c()
+        output.comp_array = self.comp_array - other.comp_array
+        return output
+
+    def __rmul__(self, factor):
+        output = orbital4c()
+        output.comp_array = factor * self.comp_array
+        return output
+                
     def setZero(self):
-        for key in self.components.keys():
-            self.components[key].setZero()
+        for func in self.comp_array:
+            func.setZero()
 
     def rescale(self, factor):
-        for comp,func in self.components.items():
-            if(func.squaredNorm() > 0):
-                func *= factor
+        self.comp_array *= factor
             
-    def init_function(self, function, component):
-        vp.advanced.copy_grid(self[component], function)
-        vp.advanced.copy_func(self[component], function)
+    def copy_component(self, func, component='La'):
+        self[component].copy_fcns(func.real, func.imag)
         
     def normalize(self):
-        norm_sq, imag1 = scalar_product(self, self)
+        norm_sq = 0
+        for comp in self.comp_array:
+            norm_sq += comp.squaredNorm()
         norm = np.sqrt(norm_sq)
         self.rescale(1.0/norm)
     
-    def init_large_components(self, Lar=None, Lai=None, Lbr=None, Lbi=None):
+    def copy_components(self, La=None, Lb=None, Sa=None, Sb=None):
         nr_of_functions = 0
-        if(Lar != None):
+        if(La != None):
             nr_of_functions += 1
-            self.init_function(Lar, 'Lar')
-        if(Lai != None):
+            self.copy_component(La, 'La')
+        if(Lb != None):
             nr_of_functions += 1
-            self.init_function(Lai, 'Lai')
-        if(Lbr != None):
+            self.copy_component(Lb, 'Lb')
+        if(Sa != None):
             nr_of_functions += 1
-            self.init_function(Lbr, 'Lbr')
-        if(Lbi != None):
+            self.copy_component(Sa, 'Sa')
+        if(Sb != None):
             nr_of_functions += 1
-            self.init_function(Lbi, 'Lbi')
+            self.copy_component(Sb, 'Sb')
         if(nr_of_functions == 0):
-            print("WARNING: Large components not initialized!")
+            print("WARNING: No component copied!")
         
     def init_small_components(self,prec):
     # initalize the small components based on the kinetic balance
-        mra = self.mra
-        D = vp.ABGVDerivative(mra, 0.0, 0.0)
-        grad_ar = vp.gradient(D, self['Lar'])
-        print(grad_ar[0],grad_ar[1],grad_ar[2])
-        grad_ai = vp.gradient(D, self['Lai'])
-        grad_br = vp.gradient(D, self['Lbr'])
-        grad_bi = vp.gradient(D, self['Lbi'])
-        sar_tree = vp.FunctionTree(mra)    
-        sai_tree = vp.FunctionTree(mra)    
-        sbr_tree = vp.FunctionTree(mra)    
-        sbi_tree = vp.FunctionTree(mra)    
-        sum_ar = []
-        sum_ar.append(tuple([ 0.5/c, grad_bi[0]]))
-        sum_ar.append(tuple([-0.5/c, grad_br[1]]))
-        sum_ar.append(tuple([ 0.5/c, grad_ai[2]]))
-        vp.advanced.add(prec/10, sar_tree, sum_ar)
-        sum_ai = []
-        sum_ai.append(tuple([-0.5/c, grad_br[0]]))
-        sum_ai.append(tuple([-0.5/c, grad_bi[1]]))
-        sum_ai.append(tuple([-0.5/c, grad_ar[2]]))
-        vp.advanced.add(prec/10, sai_tree, sum_ai)
-        sum_br = []
-        sum_br.append(tuple([ 0.5/c, grad_ai[0]]))
-        sum_br.append(tuple([ 0.5/c, grad_ar[1]]))
-        sum_br.append(tuple([-0.5/c, grad_bi[2]]))
-        vp.advanced.add(prec/10, sbr_tree, sum_br)
-        sum_bi = []
-        sum_bi.append(tuple([-0.5/c, grad_ar[0]]))
-        sum_bi.append(tuple([ 0.5/c, grad_ai[1]]))
-        sum_bi.append(tuple([ 0.5/c, grad_br[2]]))
-        vp.advanced.add(prec/10, sbi_tree, sum_bi)
-        self.init_function(sar_tree, 'Sar')
-        self.init_function(sai_tree, 'Sai')
-        self.init_function(sbr_tree, 'Sbr')
-        self.init_function(sbi_tree, 'Sbi')
+        grad_a = self['La'].gradient()
+        grad_b = self['Lb'].gradient()
+        plx = np.array([grad_a[0],grad_b[0]])
+        ply = np.array([grad_a[1],grad_b[1]])
+        plz = np.array([grad_a[2],grad_b[2]])
+        sigma_x = np.array([[0,1],  
+                            [1,0]])
+        sigma_y = np.array([[0,-1j],
+                            [1j,0]])
+        sigma_z = np.array([[1,0],  
+                            [0,-1]])
+
+        sLx = sigma_x@plx
+        sLy = sigma_y@ply
+        sLz = sigma_z@plz
+        
+        sigma_p_L = sLx + sLy + sLz
+
+        sigma_p_L *= -0.5j/c
+        self['Sa'] = sigma_p_L[0]
+        self['Sb'] = sigma_p_L[1]
+        
+    def derivative(self, dir=0):
+        orb_der = orbital4c("derivative",orbital.mra)
+        for comp,func in self.components.items():
+            orb_der[comp] = func.derivative(dir) 
+        return orb_der
         
     def gradient(self):
-        D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
         orb_grad = {}
-        for comp, func in self.components.items():
-            orb_grad[comp] = vp.gradient(D, self.components[comp]) 
-        return orb_grad
+        for key in self.comp_dict.keys():
+            orb_grad[key] = self[key].gradient()
+        grad = []
+        for i in range(3):
+            comp = orbital4c()
+            comp.copy_components(La = orb_grad['La'][i], 
+                          Lb = orb_grad['Lb'][i], 
+                          Sa = orb_grad['Sa'][i], 
+                          Sb = orb_grad['Sb'][i])
+            grad.append(comp)
+        return grad
     
     def density(self, prec):
         density = vp.FunctionTree(self.mra)
         add_vector = []
-        for comp, func in self.components.items():
-            if(func.squaredNorm() > 0):
-                temp = vp.FunctionTree(self.mra)
-                vp.advanced.multiply(prec, temp, 1.0, func, func)
+        for comp in self.comp_array:
+            temp = comp.density(prec)
+            if(temp.squaredNorm() > 0):
                 add_vector.append((1.0,temp))
         vp.advanced.add(prec/10, density, add_vector)
         return density
+
+    def alpha(self,index):
+        out_orb = orbital4c()
+        alpha = np.array([[[0, 0, 0, 1],  
+                           [0, 0, 1, 0],
+                           [0, 1, 0, 0],
+                           [1, 0, 0, 0]],
+                          [[0,  0,  0,  -1j],
+                           [0,  0,  1j,  0],
+                           [0, -1j, 0,   0],
+                           [1j, 0,  0,   0]],
+                          [[0, 0, 1, 0],
+                           [0, 0, 0,-1],
+                           [1, 0, 0, 0],
+                           [0,-1, 0, 0]]])
+        out_orb.comp_array = alpha[index]@self.comp_array
+        return out_orb
     
+    def beta(self, shift = 0):
+        out_orb = orbital4c()
+        beta = np.array([[c**2 + shift, 0, 0, 0  ],
+                         [0, c**2 + shift, 0, 0  ],
+                         [0, 0, -c**2 + shift, 0 ],
+                         [0, 0,  0, -c**2 + shift]])
+        out_orb.comp_array = beta@self.comp_array
+        return out_orb
+    
+    def dot(self, other):
+        out_real = 0
+        out_imag = 0
+        for comp in self.comp_dict.keys():
+            factor = 1
+#            if('S' in comp) factor = c**2
+            cr, ci = self[comp].dot(other[comp])
+            out_real += cr
+            out_imag += ci
+        return out_real, out_imag
+
 def grab_sign(comp, derivative):
     grab_table = {
         'Lar': ( 1, -1,  1), 
@@ -202,86 +228,57 @@ def assemble_vectors(orb, orb_grad, shift = 0.0):
     return add_orbitals
 
 def apply_dirac_hamiltonian(orbital, prec, shift = 0.0):
-    out_orbital = orbital4c("Hpsi",orbital.mra)
-    orb_grad = orbital.gradient()
-    add_vectors = assemble_vectors(orbital, orb_grad, shift)
-    for comp, func in out_orbital.components.items():
-        vp.advanced.add(prec/10, func, add_vectors[comp])
+    beta_phi = orbital.beta(shift)
+    grad_phi = orbital.gradient()
+    alpx_phi = -1j * c * grad_phi[0].alpha(0)
+    alpy_phi = -1j * c * grad_phi[1].alpha(1)
+    alpz_phi = -1j * c * grad_phi[2].alpha(2)
+    return beta_phi + alpx_phi + alpy_phi + alpz_phi
+
+def apply_potential(factor, potential, orbital, prec):
+    out_orbital = orbital4c()
+    for comp in orbital.comp_dict:
+        if orbital[comp].squaredNorm() > 0:
+            out_orbital[comp] = cf.apply_potential(factor, potential, orbital[comp], prec)
     return out_orbital
 
-def apply_potential(nuclear_potential, orbital, prec):
-    out_orbital = orbital4c("Vpsi",orbital.mra)
-    for comp, func in orbital.components.items():
-        if func.squaredNorm() > 0:
-            vp.advanced.multiply(prec, out_orbital[comp], -1.0, nuclear_potential, func)
-    return out_orbital
-
-def add_orbitals(a, orb_a, b, orb_b, prec):
-    out_orb = orbital4c("a_plus_b",orb_a.mra)
-    for comp, func in out_orb.components.items():        
-        func_a = orb_a[comp]
-        func_b = orb_b[comp]
-        if (func_a.squaredNorm() > 0 and func_b.squaredNorm() > 0):
-            vp.advanced.add(prec/10, func, a, func_a, b, func_b)
-        elif(func_a.squaredNorm() > 0):
-            out_orb.init_function(func_a, comp)
-            func *= a
-        elif(func_b.squaredNorm() > 0):
-            out_orb.init_function(func_b, comp)
-            func *= b
-        else:
-            print('Warning: adding two empty trees')
-    return out_orb
-
-def scalar_product(orb_a, orb_b):
-    out_real = 0
-    out_imag = 0
-    for comp in ['La','Lb','Sa','Sb']:
-        factor = 1
-#        if('S' in comp):
-#            factor = c**2
-        real_comp = comp + 'r'
-        imag_comp = comp + 'i'
-        ac = 0
-        bd = 0
-        ad = 0
-        bc = 0
-        func_a = orb_a[real_comp]
-        func_b = orb_a[imag_comp]
-        func_c = orb_b[real_comp]
-        func_d = orb_b[imag_comp]
-        if(func_a.squaredNorm() > 0 and func_c.squaredNorm() > 0):
-           ac = vp.dot(func_a, func_c)
-        if(func_b.squaredNorm() > 0 and func_d.squaredNorm() > 0):
-           bd = vp.dot(func_b, func_d)
-        if(func_a.squaredNorm() > 0 and func_d.squaredNorm() > 0):
-           ad = vp.dot(func_a, func_d)
-        if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
-           bc = vp.dot(func_b, func_c)
-        out_real += (ac + bd) / factor
-        out_imag += (ad - bc) / factor
-    return out_real, out_imag
+#def add_orbitals(a, orb_a, b, orb_b, prec):
+#    out_orb = orbital4c("a_plus_b",orb_a.mra)
+#    for comp, func in out_orb.components.items():        
+#        func_a = orb_a[comp]
+#        func_b = orb_b[comp]
+#        if (func_a.squaredNorm() > 0 and func_b.squaredNorm() > 0):
+#            vp.advanced.add(prec/10, func, a, func_a, b, func_b)
+#        elif(func_a.squaredNorm() > 0):
+#            out_orb.init_function(func_a, comp)
+#            func *= a
+#        elif(func_b.squaredNorm() > 0):
+#            out_orb.init_function(func_b, comp)
+#            func *= b
+#        else:
+#            print('Warning: adding two empty trees')
+#    return out_orb
 
 def apply_helmholtz(orbital, energy, c, prec):
-    out_orbital = orbital4c("apply_helmholz",orbital.mra)
-    mu = np.sqrt((c**4-energy**2)/c**2)
-    print("mu",mu)
-    H = vp.HelmholtzOperator(orbital.mra, mu, prec)
-    for comp, func in orbital.components.items():
-        if func.squaredNorm() > 0:
-            vp.advanced.apply(prec, out_orbital[comp], H, func)
-            out_orbital[comp] *= (-1.0/(2*np.pi))
+    out_orbital = orbital4c()
+    for comp in orbital.comp_dict.keys():
+        out_orbital[comp] = cf.apply_helmholtz(orbital[comp], energy, c, prec)
+    out_orbital.rescale(-1.0/(2*np.pi))
     return out_orbital
 
 def init_1s_orbital(orbital,k,Z,n,alpha,origin,prec):
     gamma_factor = compute_gamma(k,Z,alpha)
     norm_const = compute_norm_const(n, gamma_factor)
     idx = 0
-    for comp, func in orbital.components.items():
+    for comp in orbital.comp_array:
         print('Now projecting component ',comp,idx,alpha,gamma_factor,norm_const)
-        analytic_func = lambda x: one_s_alpha_comp([x[0]-origin[0],x[1]-origin[1],x[2]-origin[2]],Z,alpha,gamma_factor,norm_const,idx)
-        vp.advanced.project(prec, func, analytic_func)
-        idx += 1
+        func_real = lambda x: one_s_alpha_comp([x[0]-origin[0], x[1]-origin[1], x[2]-origin[2]],
+                                                Z, alpha, gamma_factor, norm_const, idx)
+        func_imag = lambda x: one_s_alpha_comp([x[0]-origin[0], x[1]-origin[1], x[2]-origin[2]],
+                                                Z, alpha, gamma_factor, norm_const, idx+1 )
+        vp.advanced.project(prec, comp.real, func_real)
+        vp.advanced.project(prec, comp.imag, func_imag)
+        idx += 2
     orbital.normalize()
     return orbital
 
