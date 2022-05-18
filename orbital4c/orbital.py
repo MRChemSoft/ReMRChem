@@ -21,6 +21,9 @@ class orbital4c:
     
     def __setitem__(self, key, val):
         self.comp_array[self.comp_dict[key]] = val
+        
+    def __len__(self):
+        return 4
 
     def __str__(self):
         return ('Large components\n alpha\n{} beta\n{} Small components\n alpha\n{} beta\n{}'.format(self["La"],
