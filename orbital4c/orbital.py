@@ -109,7 +109,7 @@ class orbital4c:
         for comp,func in self.components.items():
             orb_der[comp] = func.derivative(dir) 
         return orb_der
-        
+    
     def gradient(self):
         orb_grad = {}
         for key in self.comp_dict.keys():
@@ -260,4 +260,3 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
     tmp3 = np.exp(-Z*r)
     values = one_s_alpha(x,Z,alpha,gamma_factor)
     return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
-                
