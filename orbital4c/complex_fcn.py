@@ -7,8 +7,6 @@ class complex_fcn:
     """Complex function trees as pairs of real and imaginary trees"""
     mra = None
     def __init__(self):
-        if(self.mra == None):
-            print("WTF!")
         self.real = vp.FunctionTree(self.mra)
         self.imag = vp.FunctionTree(self.mra)
         self.setZero()
@@ -38,15 +36,6 @@ class complex_fcn:
 
     def __add__(self, other):
         output = complex_fcn()
-        if(self.real == None):
-            print("self real none")
-        if(self.imag == None):
-            print("self imag none")
-        if(other.real == None):
-            print("other real none")
-        if(other.imag == None):
-            print("other imag none")
-            
         output.real = self.real + other.real
         output.imag = self.imag + other.imag
         return output
@@ -140,7 +129,6 @@ def apply_potential(factor, potential, func, prec):
 def apply_helmholtz(func, energy, c, prec):
     out_func = complex_fcn()
     mu = np.sqrt((c**4-energy**2)/c**2)
-    print("mu",mu)
     H = vp.HelmholtzOperator(func.mra, mu, prec)
     if(func.real.squaredNorm() > 0):
         vp.advanced.apply(prec, out_func.real, H, func.real)

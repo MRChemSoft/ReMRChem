@@ -274,7 +274,6 @@ def init_1s_orbital(orbital,k,Z,n,alpha,origin,prec):
     norm_const = compute_norm_const(n, gamma_factor)
     idx = 0
     for comp in orbital.comp_array:
-        print('Now projecting component ',comp,idx,alpha,gamma_factor,norm_const)
         func_real = lambda x: one_s_alpha_comp([x[0]-origin[0], x[1]-origin[1], x[2]-origin[2]],
                                                 Z, alpha, gamma_factor, norm_const, idx)
         func_imag = lambda x: one_s_alpha_comp([x[0]-origin[0], x[1]-origin[1], x[2]-origin[2]],
