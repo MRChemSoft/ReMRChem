@@ -170,66 +170,13 @@ class orbital4c:
             out_real += cr
             out_imag += ci
         return out_real, out_imag
-
-def grab_sign(comp, derivative):
-    grab_table = {
-        'Lar': ( 1, -1,  1), 
-        'Lai': (-1, -1, -1), 
-        'Lbr': ( 1,  1, -1), 
-        'Lbi': (-1,  1,  1), 
-        'Sar': ( 1, -1,  1), 
-        'Sai': (-1, -1, -1), 
-        'Sbr': ( 1,  1, -1), 
-        'Sbi': (-1,  1,  1), 
-    }
-    return grab_table[comp][derivative]
-    
-def grab_coefficient(comp, derivative, global_factor = 1.0):
-    grab_table = {
-        'Lar': (c**2,c**2,c**2), 
-        'Lai': (c**2,c**2,c**2),
-        'Lbr': (c**2,c**2,c**2),
-        'Lbi': (c**2,c**2,c**2),
-        'Sar': (1, 1, 1), 
-        'Sai': (1, 1, 1), 
-        'Sbr': (1, 1, 1), 
-        'Sbi': (1, 1, 1)
-    }
-    #return grab_table[comp][derivative] * global_factor
-    return c
-    
-def grab_component(comp, derivative):
-    grab_table = {
-        'Lar': ('Sbi', 'Sbr', 'Sai'), 
-        'Lai': ('Sbr', 'Sbi', 'Sar'), 
-        'Lbr': ('Sai', 'Sar', 'Sbi'), 
-        'Lbi': ('Sar', 'Sai', 'Sbr'), 
-        'Sar': ('Lbi', 'Lbr', 'Lai'), 
-        'Sai': ('Lbr', 'Lbi', 'Lar'), 
-        'Sbr': ('Lai', 'Lar', 'Lbi'), 
-        'Sbi': ('Lar', 'Lai', 'Lbr'), 
-    }
-    return grab_table[comp][derivative]
-    
-def assemble_vectors(orb, orb_grad, shift = 0.0):
-    add_orbitals = {}
-    for comp, func in orb.components.items():
-        add_orbitals[comp] = []
-        if('L' in comp):
-            beta_factor = c**2 + shift
-        else:
-            beta_factor = -c**2 + shift            
-        if(func.squaredNorm() > 0):
-            add_orbitals[comp].append((beta_factor, func))
-        for idx in range(3):
-            comp_der = grab_component(comp, idx)
-            comp_sign = grab_sign(comp, idx)
-            comp_coeff = grab_coefficient(comp, idx)
-            if(orb_grad[comp_der][idx].squaredNorm() > 0):
-                tmp_tuple = (comp_sign * comp_coeff,orb_grad[comp_der][idx]) 
-                add_orbitals[comp].append(tmp_tuple)
-    return add_orbitals
-
+#    
+# here we should consider emulating the behavior of MRChem operators
+#
+def matrix_element(bra, operator, ket):
+    Opsi = operator(ket)
+    return bra.dot(Opsi)
+                   
 def apply_dirac_hamiltonian(orbital, prec, shift = 0.0):
     beta_phi = orbital.beta(shift)
     grad_phi = orbital.gradient()
@@ -244,7 +191,9 @@ def apply_potential(factor, potential, orbital, prec):
         if orbital[comp].squaredNorm() > 0:
             out_orbital[comp] = cf.apply_potential(factor, potential, orbital[comp], prec)
     return out_orbital
-
+#
+# Keep this for now to maybe enable precise addition later
+#
 #def add_orbitals(a, orb_a, b, orb_b, prec):
 #    out_orb = orbital4c("a_plus_b",orb_a.mra)
 #    for comp, func in out_orb.components.items():        
@@ -289,6 +238,7 @@ def compute_gamma(k,Z,alpha):
 
 def compute_norm_const(n, gamma_factor):
 # THIS NORMALIZATION CONSTANT IS FROM WIKIPEDIA BUT IT DOES NOT AGREE WITH Bethe&Salpeter
+# and most importantly, it is wrong :-)
     tmp1 = 2 * n * (n + gamma_factor)
     tmp2 = 1 / (gamma_factor * gamma(2 * gamma_factor))
     return np.sqrt(tmp2/tmp1)
