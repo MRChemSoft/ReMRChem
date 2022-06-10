@@ -102,7 +102,7 @@ class orbital4c:
         self['Sb'] = sigma_p_L[1]
         
     def derivative(self, dir=0):
-        orb_der = orbital4c("derivative",orbital.mra)
+        orb_der = orbital4c("derivative", orbital.mra)
         for comp,func in self.components.items():
             orb_der[comp] = func.derivative(dir) 
         return orb_der
@@ -130,6 +130,17 @@ class orbital4c:
                 add_vector.append((1.0,temp))
         vp.advanced.add(prec/10, density, add_vector)
         return density
+
+    #CT
+    def exchange(self, other, prec):
+        exchange = vp.FunctionTree(self.mra)
+        add_vector = []
+        for comp in self.comp_array:
+            temp = comp.density(prec)
+            if(temp.squaredNorm() > 0):
+                add_vector.append((1.0,temp))    
+        vp.advanced.add(prec/10, exchange, add_vector)
+        return exchange
 
     def alpha(self,index):
         out_orb = orbital4c()
@@ -167,32 +178,24 @@ class orbital4c:
             out_real += cr
             out_imag += ci
         return out_real, out_imag
-#Rifare
-    def exchange(self, other, prec):
-        exchange = vp.FunctionTree(self.mra)
-        add_vector = []
-        for zip_comp in zip (self.components.items(), other.components.items()):
-            if((zip_comp[0][1].squaredNorm() > 0) and (zip_comp[1][1].squaredNorm() > 0)):
-                temp = vp.FunctionTree(self.mra)
-                vp.advanced.multiply(prec, temp, 1.0, zip_comp[0][1], zip_comp[1][1])
-                add_vector.append((1.0,temp))
-        vp.advanced.add(prec/10, exchange, add_vector)
-        return exchange
     
-    def __rmul__(self, value):
-        out_orbital = orbital4c("k*vec",self.mra)
-        real_v = value[0]
-        imag_v = value[1]
-        for comp in ['La','Lb','Sa','Sb']:
-            real_comp = comp + 'r'
-            imag_comp = comp + 'i'
-            func_c = self[real_comp]
-            func_d = self[imag_comp]
-            out_orbital[real_comp] = real_v * func_c - imag_v * func_d
-            out_orbital[imag_comp] = real_v * func_d + imag_v * func_c
-        return out_orbital
- # end
-    
+    #CT
+    def div(self, other):
+        for comp in self.comp_dict.keys():
+            factor = 1
+            z = self[comp]
+            w = other[comp]
+            a = z.real
+            b = z.imag
+            c = w.real
+            d = w.imag
+            numreal = a*c + b*d
+            numimag = b*c - a*d
+            denom = c*c + d*d
+            out_real = np.divide(numreal,denom)
+            out_imag = np.divide(numimag,denom)
+        return complex(out_real, out_imag)
+
 def grab_sign(comp, derivative):
     grab_table = {
         'Lar': ( 1, -1,  1), 
@@ -266,23 +269,6 @@ def apply_potential(factor, potential, orbital, prec):
             out_orbital[comp] = cf.apply_potential(factor, potential, orbital[comp], prec)
     return out_orbital
 
-#def add_orbitals(a, orb_a, b, orb_b, prec):
-#    out_orb = orbital4c("a_plus_b",orb_a.mra)
-#    for comp, func in out_orb.components.items():        
-#        func_a = orb_a[comp]
-#        func_b = orb_b[comp]
-#        if (func_a.squaredNorm() > 0 and func_b.squaredNorm() > 0):
-#            vp.advanced.add(prec/10, func, a, func_a, b, func_b)
-#        elif(func_a.squaredNorm() > 0):
-#            out_orb.init_function(func_a, comp)
-#            func *= a
-#        elif(func_b.squaredNorm() > 0):
-#            out_orb.init_function(func_b, comp)
-#            func *= b
-#        else:
-#            print('Warning: adding two empty trees')
-#    return out_orb
-
 def apply_helmholtz(orbital, energy, c, prec):
     out_orbital = orbital4c()
     for comp in orbital.comp_dict.keys():
@@ -332,3 +318,10 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
     tmp3 = np.exp(-Z*r)
     values = one_s_alpha(x,Z,alpha,gamma_factor)
     return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
+
+#CT
+def Gaunt(orbital, prec):
+    alpx_phi = orbital.alpha(0)
+    alpy_phi = orbital.alpha(1)
+    alpz_phi = orbital.alpha(2)
+    return alpx_phi + alpy_phi + alpz_phi
