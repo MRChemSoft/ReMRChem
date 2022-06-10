@@ -45,7 +45,11 @@ class orbital4c:
         output = orbital4c()
         output.comp_array = factor * self.comp_array
         return output
-                
+
+    def cromp(self):
+        for func in self.comp_array:
+            func.crop()
+
     def setZero(self):
         for func in self.comp_array:
             func.setZero()
