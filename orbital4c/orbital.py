@@ -105,7 +105,7 @@ class orbital4c:
         self['Sb'] = sigma_p_L[1]
         
     def derivative(self, dir=0):
-        orb_der = orbital4c("derivative",orbital.mra)
+        orb_der = orbital4c("derivative", orbital.mra)
         for comp,func in self.components.items():
             orb_der[comp] = func.derivative(dir) 
         return orb_der
@@ -133,6 +133,17 @@ class orbital4c:
                 add_vector.append((1.0,temp))
         vp.advanced.add(prec/10, density, add_vector)
         return density
+
+    #CT
+    def exchange(self, other, prec):
+        exchange = vp.FunctionTree(self.mra)
+        add_vector = []
+        for comp in self.comp_array:
+            temp = comp.density(prec)
+            if(temp.squaredNorm() > 0):
+                add_vector.append((1.0,temp))    
+        vp.advanced.add(prec/10, exchange, add_vector)
+        return exchange
 
     def alpha(self,index):
         out_orb = orbital4c()
@@ -260,3 +271,10 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
     tmp3 = np.exp(-Z*r)
     values = one_s_alpha(x,Z,alpha,gamma_factor)
     return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
+
+#CT
+def Gaunt(orbital, prec):
+    alpx_phi = orbital.alpha(0)
+    alpy_phi = orbital.alpha(1)
+    alpz_phi = orbital.alpha(2)
+    return alpx_phi + alpy_phi + alpz_phi

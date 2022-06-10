@@ -100,6 +100,22 @@ class complex_fcn:
             vp.advanced.multiply(prec, temp_i, 1.0, self.imag, self.imag)
         vp.advanced.add(prec/10, density, [temp_r, temp_i])
         return density
+
+    def exchange(self, other, prec):
+        exchange = vp.FunctionTree(self.mra)
+        add_vector = []
+        temp_r = vp.FunctionTree(self.mra)
+        temp_r.setZero()
+        temp_i = vp.FunctionTree(self.mra)
+        temp_i.setZero()
+        if(self.real.squaredNorm() > 0):
+            print("real non zero")
+            vp.advanced.multiply(prec, temp_r, 1.0, self.real, other[0])
+        if(self.imag.squaredNorm() > 0):
+            print("imag non zero")
+            vp.advanced.multiply(prec, temp_i, 1.0, self.imag, other[1])
+        vp.advanced.add(prec/10, exchange, [temp_r, temp_i])
+        return exchange
     
     def dot(self, other):
         out_real = 0
