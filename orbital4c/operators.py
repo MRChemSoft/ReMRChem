@@ -92,7 +92,6 @@ class CouloumbOperator():
         rho = self.Psi[0].density(self.prec)
         for i in range(1, len(self.Psi)):
             rho += self.Psi[i].density(self.prec)
-        rho.crop(self.prec)
         self.potential = (4.0*np.pi)*self.poisson(rho)
 
     def __call__(self, Phi):
