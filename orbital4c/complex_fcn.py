@@ -29,7 +29,7 @@ class complex_fcn:
         factor = 1.0 / norm 
         self.real *= factor
         self.imag *= factor
-        
+    
     def setZero(self):
         self.real.setZero()
         self.imag.setZero()
@@ -87,7 +87,7 @@ class complex_fcn:
         im_der = D(self.imag, dir)
         der_func = complex_fcn()
         der_func.init_fcn(re_der, im_der)
-        return der_fcn
+        return der_func
         
     def density(self, prec):
         density = vp.FunctionTree(self.mra)
