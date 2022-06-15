@@ -40,10 +40,15 @@ class orbital4c:
 
     def __rmul__(self, factor):
         output = orbital4c()
-        output.comp_array = factor * self.comp_array
+        output.comp_array =  factor * self.comp_array
         return output
 
-    def cromp(self):
+    def __mul__(self, factor):
+        output = orbital4c()
+        output.comp_array =  factor * self.comp_array 
+        return output   
+
+    def crop(self):
         for func in self.comp_array:
             func.crop()
 
@@ -129,7 +134,7 @@ class orbital4c:
         density = vp.FunctionTree(self.mra)
         add_vector = []
         for comp in self.comp_array:
-            temp = comp.density(prec)
+            temp = comp.density(prec).crop(prec)
             if(temp.squaredNorm() > 0):
                 add_vector.append((1.0,temp))
         vp.advanced.add(prec/10, density, add_vector)
@@ -140,7 +145,7 @@ class orbital4c:
         exchange = vp.FunctionTree(self.mra)
         add_vector = []
         for comp in self.comp_array:
-            temp = comp.density(prec)
+            temp = comp.density(prec).crop(prec)
             if(temp.squaredNorm() > 0):
                 add_vector.append((1.0,temp))    
         vp.advanced.add(prec/10, exchange, add_vector)
@@ -333,10 +338,3 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
     tmp3 = np.exp(-Z*r)
     values = one_s_alpha(x,Z,alpha,gamma_factor)
     return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
-
-#CT
-def Gaunt(orbital, prec):
-    alpx_phi = orbital.alpha(0)
-    alpy_phi = orbital.alpha(1)
-    alpz_phi = orbital.alpha(2)
-    return alpx_phi + alpy_phi + alpz_phi
