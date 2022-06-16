@@ -34,9 +34,9 @@ class complex_fcn:
         self.real.setZero()
         self.imag.setZero()
 
-    def crop(self):
-        self.real.crop()
-        self.imag.crop()
+    def crop(self, prec):
+        self.real.crop(prec)
+        self.imag.crop(prec)
 
     def __add__(self, other):
         output = complex_fcn()
