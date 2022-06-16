@@ -191,12 +191,9 @@ class orbital4c:
     def norm(self):
         out = 0
         for comp in self.comp_dict.keys():
-            cr = np.real(self[comp])
-            ci = np.imag(self[comp])
-            out_real = cr * cr 
-            out_imag = ci * ci
-            out2 = out_real + out_imag
-            out = out2.norm()
+            comp_norm = self[comp].squaredNorm()
+            out += comp_norm
+        out = np.sqrt(out)
         return out
 
     #CT
