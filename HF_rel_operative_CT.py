@@ -183,23 +183,34 @@ tot_energy = e_hd1 + e_hd2 + e_v1 +e_v2 + e_J - e_K
 print("Total_Energy", tot_energy)
 
 
-# 15# Calculation of necessary potential contributions to Helmotz (hd-epsilon)
+# 15# Calculation of necessary potential contributions to Helmotz (hd + epsilon) * psi
 tmp1 = orb.apply_dirac_hamiltonian(spinorb1, energy_11, prec)
 print(tmp1)
 tmp2 = orb.apply_dirac_hamiltonian(spinorb2, energy_22, prec)
 print(tmp2)
 
+# 16# Calculation of necessary potential contributions to Helmotz g
+tmp_g1 = add_psi1 - energy_12*spinorb2
+tmp_g2 = add_psi2 - energy_21*spinorb1
+print("g1", tmp_g1)
+print("g2", tmp_g2)
 
-# 16# Calculation of Helmotz
-new_orbital_1 = orb.apply_helmholtz(tmp1, energy_11, c, prec)
+# 17# Calculation of Helmotz
+new_orbital_1 = orb.apply_helmholtz(tmp_g1, tmp1, c, prec)
 new_orbital_1.normalize()
 print(new_orbital_1)
-new_orbital_2 = orb.apply_helmholtz(tmp2, energy_22, c, prec)
+new_orbital_2 = orb.apply_helmholtz(tmp_g2, tmp2, c, prec)
 new_orbital_2.normalize()
 print(new_orbital_2)
 
+# 18# Compute orbital error 
+delta_psi_1 = new_orbital_1 - spinorb1
+delta_psi_2 = new_orbital_2 - spinorb2
+orbital_error = delta_psi_1 + delta_psi_2
+print("Orbital_Error", orbital_error)
 
-# 17# Compute overlap 
+
+# 19# Compute overlap 
 s_11 = new_orbital_1.dot(new_orbital_1)
 s_12 = new_orbital_1.dot(new_orbital_2)
 s_21 = new_orbital_2.dot(new_orbital_1)
@@ -210,22 +221,22 @@ print(s_21)
 print(s_22)
 
 
-# 18# Compute Overlap Matrix
+# 20# Compute Overlap Matrix
 S_tilde = np.array([[s_11, s_12], [s_21, s_22]])
 print(S_tilde)
 
 
-# 19# Compute U matrix
+# 21# Compute U matrix
 sigma, U = LA.eig(S_tilde)
 print(sigma)
 
 
-# 20# Compute matrix S^-1/2
+# 22# Compute matrix S^-1/2
 Sm5 = U @ np.diag(sigma**(-0.5)) @ U.transpose()
 print(Sm5)
 
 
-# 21# Compute the new orthogonalized orbitals
+# 23# Compute the new orthogonalized orbitals
 spinorb1 = Sm5[0,0] * new_orbital_1 + Sm5[0,1] * new_orbital_2
 spinorb2 = Sm5[1,0] * new_orbital_1 + Sm5[1,1] * new_orbital_2
 print(spinorb1)
@@ -319,40 +330,47 @@ while orbital_error > prec:
     print("Total_Energy", tot_energy)
     
     
-    # 15# Calculation of necessary potential contributions to Helmotz (hd-epsilon)
+    # 15# Calculation of necessary potential contributions to Helmotz (hd + epsilon) * psi
     tmp1 = orb.apply_dirac_hamiltonian(spinorb1, energy_11, prec)
-    print(tmp1)
     tmp2 = orb.apply_dirac_hamiltonian(spinorb2, energy_22, prec)
-    print(tmp2)
-    
-    
-    # 16# Calculation of Helmotz
-    new_orbital_1 = orb.apply_helmholtz(tmp1, energy_11, c, prec)
+
+    # 16# Calculation of necessary potential contributions to Helmotz g
+    tmp_g1 = add_psi1 - energy_12*spinorb2
+    tmp_g2 = add_psi2 - energy_21*spinorb1
+
+    # 17# Calculation of Helmotz
+    new_orbital_1 = orb.apply_helmholtz(tmp_g1, tmp1, c, prec)
     new_orbital_1.normalize()
-    new_orbital_2 = orb.apply_helmholtz(tmp2, energy_22, c, prec)
+    new_orbital_2 = orb.apply_helmholtz(tmp_g2, tmp2, c, prec)
     new_orbital_2.normalize()
     
+    # 18# Compute orbital error 
+    delta_psi_1 = new_orbital_1 - spinorb1
+    delta_psi_2 = new_orbital_2 - spinorb2
+    orbital_error = delta_psi_1 + delta_psi_2
+    print("Orbital_Error", orbital_error)
+
     
-    # 17# Compute overlap 
+    # 19# Compute overlap 
     s_11 = new_orbital_1.dot(new_orbital_1)
     s_12 = new_orbital_1.dot(new_orbital_2)
     s_21 = new_orbital_2.dot(new_orbital_1)
     s_22 = new_orbital_2.dot(new_orbital_2)
     
     
-    # 18# Compute Overlap Matrix
+    # 20# Compute Overlap Matrix
     S_tilde = np.array([[s_11, s_12], [s_21, s_22]])
     
     
-    # 19# Compute U matrix
+    # 21# Compute U matrix
     sigma, U = LA.eig(S_tilde)
     
     
-    # 20# Compute matrix S^-1/2
+    # 22# Compute matrix S^-1/2
     Sm5 = U @ np.diag(sigma**(-0.5)) @ U.transpose()
     
     
-    # 21# Compute the new orthogonalized orbitals
+    # 23# Compute the new orthogonalized orbitals
     spinorb1 = Sm5[0,0] * new_orbital_1 + Sm5[0,1] * new_orbital_2
     spinorb2 = Sm5[1,0] * new_orbital_1 + Sm5[1,1] * new_orbital_2
 
@@ -434,7 +452,7 @@ tot_energy = e_hd1 + e_hd2 + e_v1 +e_v2 + e_J - e_K
 print("Total_Energy", tot_energy)
 
 
-####################################################################################################################################
+#########################################################END###########################################################################
 
 
 
