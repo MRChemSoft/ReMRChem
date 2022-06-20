@@ -76,7 +76,7 @@ V_tree = Z*Peps(f)
 
 
 # Definition of Poisson operator 
-Pua = vp.PoissonOperator(mra,prec=0.000001)
+Pua = vp.PoissonOperator(mra, prec)
 
 
 # 1# Definition of alpha and beta densities
@@ -92,8 +92,9 @@ print("n_tot", n_tot)
 
 
 # 3# Definition of J_psi
-J_psi1 = (4*np.pi)*Pua(n_tot)*spinorb1
-J_psi2 = (4*np.pi)*Pua(n_tot)*spinorb2
+J_tree = (4 * np.pi) * Pua(n_tot)
+J_psi1 = J_tree * spinorb1
+J_psi2 = J_tree * spinorb2
 print(J_psi1)
 print(J_psi2)
 

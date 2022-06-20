@@ -147,8 +147,10 @@ class orbital4c:
     def exchange(self, other, prec):
         exchange = vp.FunctionTree(self.mra)
         add_vector = []
-        for comp in self.comp_array:
-            temp = comp.density(prec).crop(prec)
+        for comp in comp_dict.values():
+            func_i = self[comp]
+            func_j = other[comp]
+            temp = func_i.exchange(func_j, prec)
             if(temp.squaredNorm() > 0):
                 add_vector.append((1.0,temp))    
         vp.advanced.add(prec/10, exchange, add_vector)
