@@ -198,6 +198,13 @@ class orbital4c:
         out = np.sqrt(out)
         return out
 
+    def squaredNorm(self):
+        out = 0
+        for comp in self.comp_dict.keys():
+            comp_norm = self[comp].squaredNorm()
+            out += comp_norm
+        return out
+
     #CT
     def div(self, other):
         for comp in self.comp_dict.keys():
