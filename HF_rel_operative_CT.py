@@ -95,43 +95,43 @@ print("n_tot", n_tot)
 J_tree = (4 * np.pi) * Pua(n_tot)
 J_psi1 = J_tree * spinorb1
 J_psi2 = J_tree * spinorb2
-print(J_psi1)
-print(J_psi2)
+#print(J_psi1)
+#print(J_psi2)
 
 
 # 4# Definition of pseudo density made by differnt spin orbitals
 n_21 = spinorb2.exchange(spinorb1, prec)
 n_12 = spinorb1.exchange(spinorb2, prec)
-print(n_21)
-print(n_12)
+#print(n_21)
+#print(n_12)
 
 
 # 5# Definition K_psi
-K_psi1 = spinorb1 * Pua(n_21)
-K_psi2 = spinorb2 * Pua(n_12)
-print(K_psi1)
-print(K_psi2)
+K_psi1 = spinorb2 * Pua(n_21)
+K_psi2 = spinorb1 * Pua(n_12)
+#print(K_psi1)
+#print(K_psi2)
 
 
 # 6# Definiton of Dirac Hamiltonian for alpha and beta components   
 hd_psi1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0)
 hd_psi2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0)
-print(hd_psi1)
-print(hd_psi2)
+#print(hd_psi1)
+#print(hd_psi2)
 
 
 # 7# Define v_psi
 v_psi1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
 v_psi2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec)
-print(v_psi1)
-print(v_psi2)
+#print(v_psi1)
+#print(v_psi2)
 
 
 # 8# hd_psi + v_psi + J_psi - K_psi
 add_psi1 = hd_psi1 + v_psi1 + J_psi1 - K_psi1
 add_psi2 = hd_psi2 + v_psi2 + J_psi2 - K_psi2
-print(add_psi1)
-print(add_psi2)
+#print(add_psi1)
+#print(add_psi2)
 
 
 # 9# Calculate Fij Fock matrix
@@ -139,10 +139,10 @@ energy_11, imag_11 = spinorb1.dot(add_psi1)
 energy_12, imag_12 = spinorb1.dot(add_psi2)
 energy_21, imag_21 = spinorb2.dot(add_psi1)
 energy_22, imag_22 = spinorb2.dot(add_psi2)
-print(energy_11)
-print(energy_12)
-print(energy_21)
-print(energy_22)
+print(energy_11, imag_11)
+print(energy_12, imag_12)
+print(energy_21, imag_21)
+print(energy_22, imag_22)
 
 
 # 10# Print orbital energy

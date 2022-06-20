@@ -105,29 +105,28 @@ class complex_fcn:
         vp.advanced.add(prec/10, density, [temp_r, temp_i])
         return density
 
+#
+# Other is complex conjugate
+#
     def exchange(self, other, prec):
         exchange = vp.FunctionTree(self.mra)
         add_vector = []
         a_ = vp.FunctionTree(self.mra)
-        a_ .setZero()
+        a_.setZero()
         b_ = vp.FunctionTree(self.mra)
         b_.setZero()
         c_ = vp.FunctionTree(other.mra)
         c_.setZero()
         d_ = vp.FunctionTree(other.mra)
         d_.setZero()        
-        if(self.real.squaredNorm() > 0):
-            print("real non zero")
+        if(self.real.squaredNorm() > 0 and other.real.squaredNorm() > 0):
             vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
-        if(self.imag.squaredNorm() > 0):
-            print("imag non zero")
+        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
             vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
-        if(other.imag.squaredNorm() > 0):
-            print("real non zero")
+        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
             vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
-        if(other.real.squaredNorm() > 0):
-            print("imag non zero")
-            vp.advanced.multiply(prec, d_, 1.0, self.imag, other.real)        
+        if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
+            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
         vp.advanced.add(prec/10, exchange, [a_, b_, c_, d_])
         return exchange
     
