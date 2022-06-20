@@ -119,17 +119,27 @@ class complex_fcn:
     def exchange(self, other, prec):
         exchange = vp.FunctionTree(self.mra)
         add_vector = []
-        temp_r = vp.FunctionTree(self.mra)
-        temp_r.setZero()
-        temp_i = vp.FunctionTree(self.mra)
-        temp_i.setZero()
+        a_ = vp.FunctionTree(self.mra)
+        a_ .setZero()
+        b_ = vp.FunctionTree(self.mra)
+        b_.setZero()
+        c_ = vp.FunctionTree(other.mra)
+        c_.setZero()
+        d_ = vp.FunctionTree(other.mra)
+        d_.setZero()        
         if(self.real.squaredNorm() > 0):
             print("real non zero")
-            vp.advanced.multiply(prec, temp_r, 1.0, self.real, other.real)
+            vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
         if(self.imag.squaredNorm() > 0):
             print("imag non zero")
-            vp.advanced.multiply(prec, temp_i, 1.0, self.imag, other.imag)
-        vp.advanced.add(prec/10, exchange, [temp_r, temp_i])
+            vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
+        if(other.imag.squaredNorm() > 0):
+            print("real non zero")
+            vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
+        if(other.real.squaredNorm() > 0):
+            print("imag non zero")
+            vp.advanced.multiply(prec, d_, 1.0, self.imag, other.real)        
+        vp.advanced.add(prec/10, exchange, [a_, b_, c_, d_])
         return exchange
     
     def dot(self, other):
