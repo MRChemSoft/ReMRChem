@@ -125,10 +125,10 @@ class complex_fcn:
         temp_i.setZero()
         if(self.real.squaredNorm() > 0):
             print("real non zero")
-            vp.advanced.multiply(prec, temp_r, 1.0, self.real, other[0])
+            vp.advanced.multiply(prec, temp_r, 1.0, self.real, other.real)
         if(self.imag.squaredNorm() > 0):
             print("imag non zero")
-            vp.advanced.multiply(prec, temp_i, 1.0, self.imag, other[1])
+            vp.advanced.multiply(prec, temp_i, 1.0, self.imag, other.imag)
         vp.advanced.add(prec/10, exchange, [temp_r, temp_i])
         return exchange
     
