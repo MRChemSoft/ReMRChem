@@ -95,22 +95,6 @@ while error_norm > prec:
     #print(J_psi1)
     #print(J_psi2)
     
-    # 4# Definition of pseudo density made by differnt spin orbitals
-    n_21 = spinorb2.exchange(spinorb1, prec)
-    n_12 = spinorb1.exchange(spinorb2, prec)
-    #print(n_21)
-    #print(n_12)
-    
-    # 5# Definition K_psi
-    K_11 = (4*np.pi) * spinorb1 * Pua(n_alpha)
-    K_12 = (4*np.pi) * spinorb1 * Pua(n_12)
-    K_21 = (4*np.pi) * spinorb2 * Pua(n_21)
-    K_22 = (4*np.pi) * spinorb2 * Pua(n_beta)
-    K_psi1 = K_11 + K_21
-    K_psi2 = K_12 + K_22
-    #print(K_psi1)
-    #print(K_psi2)
-    
     # 6# Definiton of Dirac Hamiltonian for alpha and beta components   
     hd_psi1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0)
     hd_psi2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0)
@@ -124,8 +108,8 @@ while error_norm > prec:
     #print(v_psi2)
     
     # 8# hd_psi + v_psi + J_psi - K_psi
-    add_psi1 = hd_psi1 + v_psi1 + J_psi1 - K_psi1
-    add_psi2 = hd_psi2 + v_psi2 + J_psi2 - K_psi2
+    add_psi1 = hd_psi1 + v_psi1 + 0.5 * J_psi1
+    add_psi2 = hd_psi2 + v_psi2 + 0.5 * J_psi2
     #print(add_psi1)
     #print(add_psi2)   
     
@@ -147,9 +131,7 @@ while error_norm > prec:
     
     # 11# Preparation to calculate Total Energy step 1
     e_J1, imag_e_J1 = spinorb1.dot(J_psi1)
-    e_K1, imag_e_K1 = spinorb1.dot(K_psi1)
     e_J2, imag_e_J2 = spinorb2.dot(J_psi2)
-    e_K2, imag_e_K2 = spinorb2.dot(K_psi2)
     #print(e_J1)
     #print(e_J2)
     #print(e_K1)
@@ -158,7 +140,6 @@ while error_norm > prec:
     
     # 12# Preparation to calculate Total Energy step 2
     e_J = (e_J1 + e_J2) * 0.5
-    e_K = (e_K1 + e_K2) * 0.5
     #print(e_J)
     #print(e_K)
     
@@ -175,7 +156,7 @@ while error_norm > prec:
     
     
     # 14# Print Total Energy
-    tot_energy = e_hd1 + e_hd2 + e_v1 +e_v2 + e_J - e_K
+    tot_energy = e_hd1 + e_hd2 + e_v1 + e_v2 + e_J
     print("Total_Energy", tot_energy)
     
     
@@ -196,9 +177,14 @@ while error_norm > prec:
     # 17# Calculation of Helmotz
     print("applying helmholtz kernel")
     new_orbital_1 = orb.apply_helmholtz(tmp1, energy_11, c, prec)
+    new_orbital_1 *= (0.5/c**2)
+    print("Not yet normalized orbital 1", new_orbital_1.norm())
+    
     new_orbital_1.normalize()
 #    print("new_orbital_1", new_orbital_1)
     new_orbital_2 = orb.apply_helmholtz(tmp2, energy_22, c, prec)
+    new_orbital_2 *= (0.5/c**2)
+    print("Not yet normalized orbital 2", new_orbital_2.norm())
     new_orbital_2.normalize()
 #    print("new_orbital_2", new_orbital_2)
     
@@ -238,8 +224,8 @@ while error_norm > prec:
     spinorb1 = Sm5[0,0] * new_orbital_1 + Sm5[0,1] * new_orbital_2
     spinorb2 = Sm5[1,0] * new_orbital_1 + Sm5[1,1] * new_orbital_2
     
-    spinorb1.crop(prec)
-    spinorb2.crop(prec)
+    spinorb1.crop(prec/10.)
+    spinorb2.crop(prec/10.)
 
 
 ##########
@@ -255,14 +241,6 @@ n_tot = n_alpha + n_beta
 J_psi1 = (4*np.pi)*Pua(n_tot)*spinorb1
 J_psi2 = (4*np.pi)*Pua(n_tot)*spinorb2
     
-# 4# Definition of pseudo density made by differnt spin orbitals
-n_21 = spinorb2.exchange(spinorb1, prec)
-n_12 = spinorb1.exchange(spinorb2, prec)
-    
-# 5# Definition K_psi
-K_psi1 = spinorb2 * Pua(n_21)
-K_psi2 = spinorb1 * Pua(n_12)
-    
 # 6# Definiton of Dirac Hamiltonian for alpha and beta components   
 hd_psi1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0)
 hd_psi2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0)
@@ -272,8 +250,8 @@ v_psi1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
 v_psi2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec)
     
 # 8# hd_psi + v_psi + J_psi - K_psi
-add_psi1 = hd_psi1 + v_psi1 + J_psi1 - K_psi1
-add_psi2 = hd_psi2 + v_psi2 + J_psi2 - K_psi2
+add_psi1 = hd_psi1 + v_psi1 + J_psi1
+add_psi2 = hd_psi2 + v_psi2 + J_psi2
     
 # 9# Calculate Fij Fock matrix
 energy_11, imag_11 = spinorb1.dot(add_psi1)
@@ -288,15 +266,11 @@ print("Orb_Energy_spin2", energy_22)
     
 # 11# Preparation to calculate Total Energy step 1
 e_J1, imag_e_J1 = spinorb1.dot(J_psi1)
-e_K1, imag_e_K1 = spinorb1.dot(K_psi1)
 e_J2, imag_e_J2 = spinorb2.dot(J_psi2)
-e_K2, imag_e_K2 = spinorb2.dot(K_psi2)
 
 
 # 12# Preparation to calculate Total Energy step 2
-e_J = (e_J1 + e_J2) * 0.5
-e_K = (e_K1 + e_K2) * 0.5
-    
+e_J = (e_J1 + e_J2) * 0.5    
 
 # 13# Preparation to calculate Total Energy step 3
 e_v1, imag_v1 = spinorb1.dot(v_psi1)
@@ -306,7 +280,7 @@ e_hd2, imag_hd2 = spinorb2.dot(hd_psi2)
     
     
 # 14# Print Total Energy
-tot_energy = e_hd1 + e_hd2 + e_v1 +e_v2 + e_J - e_K
+tot_energy = e_hd1 + e_hd2 + e_v1 +e_v2 + e_J
 print("Total_Energy", tot_energy)
 
 
@@ -316,3 +290,4 @@ print("Total_Energy", tot_energy)
 
 
 
+     

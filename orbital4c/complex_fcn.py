@@ -97,10 +97,8 @@ class complex_fcn:
         temp_i = vp.FunctionTree(self.mra)
         temp_i.setZero()
         if(self.real.squaredNorm() > 0):
-            print("real non zero")
             vp.advanced.multiply(prec, temp_r, 1.0, self.real, self.real)
         if(self.imag.squaredNorm() > 0):
-            print("imag non zero")
             vp.advanced.multiply(prec, temp_i, 1.0, self.imag, self.imag)
         vp.advanced.add(prec/10, density, [temp_r, temp_i])
         return density
@@ -157,6 +155,7 @@ def apply_potential(factor, potential, func, prec):
 
 def apply_helmholtz(func, energy, c, prec):
     out_func = complex_fcn()
+    print("Energy and c**2", energy, c)
     mu = np.sqrt((c**4-energy**2)/c**2)
     H = vp.HelmholtzOperator(func.mra, mu, prec)
     if(func.real.squaredNorm() > 0):
