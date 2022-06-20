@@ -184,25 +184,28 @@ tot_energy = e_hd1 + e_hd2 + e_v1 +e_v2 + e_J - e_K
 print("Total_Energy", tot_energy)
 
 
-# 15# Calculation of necessary potential contributions to Helmotz (hd + epsilon) * psi
-tmp1 = orb.apply_dirac_hamiltonian(spinorb1, energy_11, prec)
-print(tmp1)
-tmp2 = orb.apply_dirac_hamiltonian(spinorb2, energy_22, prec)
-print(tmp2)
-
-# 16# Calculation of necessary potential contributions to Helmotz g
+# 15# Calculation of necessary potential contributions to Helmotz g
 tmp_g1 = add_psi1 - energy_12*spinorb2
 tmp_g2 = add_psi2 - energy_21*spinorb1
 print("g1", tmp_g1)
 print("g2", tmp_g2)
 
+
+# 16# Calculation of necessary potential contributions to Helmotz (hd + epsilon) on g 
+tmp1 = orb.apply_dirac_hamiltonian(tmp_g1, energy_11, prec)
+print(tmp1)
+tmp2 = orb.apply_dirac_hamiltonian(tmp_g2, energy_22, prec)
+print(tmp2)
+
+
 # 17# Calculation of Helmotz
-new_orbital_1 = orb.apply_helmholtz(tmp_g1, tmp1, c, prec)
+new_orbital_1 = orb.apply_helmholtz(tmp1, 0, c, prec)
 new_orbital_1.normalize()
 print(new_orbital_1)
-new_orbital_2 = orb.apply_helmholtz(tmp_g2, tmp2, c, prec)
+new_orbital_2 = orb.apply_helmholtz(tmp1, 0, c, prec)
 new_orbital_2.normalize()
 print(new_orbital_2)
+
 
 # 18# Compute orbital error 
 delta_psi_1 = new_orbital_1 - spinorb1
