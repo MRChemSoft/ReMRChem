@@ -202,7 +202,7 @@ print(tmp2)
 new_orbital_1 = orb.apply_helmholtz(tmp1, 0, c, prec)
 new_orbital_1.normalize()
 print(new_orbital_1)
-new_orbital_2 = orb.apply_helmholtz(tmp1, 0, c, prec)
+new_orbital_2 = orb.apply_helmholtz(tmp2, 0, c, prec)
 new_orbital_2.normalize()
 print(new_orbital_2)
 
@@ -256,6 +256,7 @@ print(spinorb2)
 Pua = vp.PoissonOperator(mra,prec=0.000001)
 
 orbital_error = 1
+#for idx in range(1):
 while orbital_error > prec:
     # 1# Definition of alpha and beta densities
     n_alpha = spinorb1.density(prec)
