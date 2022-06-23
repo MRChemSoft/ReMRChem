@@ -6,6 +6,7 @@ from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
 from scipy.constants import hbar
 
+
 def u(r):
     u = erf(r)/r + (1/(3*np.sqrt(np.pi)))*(np.exp(-(r**2)) + 16*np.exp(-4*r**2))
     #erf(r) is an error function that is supposed to stop the potential well from going to inf.
