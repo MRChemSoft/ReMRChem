@@ -1,6 +1,8 @@
+from vampyr import vampyr3d as vp
 from orbital4c import orbital as orb
 from orbital4c import complex_fcn as cf
 import numpy as np
+import pytest
 from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
 from scipy.constants import hbar
@@ -50,7 +52,7 @@ spinor_H.normalize()
 
 def test_spinor():
     val = spinor_H.comp_array[0].real([0.0, 0.0, 0.0])
-    assert val == pytest.approx(1.0)
+    assert val == pytest.approx(0.593789254406578)
 
 def my_fcn(a,b):
     return a + b
