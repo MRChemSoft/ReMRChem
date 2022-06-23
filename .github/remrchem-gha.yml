@@ -1,0 +1,9 @@
+name: remrchem-gha
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - pytest
+  - pytest-cov
+  - vampyr
+  
