@@ -172,7 +172,8 @@ class orbital4c:
                            [0,-1, 0, 0]]])
         out_orb.comp_array = alpha[index]@self.comp_array
         return out_orb
-    
+
+#Beta c**2
     def beta(self, shift = 0):
         out_orb = orbital4c()
         beta = np.array([[c**2 + shift, 0, 0, 0  ],
@@ -282,3 +283,23 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
     tmp3 = np.exp(-Z*r)
     values = one_s_alpha(x,Z,alpha,gamma_factor)
     return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
+
+
+def alpha(self,index):
+    out_orb = orbital4c()
+    alpha = np.array([[[0, 0, 0, 1],  
+                       [0, 0, 1, 0],
+                       [0, 1, 0, 0],
+                       [1, 0, 0, 0]],
+                      [[0,  0,  0,  -1j],
+                       [0,  0,  1j,  0],
+                       [0, -1j, 0,   0],
+                       [1j, 0,  0,   0]],
+                      [[0, 0, 1, 0],
+                       [0, 0, 0,-1],
+                       [1, 0, 0, 0],
+                       [0,-1, 0, 0]]])
+    out_orb.comp_array = alpha[index]@self.comp_array
+    return out_orb
+
+
