@@ -74,7 +74,7 @@ V_tree = Z*Peps(f)
 ################# Working on Helium with Coulomb direct (CJ) & exchange (CK) ################
 
 error_norm = 1
-#for idx in range(1):
+
 while error_norm > prec:
     # Definition of different densities
     n_11 = spinorb1.density(prec)
@@ -86,27 +86,32 @@ while error_norm > prec:
     # Definition of Poisson operator
     Pua = vp.PoissonOperator(mra, prec)
     
+    # Defintion of Jx
+    J11 = Pua(n_11) * (4 * np.pi)
+    J12 = Pua(n_12) * (4 * np.pi)
+    J21 = Pua(n_21) * (4 * np.pi)
+    J22 = Pua(n_22) * (4 * np.pi)
 
-    # Defintion of J1 and J2
-    J1 = Pua(n_11) * (4 * np.pi)
-    J2 = Pua(n_22) * (4 * np.pi)
-    
 
-    # Definition of K1 and K2
+    # Definition of Kx
     K1 = Pua(n_12) * (4 * np.pi)
     K2 = Pua(n_21) * (4 * np.pi)
-    
 
-    # Definition of Energy Hartree for spin orbit 1 and 2
-    E_H1 = vp.dot(n_11, J1)
-    E_H2 = vp.dot(n_22, J2)
 
-    
-    # Definition of Energy Exchange for spin orbit 1 and 2
-    E_xc1 = vp.dot(n_12, K2)
-    E_xc2 = vp.dot(n_21, K1)
+    # Definition of Energy Hartree of Fock matrix
+    E_H11 = vp.dot(n_11, J11)
+    E_H12 = vp.dot(n_12, J12)
+    E_H21 = vp.dot(n_21, J21)
+    E_H22 = vp.dot(n_22, J22)
 
     
+    # Definition of Energy Exchange of Fock matrix
+    E_xc11 = vp.dot(n_12, K2)
+    E_xc12 = vp.dot(n_12, K1)
+    E_xc21 = vp.dot(n_21, K2)
+    E_xc22 = vp.dot(n_21, K1)
+
+
     # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
     hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0)
     hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0)
@@ -128,28 +133,27 @@ while error_norm > prec:
     energy_21, imag_21 = spinorb2.dot(add_psi_1)
     energy_22, imag_22 = spinorb2.dot(add_psi_2)
     
-
     # Orbital Energy calculation
-    energy_11 = energy_11 + E_H1 - E_xc1
-    energy_12 = energy_12 
-    energy_21 = energy_21
-    energy_22 = energy_22 + E_H2 - E_xc2
+    energy_11 = energy_11 + E_H11 - E_xc11
+    energy_12 = energy_12 + E_H12 - E_xc12
+    energy_21 = energy_21 + E_H21 - E_xc21
+    energy_22 = energy_22 + E_H22 - E_xc22
     print('Energy_Spin_Orbit_1', energy_11, imag_11)
     print('Energy_Spin_Orbit_2', energy_22, imag_22)
     
 
     # Total Energy with J = K approximation
-    E_tot_JK = energy_11 + energy_22 - 0.5 * (E_H1 + E_H2 - E_xc1 - E_xc2)
+    E_tot_JK = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22)
     print("E_total(Coulomb) approximiation", E_tot_JK)
     
     
     # Calculation of necessary potential contributions to Hellmotz
-    J_spinorb1   = orb.apply_potential(1.0, J1, spinorb1, prec)
+    J_spinorb1   = orb.apply_potential(1.0, J11, spinorb1, prec)
     K_spinorb1   = orb.apply_potential(1.0, K2, spinorb2, prec)
     F12_spinorb2 =  energy_12 * spinorb2
     
     
-    J_spinorb2   = orb.apply_potential(1.0, J2, spinorb2, prec)
+    J_spinorb2   = orb.apply_potential(1.0, J22, spinorb2, prec)
     K_spinorb2   = orb.apply_potential(1.0, K1, spinorb1, prec)
     F21_spinorb1 = energy_21 * spinorb1
     
@@ -221,24 +225,30 @@ n_22 = spinorb2.density(prec)
 Pua = vp.PoissonOperator(mra, prec)
 
 
-# Defintion of J1 and J2
-J1 = Pua(n_11) * (4 * np.pi)
-J2 = Pua(n_22) * (4 * np.pi)
+# Defintion of Jx
+J11 = Pua(n_11) * (4 * np.pi)
+J12 = Pua(n_12) * (4 * np.pi)
+J21 = Pua(n_21) * (4 * np.pi)
+J22 = Pua(n_22) * (4 * np.pi)
 
 
-# Definition of K1 and K2
+# Definition of Kx
 K1 = Pua(n_12) * (4 * np.pi)
 K2 = Pua(n_21) * (4 * np.pi)
 
 
-# Definition of Energy Hartree for spin orbit 1 and 2
-E_H1 = vp.dot(n_11, J1)
-E_H2 = vp.dot(n_22, J2)
+# Definition of Energy Hartree of Fock matrix
+E_H11 = vp.dot(n_11, J11)
+E_H12 = vp.dot(n_12, J12)
+E_H21 = vp.dot(n_21, J21)
+E_H22 = vp.dot(n_22, J22)
 
     
-# Definition of Energy Exchange for spin orbit 1 and 2
-E_xc1 = vp.dot(n_12, K2)
-E_xc2 = vp.dot(n_21, K1)
+# Definition of Energy Exchange of Fock matrix
+E_xc11 = vp.dot(n_12, K2)
+E_xc12 = vp.dot(n_12, K1)
+E_xc21 = vp.dot(n_21, K2)
+E_xc22 = vp.dot(n_21, K1)
 
     
 # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
@@ -264,16 +274,16 @@ energy_22, imag_22 = spinorb2.dot(add_psi_2)
     
 
 # Orbital Energy calculation
-energy_11 = energy_11 + E_H1 - E_xc1
-energy_12 = energy_12 
-energy_21 = energy_21 
-energy_22 = energy_22 + E_H2 - E_xc2
+energy_11 = energy_11 + E_H11 - E_xc11
+energy_12 = energy_12 + E_H12 - E_xc12
+energy_21 = energy_21 + E_H21 - E_xc21
+energy_22 = energy_22 + E_H22 - E_xc22
 print('Energy_Spin_Orbit_1', energy_11, imag_11)
 print('Energy_Spin_Orbit_2', energy_22, imag_22)
     
 
 # Total Energy with J = K approximation
-E_tot_JK = energy_11 + energy_22 - 0.5 * (E_H1 + E_H2 - E_xc1 - E_xc2)
+E_tot_JK = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22)
 print("E_total(Coulomb) approximiation", E_tot_JK)
     
 
