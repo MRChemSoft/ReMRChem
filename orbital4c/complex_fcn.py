@@ -70,15 +70,6 @@ class complex_fcn:
         im = vp.dot(self.real, other.imag) + vp.dot(self.imag, other.real)
         return re + 1j * im
       
-    def div(self, other):
-        denom = vp.dot(other.real, other.real) + vp.dot(other.imag, other.imag)
-        numre = vp.dot(self.real, other.real) + vp.dot(self.imag, other.imag)
-        re = np.divide(numre,denom)
-        numim = vp.dot(self.imag, other.real) - vp.dot(self.real, other.imag)
-        im = np.divide(numim,denom)
-        return re + 1j * im
-
-
     def gradient(self):
         D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
         grad_re = vp.gradient(D, self.real)
@@ -115,7 +106,7 @@ class complex_fcn:
 #
 # Other is complex conjugate
 #
-    #CT
+
     def exchange(self, other, prec):
         exchange = vp.FunctionTree(self.mra)
         add_vector = []
@@ -153,27 +144,6 @@ class complex_fcn:
            out_imag += vp.dot(func_a, func_d)
         if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
            out_imag -= vp.dot(func_b, func_c)
-        return out_real, out_imag
-
-    #CT 
-    def div(self, other):
-        out_real = 0
-        out_imag = 0
-        func_a = self.real
-        func_b = self.imag
-        func_c = other.real
-        func_d = other.imag
-        if(func_a.squaredNorm() > 0 and func_c.squaredNorm() > 0):
-           out_real += vp.dot(func_a, func_c)
-        if(func_b.squaredNorm() > 0 and func_d.squaredNorm() > 0):
-           out_real += vp.dot(func_b, func_d)
-        if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
-           out_imag += vp.dot(func_b, func_c)
-        if(func_a.squaredNorm() > 0 and func_d.squaredNorm() > 0):
-           out_imag -= vp.dot(func_a, func_d)
-        denom = vp.dot(func_c, func_c) + vp.dot(func_d, func_d)
-        out_real = np.divide(out_real,denom)
-        out_imag = np.divide(out_imag,denom)
         return out_real, out_imag
 
 #Not too happy about this design. Potential is only a real FunctionTree...
