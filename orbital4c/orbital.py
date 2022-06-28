@@ -158,7 +158,6 @@ class orbital4c:
         vp.advanced.add(prec/10, density, add_vector)
         return density
 
-    #CT
     def exchange(self, other, prec):
         exchange = vp.FunctionTree(self.mra)
         add_vector = []
