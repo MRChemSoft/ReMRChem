@@ -29,10 +29,14 @@ class complex_fcn:
         factor = 1.0 / norm 
         self.real *= factor
         self.imag *= factor
-        
+    
     def setZero(self):
         self.real.setZero()
         self.imag.setZero()
+
+    def crop(self, prec):
+        self.real.crop(prec)
+        self.imag.crop(prec)
 
     def __add__(self, other):
         output = complex_fcn()
@@ -65,7 +69,16 @@ class complex_fcn:
         re = vp.dot(self.real, other.real) - vp.dot(self.imag, other.imag)
         im = vp.dot(self.real, other.imag) + vp.dot(self.imag, other.real)
         return re + 1j * im
-   
+      
+    def div(self, other):
+        denom = vp.dot(other.real, other.real) + vp.dot(other.imag, other.imag)
+        numre = vp.dot(self.real, other.real) + vp.dot(self.imag, other.imag)
+        re = np.divide(numre,denom)
+        numim = vp.dot(self.imag, other.real) - vp.dot(self.real, other.imag)
+        im = np.divide(numim,denom)
+        return re + 1j * im
+
+
     def gradient(self):
         D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
         grad_re = vp.gradient(D, self.real)
@@ -83,7 +96,7 @@ class complex_fcn:
         im_der = D(self.imag, dir)
         der_func = complex_fcn()
         der_func.init_fcn(re_der, im_der)
-        return der_fcn
+        return der_func
         
     def density(self, prec):
         density = vp.FunctionTree(self.mra)
@@ -93,13 +106,37 @@ class complex_fcn:
         temp_i = vp.FunctionTree(self.mra)
         temp_i.setZero()
         if(self.real.squaredNorm() > 0):
-            print("real non zero")
             vp.advanced.multiply(prec, temp_r, 1.0, self.real, self.real)
         if(self.imag.squaredNorm() > 0):
-            print("imag non zero")
             vp.advanced.multiply(prec, temp_i, 1.0, self.imag, self.imag)
         vp.advanced.add(prec/10, density, [temp_r, temp_i])
         return density
+
+#
+# Other is complex conjugate
+#
+    #CT
+    def exchange(self, other, prec):
+        exchange = vp.FunctionTree(self.mra)
+        add_vector = []
+        a_ = vp.FunctionTree(self.mra)
+        a_.setZero()
+        b_ = vp.FunctionTree(self.mra)
+        b_.setZero()
+        c_ = vp.FunctionTree(other.mra)
+        c_.setZero()
+        d_ = vp.FunctionTree(other.mra)
+        d_.setZero()        
+        if(self.real.squaredNorm() > 0 and other.real.squaredNorm() > 0):
+            vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
+        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
+            vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
+        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
+            vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
+        if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
+            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
+        vp.advanced.add(prec/10, exchange, [a_, b_, c_, d_])
+        return exchange
     
     def dot(self, other):
         out_real = 0
@@ -118,6 +155,26 @@ class complex_fcn:
            out_imag -= vp.dot(func_b, func_c)
         return out_real, out_imag
 
+    #CT 
+    def div(self, other):
+        out_real = 0
+        out_imag = 0
+        func_a = self.real
+        func_b = self.imag
+        func_c = other.real
+        func_d = other.imag
+        if(func_a.squaredNorm() > 0 and func_c.squaredNorm() > 0):
+           out_real += vp.dot(func_a, func_c)
+        if(func_b.squaredNorm() > 0 and func_d.squaredNorm() > 0):
+           out_real += vp.dot(func_b, func_d)
+        if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
+           out_imag += vp.dot(func_b, func_c)
+        if(func_a.squaredNorm() > 0 and func_d.squaredNorm() > 0):
+           out_imag -= vp.dot(func_a, func_d)
+        denom = vp.dot(func_c, func_c) + vp.dot(func_d, func_d)
+        out_real = np.divide(out_real,denom)
+        out_imag = np.divide(out_imag,denom)
+        return out_real, out_imag
 
 #Not too happy about this design. Potential is only a real FunctionTree...
 def apply_potential(factor, potential, func, prec):
@@ -128,6 +185,7 @@ def apply_potential(factor, potential, func, prec):
 
 def apply_helmholtz(func, energy, c, prec):
     out_func = complex_fcn()
+    print("Energy and c**2", energy, c)
     mu = np.sqrt((c**4-energy**2)/c**2)
     H = vp.HelmholtzOperator(func.mra, mu, prec)
     if(func.real.squaredNorm() > 0):

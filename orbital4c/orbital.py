@@ -43,9 +43,33 @@ class orbital4c:
 
     def __rmul__(self, factor):
         output = orbital4c()
-        output.comp_array = factor * self.comp_array
+        output.comp_array =  factor * self.comp_array
         return output
-                
+
+    def __mul__(self, factor):
+        output = orbital4c()
+        output.comp_array =  factor * self.comp_array 
+        return output   
+
+    def norm(self):
+        out = 0
+        for comp in self.comp_dict.keys():
+            comp_norm = self[comp].squaredNorm()
+            out += comp_norm
+        out = np.sqrt(out)
+        return out
+
+    def squaredNorm(self):
+        out = 0
+        for comp in self.comp_dict.keys():
+            comp_norm = self[comp].squaredNorm()
+            out += comp_norm
+        return out
+
+    def crop(self, prec):
+        for func in self.comp_array:
+            func.crop(prec)
+
     def setZero(self):
         for func in self.comp_array:
             func.setZero()
@@ -105,11 +129,11 @@ class orbital4c:
         self['Sb'] = sigma_p_L[1]
         
     def derivative(self, dir=0):
-        orb_der = orbital4c("derivative",orbital.mra)
+        orb_der = orbital4c("derivative", orbital.mra)
         for comp,func in self.components.items():
             orb_der[comp] = func.derivative(dir) 
         return orb_der
-        
+    
     def gradient(self):
         orb_grad = {}
         for key in self.comp_dict.keys():
@@ -128,11 +152,24 @@ class orbital4c:
         density = vp.FunctionTree(self.mra)
         add_vector = []
         for comp in self.comp_array:
-            temp = comp.density(prec)
+            temp = comp.density(prec).crop(prec)
             if(temp.squaredNorm() > 0):
                 add_vector.append((1.0,temp))
         vp.advanced.add(prec/10, density, add_vector)
         return density
+
+    #CT
+    def exchange(self, other, prec):
+        exchange = vp.FunctionTree(self.mra)
+        add_vector = []
+        for comp in self.comp_dict.keys():
+            func_i = self[comp]
+            func_j = other[comp]
+            temp = func_i.exchange(func_j, prec)
+            if(temp.squaredNorm() > 0):
+                add_vector.append((1.0,temp))    
+        vp.advanced.add(prec/10, exchange, add_vector)
+        return exchange
 
     def alpha(self,index):
         out_orb = orbital4c()
@@ -150,7 +187,8 @@ class orbital4c:
                            [0,-1, 0, 0]]])
         out_orb.comp_array = alpha[index]@self.comp_array
         return out_orb
-    
+
+#Beta c**2
     def beta(self, shift = 0):
         out_orb = orbital4c()
         beta = np.array([[c**2 + shift, 0, 0, 0  ],
@@ -260,4 +298,23 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
     tmp3 = np.exp(-Z*r)
     values = one_s_alpha(x,Z,alpha,gamma_factor)
     return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
-                
+
+
+def alpha(self,index):
+    out_orb = orbital4c()
+    alpha = np.array([[[0, 0, 0, 1],  
+                       [0, 0, 1, 0],
+                       [0, 1, 0, 0],
+                       [1, 0, 0, 0]],
+                      [[0,  0,  0,  -1j],
+                       [0,  0,  1j,  0],
+                       [0, -1j, 0,   0],
+                       [1j, 0,  0,   0]],
+                      [[0, 0, 1, 0],
+                       [0, 0, 0,-1],
+                       [1, 0, 0, 0],
+                       [0,-1, 0, 0]]])
+    out_orb.comp_array = alpha[index]@self.comp_array
+    return out_orb
+
+
