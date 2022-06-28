@@ -51,6 +51,21 @@ class orbital4c:
         output.comp_array =  factor * self.comp_array 
         return output   
 
+    def norm(self):
+        out = 0
+        for comp in self.comp_dict.keys():
+            comp_norm = self[comp].squaredNorm()
+            out += comp_norm
+        out = np.sqrt(out)
+        return out
+
+    def squaredNorm(self):
+        out = 0
+        for comp in self.comp_dict.keys():
+            comp_norm = self[comp].squaredNorm()
+            out += comp_norm
+        return out
+
     def crop(self, prec):
         for func in self.comp_array:
             func.crop(prec)
