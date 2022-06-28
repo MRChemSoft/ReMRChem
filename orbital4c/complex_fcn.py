@@ -106,7 +106,7 @@ class complex_fcn:
 #
 # Other is complex conjugate
 #
-   
+
     def exchange(self, other, prec):
         exchange = vp.FunctionTree(self.mra)
         add_vector = []
@@ -145,7 +145,6 @@ class complex_fcn:
         if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
            out_imag -= vp.dot(func_b, func_c)
         return out_real, out_imag
-
 
 #Not too happy about this design. Potential is only a real FunctionTree...
 def apply_potential(factor, potential, func, prec):
