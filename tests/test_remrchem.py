@@ -55,10 +55,3 @@ def test_spinor():
     val = spinor_H.comp_array[0].real([0.0, 0.0, 0.0])
     assert val == pytest.approx(0.593789254406578)
 
-def my_fcn(a,b):
-    return a + b
-
-def test_sum():
-    assert my_fcn(3,4) == 7
-
-
