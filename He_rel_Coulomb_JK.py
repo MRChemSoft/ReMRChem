@@ -12,8 +12,8 @@ from scipy.constants import hbar
 import numpy.linalg as LA
 
 ################# Define Paramters ###########################
-c = 137   # NOT A GOOD WAY. MUST BE FIXED!!!
-alpha = 1/c
+light_speed = 137.3604   # NOT A GOOD WAY. MUST BE FIXED!!!
+alpha = 1/light_speed
 k = -1
 l = 0
 n = 1
@@ -36,6 +36,7 @@ gauss_tree.normalize()
 
 ################ Define orbital as complex function ######################
 orb.orbital4c.mra = mra
+orb.orbital4c.light_speed = light_speed
 cf.complex_fcn.mra = mra
 complexfc = cf.complex_fcn()
 complexfc.copy_fcns(real=gauss_tree)
@@ -163,8 +164,8 @@ while error_norm > prec:
     
 
     # Calculation of Helmotz
-    tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, energy_11, c, prec)
-    tmp_2 = orb.apply_helmholtz(V_J_K_spinorb2, energy_22, c, prec)
+    tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, energy_11, prec)
+    tmp_2 = orb.apply_helmholtz(V_J_K_spinorb2, energy_22, prec)
     new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, energy_11)
     new_orbital_1 *= 0.5/c**2
     new_orbital_1.normalize()
