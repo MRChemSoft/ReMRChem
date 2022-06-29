@@ -4,11 +4,10 @@ import copy as cp
 from scipy.special import gamma
 from orbital4c import complex_fcn as cf
 
-c = 137
-
 class orbital4c:
     """Four components orbital."""
     mra = None
+    light_speed = -1.0
     comp_dict = {'La': 0, 'Lb': 1, 'Sa': 2, 'Sb': 3}
     def __init__(self):
         self.comp_array = np.array([cf.complex_fcn(),
@@ -124,7 +123,7 @@ class orbital4c:
         
         sigma_p_L = sLx + sLy + sLz
 
-        sigma_p_L *= -0.5j/c
+        sigma_p_L *= -0.5j/orbital4c.light_speed
         self['Sa'] = sigma_p_L[0]
         self['Sb'] = sigma_p_L[1]
         
@@ -190,10 +189,10 @@ class orbital4c:
 #Beta c**2
     def beta(self, shift = 0):
         out_orb = orbital4c()
-        beta = np.array([[c**2 + shift, 0, 0, 0  ],
-                         [0, c**2 + shift, 0, 0  ],
-                         [0, 0, -c**2 + shift, 0 ],
-                         [0, 0,  0, -c**2 + shift]])
+        beta = np.array([[orbital4c.light_speed**2 + shift, 0, 0, 0  ],
+                         [0, orbital4c.light_speed**2 + shift, 0, 0  ],
+                         [0, 0, -orbital4c.light_speed**2 + shift, 0 ],
+                         [0, 0,  0, -orbital4c.light_speed**2 + shift]])
         out_orb.comp_array = beta@self.comp_array
         return out_orb
     
@@ -217,9 +216,9 @@ def matrix_element(bra, operator, ket):
 def apply_dirac_hamiltonian(orbital, prec, shift = 0.0):
     beta_phi = orbital.beta(shift)
     grad_phi = orbital.gradient()
-    alpx_phi = -1j * c * grad_phi[0].alpha(0)
-    alpy_phi = -1j * c * grad_phi[1].alpha(1)
-    alpz_phi = -1j * c * grad_phi[2].alpha(2)
+    alpx_phi = -1j * orbital4c.light_speed * grad_phi[0].alpha(0)
+    alpy_phi = -1j * orbital4c.light_speed * grad_phi[1].alpha(1)
+    alpz_phi = -1j * orbital4c.light_speed * grad_phi[2].alpha(2)
     return beta_phi + alpx_phi + alpy_phi + alpz_phi
 
 def apply_potential(factor, potential, orbital, prec):
@@ -248,10 +247,10 @@ def apply_potential(factor, potential, orbital, prec):
 #            print('Warning: adding two empty trees')
 #    return out_orb
 
-def apply_helmholtz(orbital, energy, c, prec):
+def apply_helmholtz(orbital, energy, prec):
     out_orbital = orbital4c()
     for comp in orbital.comp_dict.keys():
-        out_orbital[comp] = cf.apply_helmholtz(orbital[comp], energy, c, prec)
+        out_orbital[comp] = cf.apply_helmholtz(orbital[comp], energy, orbital4c.light_speed, prec)
     out_orbital.rescale(-1.0/(2*np.pi))
     return out_orbital
 
@@ -297,7 +296,6 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
     tmp3 = np.exp(-Z*r)
     values = one_s_alpha(x,Z,alpha,gamma_factor)
     return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
-
 
 def alpha(self,index):
     out_orb = orbital4c()

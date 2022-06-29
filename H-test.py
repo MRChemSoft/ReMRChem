@@ -19,18 +19,20 @@ def V(x):
     f_bar = u(r/c)/c
     return f_bar
 
-c = 137   # NOT A GOOD WAY. MUST BE FIXED!!!
-alpha = 1/c
+light_speed = 137
+alpha = 1/light_speed
 k = -1
 l = 0
 n = 1
 m = 0.5
 Z = 1
 
+
 mra = vp.MultiResolutionAnalysis(box=[-20,20], order=7)
 prec = 1.0e-5
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 
+orb.orbital4c.light_speed = light_speed
 orb.orbital4c.mra = mra
 cf.complex_fcn.mra = mra
 
@@ -58,21 +60,23 @@ while orbital_error > prec:
     hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec)
     v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec)
     add_psi = hd_psi + v_psi
+    add_psi.crop(prec/10)
     energy, imag = spinor_H.dot(add_psi)
-    print('Energy',energy,imag)
-    tmp = orb.apply_helmholtz(v_psi, energy, c, prec)
+    print('Energy',energy-light_speed**2,imag)
+    tmp = orb.apply_helmholtz(v_psi, energy, prec)
     new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy)
+    new_orbital.crop(prec/10)
     new_orbital.normalize()
     delta_psi = new_orbital - spinor_H
     orbital_error, imag = delta_psi.dot(delta_psi)
-    print('Error',orbital_error, imag)
+    print('Error',orbital_error, imag, flush = True)
     spinor_H = new_orbital
     
 hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec)
 v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec)
 add_psi = hd_psi + v_psi
 energy, imag = spinor_H.dot(add_psi)
-print('Final Energy',energy)
+print('Final Energy',energy - light_speed**2)
 
 exact_orbital = orb.orbital4c()
 orb.init_1s_orbital(exact_orbital,k,Z,n,alpha,origin,prec)
@@ -82,5 +86,5 @@ hd_psi = orb.apply_dirac_hamiltonian(exact_orbital, prec)
 v_psi = orb.apply_potential(-1.0, V_tree, exact_orbital, prec)
 add_psi = hd_psi + v_psi
 energy, imag = exact_orbital.dot(add_psi)
-print('Exact Energy',energy)
+print('Exact Energy',energy - light_speed**2)
 

@@ -1,8 +1,6 @@
 from vampyr import vampyr3d as vp
 import numpy as np
 
-c = 137
-
 class complex_fcn:
     """Complex function trees as pairs of real and imaginary trees"""
     mra = None
@@ -153,10 +151,10 @@ def apply_potential(factor, potential, func, prec):
     vp.advanced.multiply(prec, output.imag, factor, potential, func.imag)
     return output
 
-def apply_helmholtz(func, energy, c, prec):
+def apply_helmholtz(func, energy, light_speed, prec):
     out_func = complex_fcn()
-    print("Energy and c**2", energy, c)
-    mu = np.sqrt((c**4-energy**2)/c**2)
+    print("Energy and c**2", energy, light_speed)
+    mu = np.sqrt((light_speed**4-energy**2)/light_speed**2)
     H = vp.HelmholtzOperator(func.mra, mu, prec)
     if(func.real.squaredNorm() > 0):
         vp.advanced.apply(prec, out_func.real, H, func.real)
