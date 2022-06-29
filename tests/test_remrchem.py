@@ -32,6 +32,7 @@ mra = vp.MultiResolutionAnalysis(box=[-20,20], order=7)
 prec = 1.0e-5
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 
+orb.orbital4c.light_speed = c
 orb.orbital4c.mra = mra
 cf.complex_fcn.mra = mra
 
