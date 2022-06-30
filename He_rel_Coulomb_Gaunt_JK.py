@@ -21,8 +21,8 @@ m = 0.5
 Z = 2
 
 ################# Call MRA #######################
-mra = vp.MultiResolutionAnalysis(box=[-20,20], order=6)
-prec = 1.0e-3
+mra = vp.MultiResolutionAnalysis(box=[-20,20], order=10)
+prec = 1.0e-7
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 
 ################# Define Gaussian function ########## 
