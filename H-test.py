@@ -39,8 +39,8 @@ Z = 1
 energy_1s = analytic_1s(light_speed, n, k, Z)
 print('Exact Energy',energy_1s - light_speed**2, flush = True)
 
-mra = vp.MultiResolutionAnalysis(box=[-20,20], order=10)
-prec = 1.0e-6
+mra = vp.MultiResolutionAnalysis(box=[-20,20], order=8)
+prec = 1.0e-4
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 
 orb.orbital4c.light_speed = light_speed
@@ -74,8 +74,9 @@ while orbital_error > prec:
     add_psi.crop(prec/10)
     energy, imag = spinor_H.dot(add_psi)
     print('Energy',energy-light_speed**2,imag)
-    tmp = orb.apply_dirac_hamiltonian(v_psi, prec, energy)
-    new_orbital = orb.apply_helmholtz(tmp, energy, prec)
+    tmp = orb.apply_helmholtz(v_psi, energy, prec)
+    tmp.crop(prec/10)
+    new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy)
     new_orbital.crop(prec/10)
     new_orbital.normalize()
     delta_psi = new_orbital - spinor_H
