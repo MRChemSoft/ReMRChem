@@ -183,7 +183,6 @@ while error_norm > prec:
     # Total Energy with J = K approximation
     E_tot = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22 - E_GJ11 - E_GJ22 + E_Gxc11 + E_Gxc22)
     print("E_total(Coulomb&Gaunt) approximiation", E_tot - 2.0 * (light_speed**2))
-    
 
     # Calculation of necessary potential contributions to Hellmotz
     CJ_spinorb1 = orb.apply_potential(1.0, J11, spinorb1, prec)
