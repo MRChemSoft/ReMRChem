@@ -20,13 +20,11 @@ def u(r):
     #if i remember correctly
     return u
 
-def V(x):
+def V(x,Z,prec):
     r = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
-#    c = 0.0435 # ten times looser nuclear potential
-#    c = 0.00435 # normal
-    c = 0.000435 # ten times tighter nuclear potential
+    c = (0.00435 * prec / Z**5) ** (1/3)
     f_bar = u(r/c)/c
-    return f_bar
+    return Z * f_bar
 
 light_speed = 137.035999084
 alpha = 1/light_speed
@@ -39,8 +37,8 @@ Z = 1
 energy_1s = analytic_1s(light_speed, n, k, Z)
 print('Exact Energy',energy_1s - light_speed**2, flush = True)
 
-mra = vp.MultiResolutionAnalysis(box=[-20,20], order=8)
-prec = 1.0e-4
+mra = vp.MultiResolutionAnalysis(box=[-20,20], order=9)
+prec = 1.0e-5
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 
 orb.orbital4c.light_speed = light_speed
@@ -63,20 +61,21 @@ spinor_H.init_small_components(prec/10)
 spinor_H.normalize()
 
 Peps = vp.ScalingProjector(mra,prec)
-f = lambda x: V([x[0]-origin[0],x[1]-origin[1],x[2]-origin[2]])
-V_tree = Z*Peps(f)
+f = lambda x: V([x[0]-origin[0],x[1]-origin[1],x[2]-origin[2]],Z,prec)
+V_tree = Peps(f)
 
 orbital_error = 1
 while orbital_error > prec:
     hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec)
     v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec) 
     add_psi = hd_psi + v_psi
-    add_psi.crop(prec/10)
     energy, imag = spinor_H.dot(add_psi)
     print('Energy',energy-light_speed**2,imag)
-    tmp = orb.apply_helmholtz(v_psi, energy, prec)
+    tmp = orb.apply_dirac_hamiltonian(v_psi, prec, energy)
+#    tmp = orb.apply_helmholtz(v_psi, energy, prec)
     tmp.crop(prec/10)
-    new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy)
+    new_orbital = orb.apply_helmholtz(tmp, energy, prec)
+#    new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy)
     new_orbital.crop(prec/10)
     new_orbital.normalize()
     delta_psi = new_orbital - spinor_H

@@ -205,10 +205,10 @@ class orbital4c:
 #                         [0, 0, -orbital4c.light_speed**2 + shift, 0 ],
 #                         [0, 0,  0, -orbital4c.light_speed**2 + shift]])
 #        out_orb.comp_array = beta@self.comp_array
-        beta = np.array([light_speed**2 + shift,
-                         light_speed**2 + shift,
-                        -light_speed**2 + shift,
-                        -light_speed**2 + shift])
+        beta = np.array([orbital4c.light_speed**2 + shift,
+                         orbital4c.light_speed**2 + shift,
+                        -orbital4c.light_speed**2 + shift,
+                        -orbital4c.light_speed**2 + shift])
         for idx in range(4):
             out_orb.comp_array[idx] = beta[idx] * self.comp_array[idx]
         return out_orb
