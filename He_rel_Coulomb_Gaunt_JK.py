@@ -21,8 +21,8 @@ m = 0.5
 Z = 2
 
 ################# Call MRA #######################
-mra = vp.MultiResolutionAnalysis(box=[-20,20], order=10)
-prec = 1.0e-7
+mra = vp.MultiResolutionAnalysis(box=[-20,20], order=7)
+prec = 1.0e-5
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 
 ################# Define Gaussian function ########## 
@@ -36,6 +36,7 @@ gauss_tree.normalize()
 
 ################ Define orbital as complex function ######################
 orb.orbital4c.mra = mra
+orb.orbital4c.light_speed = light_speed
 cf.complex_fcn.mra = mra
 complexfc = cf.complex_fcn()
 complexfc.copy_fcns(real=gauss_tree)
@@ -181,7 +182,7 @@ while error_norm > prec:
 
     # Total Energy with J = K approximation
     E_tot = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22 - E_GJ11 - E_GJ22 + E_Gxc11 + E_Gxc22)
-    print("E_total(Coulomb&Gaunt) approximiation", E_tot - 2.0 (light_speed**2))
+    print("E_total(Coulomb&Gaunt) approximiation", E_tot - 2.0 * (light_speed**2))
     
 
     # Calculation of necessary potential contributions to Hellmotz
