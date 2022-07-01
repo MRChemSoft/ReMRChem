@@ -1,5 +1,6 @@
 from vampyr import vampyr3d as vp
 from orbital4c import orbital as orb
+from orbital4c import NuclearPotential as nucpot
 from orbital4c import complex_fcn as cf
 import numpy as np
 from scipy.special import legendre, laguerre, erf, gamma
@@ -14,18 +15,6 @@ def analytic_1s(light_speed, n, k, Z):
     tmp3 = 1 + tmp2**2
     return light_speed**2 / np.sqrt(tmp3)
 
-def u(r):
-    u = erf(r)/r + (1/(3*np.sqrt(np.pi)))*(np.exp(-(r**2)) + 16*np.exp(-4*r**2))
-    #erf(r) is an error function that is supposed to stop the potential well from going to inf.
-    #if i remember correctly
-    return u
-
-def V(x,Z,prec):
-    r = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
-    c = (0.00435 * prec / Z**5) ** (1/3)
-    f_bar = u(r/c)/c
-    return Z * f_bar
-
 light_speed = 137.035999084
 alpha = 1/light_speed
 k = -1
@@ -37,8 +26,8 @@ Z = 1
 energy_1s = analytic_1s(light_speed, n, k, Z)
 print('Exact Energy',energy_1s - light_speed**2, flush = True)
 
-mra = vp.MultiResolutionAnalysis(box=[-20,20], order=9)
-prec = 1.0e-5
+mra = vp.MultiResolutionAnalysis(box=[-20,20], order=11)
+prec = 1.0e-8
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 
 orb.orbital4c.light_speed = light_speed
@@ -61,7 +50,7 @@ spinor_H.init_small_components(prec/10)
 spinor_H.normalize()
 
 Peps = vp.ScalingProjector(mra,prec)
-f = lambda x: V([x[0]-origin[0],x[1]-origin[1],x[2]-origin[2]],Z,prec)
+f = lambda x: nucpot.CoulombHFYGB(x, origin, Z, prec)
 V_tree = Peps(f)
 
 orbital_error = 1
@@ -71,11 +60,11 @@ while orbital_error > prec:
     add_psi = hd_psi + v_psi
     energy, imag = spinor_H.dot(add_psi)
     print('Energy',energy-light_speed**2,imag)
-    tmp = orb.apply_dirac_hamiltonian(v_psi, prec, energy)
-#    tmp = orb.apply_helmholtz(v_psi, energy, prec)
+#    tmp = orb.apply_dirac_hamiltonian(v_psi, prec, energy)
+    tmp = orb.apply_helmholtz(v_psi, energy, prec)
     tmp.crop(prec/10)
-    new_orbital = orb.apply_helmholtz(tmp, energy, prec)
-#    new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy)
+#    new_orbital = orb.apply_helmholtz(tmp, energy, prec)
+    new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy)
     new_orbital.crop(prec/10)
     new_orbital.normalize()
     delta_psi = new_orbital - spinor_H
