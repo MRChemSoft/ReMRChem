@@ -1,25 +1,21 @@
 from vampyr import vampyr3d as vp
 from orbital4c import orbital as orb
+from orbital4c import NuclearPotential as nucpot
 from orbital4c import complex_fcn as cf
 import numpy as np
 from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
 from scipy.constants import hbar
 
-def u(r):
-    u = erf(r)/r + (1/(3*np.sqrt(np.pi)))*(np.exp(-(r**2)) + 16*np.exp(-4*r**2))
-    #erf(r) is an error function that is supposed to stop the potential well from going to inf.
-    #if i remember correctly
-    return u
+def analytic_1s(light_speed, n, k, Z):
+    alpha = 1/light_speed
+    gamma = orb.compute_gamma(k,Z,alpha)
+    tmp1 = n - np.abs(k) + gamma
+    tmp2 = Z * alpha / tmp1
+    tmp3 = 1 + tmp2**2
+    return light_speed**2 / np.sqrt(tmp3)
 
-def V(x):
-    r = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
-#    c = 0.0435
-    c = 0.000435 # ten times tighter nuclear potential
-    f_bar = u(r/c)/c
-    return f_bar
-
-light_speed = 137
+light_speed = 137.035999084
 alpha = 1/light_speed
 k = -1
 l = 0
@@ -27,9 +23,11 @@ n = 1
 m = 0.5
 Z = 1
 
+energy_1s = analytic_1s(light_speed, n, k, Z)
+print('Exact Energy',energy_1s - light_speed**2, flush = True)
 
-mra = vp.MultiResolutionAnalysis(box=[-20,20], order=7)
-prec = 1.0e-5
+mra = vp.MultiResolutionAnalysis(box=[-20,20], order=11)
+prec = 1.0e-8
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 
 orb.orbital4c.light_speed = light_speed
@@ -52,18 +50,20 @@ spinor_H.init_small_components(prec/10)
 spinor_H.normalize()
 
 Peps = vp.ScalingProjector(mra,prec)
-f = lambda x: V([x[0]-origin[0],x[1]-origin[1],x[2]-origin[2]])
-V_tree = Z*Peps(f)
+f = lambda x: nucpot.CoulombHFYGB(x, origin, Z, prec)
+V_tree = Peps(f)
 
 orbital_error = 1
 while orbital_error > prec:
     hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec)
-    v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec)
+    v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec) 
     add_psi = hd_psi + v_psi
-    add_psi.crop(prec/10)
     energy, imag = spinor_H.dot(add_psi)
     print('Energy',energy-light_speed**2,imag)
+#    tmp = orb.apply_dirac_hamiltonian(v_psi, prec, energy)
     tmp = orb.apply_helmholtz(v_psi, energy, prec)
+    tmp.crop(prec/10)
+#    new_orbital = orb.apply_helmholtz(tmp, energy, prec)
     new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy)
     new_orbital.crop(prec/10)
     new_orbital.normalize()
@@ -78,13 +78,15 @@ add_psi = hd_psi + v_psi
 energy, imag = spinor_H.dot(add_psi)
 print('Final Energy',energy - light_speed**2)
 
-exact_orbital = orb.orbital4c()
-orb.init_1s_orbital(exact_orbital,k,Z,n,alpha,origin,prec)
-exact_orbital.normalize()
+#exact_orbital = orb.orbital4c()
+#orb.init_1s_orbital(exact_orbital,k,Z,n,alpha,origin,prec)
+#exact_orbital.normalize()
 
-hd_psi = orb.apply_dirac_hamiltonian(exact_orbital, prec)
-v_psi = orb.apply_potential(-1.0, V_tree, exact_orbital, prec)
-add_psi = hd_psi + v_psi
-energy, imag = exact_orbital.dot(add_psi)
-print('Exact Energy',energy - light_speed**2)
+energy_1s = analytic_1s(light_speed, n, k, Z)
 
+#hd_psi = orb.apply_dirac_hamiltonian(exact_orbital, prec)
+#v_psi = orb.apply_potential(-1.0, V_tree, exact_orbital, prec)
+#add_psi = hd_psi + v_psi
+#energy, imag = exact_orbital.dot(add_psi)
+print('Exact Energy',energy_1s - light_speed**2)
+print('Difference',energy_1s - energy)

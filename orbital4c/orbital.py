@@ -169,31 +169,48 @@ class orbital4c:
         vp.advanced.add(prec/10, exchange, add_vector)
         return exchange
 
-    def alpha(self,index):
+    def alpha(self,direction):
         out_orb = orbital4c()
-        alpha = np.array([[[0, 0, 0, 1],  
-                           [0, 0, 1, 0],
-                           [0, 1, 0, 0],
-                           [1, 0, 0, 0]],
-                          [[0,  0,  0,  -1j],
-                           [0,  0,  1j,  0],
-                           [0, -1j, 0,   0],
-                           [1j, 0,  0,   0]],
-                          [[0, 0, 1, 0],
-                           [0, 0, 0,-1],
-                           [1, 0, 0, 0],
-                           [0,-1, 0, 0]]])
-        out_orb.comp_array = alpha[index]@self.comp_array
+        alpha_order = np.array([[3, 2, 1, 0],
+                                [3, 2, 1, 0],
+                                [2, 3, 0, 1]])
+        
+        alpha_coeff = np.array([[ 1,  1,   1,  1],
+                                [-1j, 1j, -1j, 1j],
+                                [ 1, -1,   1, -1]])
+#        alpha = np.array([[[0, 0, 0, 1],
+#                           [0, 0, 1, 0],
+#                           [0, 1, 0, 0],
+#                           [1, 0, 0, 0]],
+#                          [[0,  0,  0,  -1j],
+#                           [0,  0,  1j,  0],
+#                           [0, -1j, 0,   0],
+#                           [1j, 0,  0,   0]],
+#                          [[0, 0, 1, 0],
+#                           [0, 0, 0,-1],
+#                           [1, 0, 0, 0],
+#                           [0,-1, 0, 0]]])
+#        out_orb.comp_array = alpha[direction]@self.comp_array
+        for idx in range(4):
+            coeff = alpha_coeff[direction][idx]
+            comp = alpha_order[direction][idx]
+            out_orb.comp_array[idx] = coeff * self.comp_array[comp]
         return out_orb
 
 #Beta c**2
     def beta(self, shift = 0):
         out_orb = orbital4c()
-        beta = np.array([[orbital4c.light_speed**2 + shift, 0, 0, 0  ],
-                         [0, orbital4c.light_speed**2 + shift, 0, 0  ],
-                         [0, 0, -orbital4c.light_speed**2 + shift, 0 ],
-                         [0, 0,  0, -orbital4c.light_speed**2 + shift]])
-        out_orb.comp_array = beta@self.comp_array
+#        beta = np.array([[orbital4c.light_speed**2 + shift, 0, 0, 0  ],
+#                         [0, orbital4c.light_speed**2 + shift, 0, 0  ],
+#                         [0, 0, -orbital4c.light_speed**2 + shift, 0 ],
+#                         [0, 0,  0, -orbital4c.light_speed**2 + shift]])
+#        out_orb.comp_array = beta@self.comp_array
+        beta = np.array([orbital4c.light_speed**2 + shift,
+                         orbital4c.light_speed**2 + shift,
+                        -orbital4c.light_speed**2 + shift,
+                        -orbital4c.light_speed**2 + shift])
+        for idx in range(4):
+            out_orb.comp_array[idx] = beta[idx] * self.comp_array[idx]
         return out_orb
     
     def dot(self, other):
@@ -296,22 +313,3 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
     tmp3 = np.exp(-Z*r)
     values = one_s_alpha(x,Z,alpha,gamma_factor)
     return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
-
-def alpha(self,index):
-    out_orb = orbital4c()
-    alpha = np.array([[[0, 0, 0, 1],  
-                       [0, 0, 1, 0],
-                       [0, 1, 0, 0],
-                       [1, 0, 0, 0]],
-                      [[0,  0,  0,  -1j],
-                       [0,  0,  1j,  0],
-                       [0, -1j, 0,   0],
-                       [1j, 0,  0,   0]],
-                      [[0, 0, 1, 0],
-                       [0, 0, 0,-1],
-                       [1, 0, 0, 0],
-                       [0,-1, 0, 0]]])
-    out_orb.comp_array = alpha[index]@self.comp_array
-    return out_orb
-
-
