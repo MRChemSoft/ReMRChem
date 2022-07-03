@@ -1,43 +1,26 @@
 from vampyr import vampyr3d as vp
 from orbital4c import orbital as orb
+from orbital4c import NuclearPotential as nucpot
 from orbital4c import complex_fcn as cf
 import numpy as np
 from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
 from scipy.constants import hbar
 
-def u(r):
-    u = erf(r)/r + (1/(3*np.sqrt(np.pi)))*(np.exp(-(r**2)) + 16*np.exp(-4*r**2))
-    #erf(r) is an error function that is supposed to stop the potential well from going to inf.
-    #if i remember correctly
-    return u
-
-def V(x):
-    r = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
-#    c = 0.0435
-    c = 0.000435 # ten times tighter nuclear potential
-    f_bar = u(r/c)/c
-    return f_bar
-
-c = 137.035999084   # NOT A GOOD WAY. MUST BE FIXED!!!
-
-alpha = 1/c
-k = -1
-l = 0
-n = 1
-m = 0.5
+light_speed = 137.035999084
 Z = 1
 
-mra = vp.MultiResolutionAnalysis(box=[-20,20], order=7)
-prec = 1.0e-5
-origin1 = [0.0, 0.0, -1.0]  # origin moved to avoid placing the nuclar charge on a node
-origin2 = [0.0, 0.0,  1.0]  # origin moved to avoid placing the nuclar charge on a node
+mra = vp.MultiResolutionAnalysis(box=[-60,60], order=10)
+prec = 1.0e-7
+origin1 = [0.1, 0.2, -0.7]  # origin moved to avoid placing the nuclar charge on a node
+origin2 = [0.1, 0.2,  1.3]  # origin moved to avoid placing the nuclar charge on a node
 
-def VH2(x,origin1,origin2):
-    V1 = V([x[0]-origin1[0],x[1]-origin1[1],x[2]-origin1[2]])
-    V2 = V([x[0]-origin2[0],x[1]-origin2[1],x[2]-origin2[2]])
+def VH2(x, origin1, origin2, Z1, Z2, prec):
+    V1 = nucpot.CoulombHFYGB(x, origin1, Z1, prec)
+    V2 = nucpot.CoulombHFYGB(x, origin2, Z2, prec)
     return V1 + V2
 
+orb.orbital4c.light_speed = light_speed
 orb.orbital4c.mra = mra
 cf.complex_fcn.mra = mra
 
@@ -63,28 +46,30 @@ spinor_H.init_small_components(prec/10)
 spinor_H.normalize()
 
 Peps = vp.ScalingProjector(mra,prec)
-f = lambda x: VH2(x, origin1, origin2)
+f = lambda x: VH2(x, origin1, origin2, Z, Z, prec)
 V_tree = Peps(f)
 
+default_der = 'PH'
 orbital_error = 1
 while orbital_error > prec:
-    hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec)
-    
+    hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = default_der)
     v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec)
     add_psi = hd_psi + v_psi
     energy, imag = spinor_H.dot(add_psi)
-    print('Energy',energy-c**2,imag)
-    tmp = orb.apply_helmholtz(v_psi, energy, c, prec)
-    new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy)
+    print('Energy',energy - light_speed**2,imag)
+    tmp = orb.apply_helmholtz(v_psi, energy, prec)
+    tmp.crop(prec/10)
+    new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy, der = default_der)
+    new_orbital.crop(prec/10)
     new_orbital.normalize()
     delta_psi = new_orbital - spinor_H
     orbital_error, imag = delta_psi.dot(delta_psi)
     print('Error',orbital_error, imag)
     spinor_H = new_orbital
     
-hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec)
+hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = default_der)
 v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec)
 add_psi = hd_psi + v_psi
 energy, imag = spinor_H.dot(add_psi)
-print('Final Energy',energy-c**2)
+print('Final Energy',energy - light_speed**2)
 
