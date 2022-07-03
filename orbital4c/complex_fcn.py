@@ -68,8 +68,15 @@ class complex_fcn:
         im = vp.dot(self.real, other.imag) + vp.dot(self.imag, other.real)
         return re + 1j * im
       
-    def gradient(self):
-        D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
+    def gradient(self, der = 'ABGV'):
+        if(der == 'ABGV'):
+            D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
+        elif(der == 'PH'):
+            D = vp.PHDerivative(self.mra)
+        elif(der == 'BS'):
+            D = vp.BSDerivative(self.mra)
+        else:
+            exit("Derivative operator not found")
         grad_re = vp.gradient(D, self.real)
         grad_im = vp.gradient(D, self.imag)
         grad = []
@@ -79,8 +86,15 @@ class complex_fcn:
             grad.append(comp)
         return grad
 
-    def derivative(self, dir=0):
-        D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
+    def derivative(self, dir = 0, der = 'ABGV'):
+        if(der == 'ABGV', 0.0, 0.0):
+            D = vp.ABGVDerivative(self.mra)
+        elif(der == 'PH'):
+            D = vp.PHDerivative(self.mra)
+        elif(der == 'BS'):
+            D = vp.BSDerivative(self.mra)
+        else:
+            exit("Derivative operator not found")
         re_der = D(self.real, dir)
         im_der = D(self.imag, dir)
         der_func = complex_fcn()
