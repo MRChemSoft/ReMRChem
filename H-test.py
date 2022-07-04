@@ -26,9 +26,10 @@ Z = 1
 energy_1s = analytic_1s(light_speed, n, k, Z)
 print('Exact Energy',energy_1s - light_speed**2, flush = True)
 
-mra = vp.MultiResolutionAnalysis(box=[-20,20], order=11)
-prec = 1.0e-8
+mra = vp.MultiResolutionAnalysis(box=[-60,60], order=8)
+prec = 1.0e-5
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
+#origin = [0.0, 0.0, 0.0]
 
 orb.orbital4c.light_speed = light_speed
 orb.orbital4c.mra = mra
@@ -53,9 +54,11 @@ Peps = vp.ScalingProjector(mra,prec)
 f = lambda x: nucpot.CoulombHFYGB(x, origin, Z, prec)
 V_tree = Peps(f)
 
+default_der = 'PH'
+
 orbital_error = 1
 while orbital_error > prec:
-    hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec)
+    hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = default_der)
     v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec) 
     add_psi = hd_psi + v_psi
     energy, imag = spinor_H.dot(add_psi)
@@ -64,7 +67,7 @@ while orbital_error > prec:
     tmp = orb.apply_helmholtz(v_psi, energy, prec)
     tmp.crop(prec/10)
 #    new_orbital = orb.apply_helmholtz(tmp, energy, prec)
-    new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy)
+    new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy, der = default_der) 
     new_orbital.crop(prec/10)
     new_orbital.normalize()
     delta_psi = new_orbital - spinor_H
@@ -72,7 +75,7 @@ while orbital_error > prec:
     print('Error',orbital_error, imag, flush = True)
     spinor_H = new_orbital
     
-hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec)
+hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = default_der)
 v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec)
 add_psi = hd_psi + v_psi
 energy, imag = spinor_H.dot(add_psi)

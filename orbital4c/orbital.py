@@ -127,16 +127,16 @@ class orbital4c:
         self['Sa'] = sigma_p_L[0]
         self['Sb'] = sigma_p_L[1]
         
-    def derivative(self, dir=0):
-        orb_der = orbital4c("derivative", orbital.mra)
+    def derivative(self, dir = 0, der = 'ABGV'):
+        orb_der = orbital4c()
         for comp,func in self.components.items():
-            orb_der[comp] = func.derivative(dir) 
+            orb_der[comp] = func.derivative(dir, der) 
         return orb_der
     
-    def gradient(self):
+    def gradient(self, der = 'ABGV'):
         orb_grad = {}
         for key in self.comp_dict.keys():
-            orb_grad[key] = self[key].gradient()
+            orb_grad[key] = self[key].gradient(der)
         grad = []
         for i in range(3):
             comp = orbital4c()
@@ -230,9 +230,9 @@ def matrix_element(bra, operator, ket):
     Opsi = operator(ket)
     return bra.dot(Opsi)
                    
-def apply_dirac_hamiltonian(orbital, prec, shift = 0.0):
+def apply_dirac_hamiltonian(orbital, prec, shift = 0.0, der = 'ABGV'):
     beta_phi = orbital.beta(shift)
-    grad_phi = orbital.gradient()
+    grad_phi = orbital.gradient(der)
     alpx_phi = -1j * orbital4c.light_speed * grad_phi[0].alpha(0)
     alpy_phi = -1j * orbital4c.light_speed * grad_phi[1].alpha(1)
     alpz_phi = -1j * orbital4c.light_speed * grad_phi[2].alpha(2)
