@@ -34,7 +34,7 @@ def PoCh(position, center , charge):
     return charge / distance
 
 def HomChSph(position, center, charge, atom):
-    fileObj = open("./param_V.txt", "r")
+    fileObj = open("./orbital4c/param_V.txt", "r")
     for line in fileObj:
         if not line.startswith("#"):
             line = line.strip().split()
@@ -60,7 +60,7 @@ def HomChSph(position, center, charge, atom):
     return prec * factor
 
 def FTwoPaChDi(position, center, charge, atom):
-    fileObj = open("./param_V.txt", "r")
+    fileObj = open("./orbital4c/param_V.txt", "r")
     for line in fileObj:
         if not line.startswith("#"):
             line = line.strip().split()
@@ -81,7 +81,7 @@ def FTwoPaChDi(position, center, charge, atom):
     return charge / (1.0 + Fermi)
 
 def GausChD(position, center, charge, atom):
-    fileObj = open("./param_V.txt", "r")
+    fileObj = open("./orbital4c/param_V.txt", "r")
     for line in fileObj:
         if not line.startswith("#"):
             line = line.strip().split()
