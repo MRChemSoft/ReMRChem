@@ -1,6 +1,7 @@
 ########## Define Enviroment #################
 from vampyr import vampyr3d as vp
 from orbital4c import orbital as orb
+from orbital4c import NuclearPotential as nucpot
 from orbital4c import complex_fcn as cf
 import numpy as np
 from scipy.linalg import eig, inv
@@ -18,10 +19,11 @@ k = -1
 l = 0
 n = 1
 m = 0.5
-Z = 2
+Z = 10
+atom = "Ne"
 
 ################# Call MRA #######################
-mra = vp.MultiResolutionAnalysis(box=[-20,20], order=8)
+mra = vp.MultiResolutionAnalysis(box=[-60,60], order=8)
 prec = 1.0e-5
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 
@@ -53,23 +55,11 @@ spinorb2.init_small_components(prec/10)
 spinorb2.normalize()
 
 ################### Define V potential ######################
-def u(r):
-    u = erf(r)/r + (1/(3*np.sqrt(np.pi)))*(np.exp(-(r**2)) + 16*np.exp(-4*r**2))
-    #erf(r) is an error function that is supposed to stop the potential well from going to inf.
-    #if i remember correctly
-    return u
-
-def V(x):
-    r = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
-    cz = 0.000435 # ten times tighter nuclear potential
-    f_bar = u(r/cz)/cz
-    return f_bar
-
 Peps = vp.ScalingProjector(mra,prec)
-f = lambda x: V([x[0]-origin[0],x[1]-origin[1],x[2]-origin[2]])
+f = lambda x: nucpot.GausChD(x, origin, Z, atom)
+V_tree = Peps(f)
 
-print(f([0.5,0.5,0.5]))
-V_tree = Z*Peps(f)
+default_der = 'PH'
 
 ################# Working on Helium with Coulomb direct (CJ) & exchange (CK) ################
 
@@ -113,8 +103,8 @@ while error_norm > prec:
 
 
     # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
-    hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0)
-    hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0)
+    hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
+    hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
     
 
     # Applying nuclear potential to spin orbit 1 and 2
@@ -165,10 +155,10 @@ while error_norm > prec:
     # Calculation of Helmotz
     tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, energy_11, prec)
     tmp_2 = orb.apply_helmholtz(V_J_K_spinorb2, energy_22, prec)
-    new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, energy_11)
+    new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, energy_11, der = default_der)
     new_orbital_1 *= 0.5/light_speed**2
     new_orbital_1.normalize()
-    new_orbital_2 = orb.apply_dirac_hamiltonian(tmp_2, prec, energy_22)
+    new_orbital_2 = orb.apply_dirac_hamiltonian(tmp_2, prec, energy_22, der = default_der)
     new_orbital_2 *= 0.5/light_speed**2
     new_orbital_2.normalize()
     
@@ -251,8 +241,8 @@ E_xc22 = vp.dot(n_21, K1)
 
     
 # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
-hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0)
-hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0)
+hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
+hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
     
 
 # Applying nuclear potential to spin orbit 1 and 2
