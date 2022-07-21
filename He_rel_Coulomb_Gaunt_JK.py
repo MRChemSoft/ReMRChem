@@ -12,8 +12,8 @@ from scipy.constants import hbar
 import numpy.linalg as LA
 
 ################# Define Paramters ###########################
-c = 137   # NOT A GOOD WAY. MUST BE FIXED!!!
-alpha = 1/c
+light_speed = 137.03604   # NOT A GOOD WAY. MUST BE FIXED!!!
+alpha = 1/light_speed
 k = -1
 l = 0
 n = 1
@@ -21,8 +21,8 @@ m = 0.5
 Z = 2
 
 ################# Call MRA #######################
-mra = vp.MultiResolutionAnalysis(box=[-20,20], order=6)
-prec = 1.0e-3
+mra = vp.MultiResolutionAnalysis(box=[-20,20], order=7)
+prec = 1.0e-5
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 
 ################# Define Gaussian function ########## 
@@ -36,6 +36,7 @@ gauss_tree.normalize()
 
 ################ Define orbital as complex function ######################
 orb.orbital4c.mra = mra
+orb.orbital4c.light_speed = light_speed
 cf.complex_fcn.mra = mra
 complexfc = cf.complex_fcn()
 complexfc.copy_fcns(real=gauss_tree)
@@ -54,15 +55,12 @@ spinorb2.normalize()
 ################### Define V potential ######################
 def u(r):
     u = erf(r)/r + (1/(3*np.sqrt(np.pi)))*(np.exp(-(r**2)) + 16*np.exp(-4*r**2))
-    #erf(r) is an error function that is supposed to stop the potential well from going to inf.
-    #if i remember correctly
     return u
 
 def V(x):
     r = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
-#    c = 0.0435
-    c = 0.000435 # ten times tighter nuclear potential
-    f_bar = u(r/c)/c
+    cz = 0.000435 # ten times tighter nuclear potential
+    f_bar = u(r/cz)/cz
     return f_bar
 
 Peps = vp.ScalingProjector(mra,prec)
@@ -137,8 +135,6 @@ while error_norm > prec:
     E_GJ12 = vp.dot(spinorb2_alpha2, GJ12)
     E_GJ21 = vp.dot(spinorb2_alpha1, GJ21)
     E_GJ22 = vp.dot(spinorb1_alpha1, GJ22)
-    print("E_GJ11", E_GJ11)
-    print("E_GJ22", E_GJ22)
     
     
     # Defintion of GKx
@@ -151,8 +147,6 @@ while error_norm > prec:
     E_Gxc12 = vp.dot(spinorb1_alpha2, GK1)
     E_Gxc21 = vp.dot(spinorb2_alpha1, GK2)
     E_Gxc22 = vp.dot(spinorb2_alpha1, GK1)
-    print("E_Gxc11", E_Gxc11)
-    print("E_Gxc22", E_Gxc22)
     
     
     # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
@@ -182,14 +176,13 @@ while error_norm > prec:
     energy_12 = energy_12 + E_H12 - E_xc12 - E_GJ12 + E_Gxc12
     energy_21 = energy_21 + E_H21 - E_xc21 - E_GJ21 + E_Gxc21
     energy_22 = energy_22 + E_H22 - E_xc22 - E_GJ22 + E_Gxc22
-    print('Energy_Spin_Orbit_1', energy_11, imag_11)
-    print('Energy_Spin_Orbit_2', energy_22, imag_22)
+    print('Energy_Spin_Orbit_1', energy_11 - light_speed**2)
+    print('Energy_Spin_Orbit_2', energy_22 - light_speed**2)
     
 
     # Total Energy with J = K approximation
     E_tot = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22 - E_GJ11 - E_GJ22 + E_Gxc11 + E_Gxc22)
-    print("E_total(Coulomb&Gaunt) approximiation", E_tot)
-    
+    print("E_total(Coulomb&Gaunt) approximiation", E_tot - 2.0 * (light_speed**2))
 
     # Calculation of necessary potential contributions to Hellmotz
     CJ_spinorb1 = orb.apply_potential(1.0, J11, spinorb1, prec)
@@ -211,13 +204,13 @@ while error_norm > prec:
     
 
     # Calculation of Helmotz
-    tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, energy_11, c, prec)
-    tmp_2 = orb.apply_helmholtz(V_J_K_spinorb2, energy_22, c, prec)
+    tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, energy_11, prec)
+    tmp_2 = orb.apply_helmholtz(V_J_K_spinorb2, energy_22, prec)
     new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, energy_11)
-    new_orbital_1 *= 0.5 / c ** 2
+    new_orbital_1 *= 0.5 / light_speed ** 2
     new_orbital_1.normalize()
     new_orbital_2 = orb.apply_dirac_hamiltonian(tmp_2, prec, energy_22)
-    new_orbital_2 *= 0.5 / c ** 2
+    new_orbital_2 *= 0.5 / light_speed ** 2
     new_orbital_2.normalize()
     
 
@@ -242,7 +235,6 @@ while error_norm > prec:
 
     # Compute Overlap Matrix
     S_tilde = np.array([[s_11, s_12], [s_21, s_22]])
-    print("S_tilde", S_tilde)
     
     
     # Compute U matrix
@@ -322,8 +314,6 @@ E_GJ11 = vp.dot(spinorb2_alpha2, GJ11)
 E_GJ12 = vp.dot(spinorb2_alpha2, GJ12)
 E_GJ21 = vp.dot(spinorb2_alpha1, GJ21)
 E_GJ22 = vp.dot(spinorb1_alpha1, GJ22)
-print("E_GJ11", E_GJ11)
-print("E_GJ22", E_GJ22)
     
     
 # Defintion of GKx
@@ -336,8 +326,6 @@ E_Gxc11 = vp.dot(spinorb1_alpha2, GK2)
 E_Gxc12 = vp.dot(spinorb1_alpha2, GK1)
 E_Gxc21 = vp.dot(spinorb2_alpha1, GK2)
 E_Gxc22 = vp.dot(spinorb2_alpha1, GK1)
-print("E_Gxc11", E_Gxc11)
-print("E_Gxc22", E_Gxc22)
 
 
 # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
@@ -363,10 +351,10 @@ energy_11 = energy_11 + E_H11 - E_xc11 - E_GJ11 + E_Gxc11
 energy_12 = energy_12 + E_H12 - E_xc12 - E_GJ12 + E_Gxc12
 energy_21 = energy_21 + E_H21 - E_xc21 - E_GJ21 + E_Gxc21
 energy_22 = energy_22 + E_H22 - E_xc22 - E_GJ22 + E_Gxc22
-print('Energy_Spin_Orbit_1', energy_11, imag_11)
-print('Energy_Spin_Orbit_2', energy_22, imag_22)
+print('Energy_Spin_Orbit_1', energy_11 - light_speed**2)
+print('Energy_Spin_Orbit_2', energy_22 - light_speed**2)
 
 # Total Energy with J = K approximation
 E_tot = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22 - E_GJ11 - E_GJ22 + E_Gxc11 + E_Gxc22)
-print("E_total(Coulomb&Gaunt) approximiation", E_tot)
+print("E_total(Coulomb&Gaunt) approximiation", E_tot - 2.0 * (light_speed**2))
 #########################################################END###########################################################################

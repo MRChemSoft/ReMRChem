@@ -167,7 +167,6 @@ def apply_potential(factor, potential, func, prec):
 
 def apply_helmholtz(func, energy, light_speed, prec):
     out_func = complex_fcn()
-    print("Energy and c**2", energy, light_speed)
     mu = np.sqrt((light_speed**4-energy**2)/light_speed**2)
     H = vp.HelmholtzOperator(func.mra, mu, prec)
     if(func.real.squaredNorm() > 0):

@@ -22,6 +22,7 @@ l = 0
 n = 1
 m = 0.5
 Z = 1
+atom = "H"
 
 energy_1s = analytic_1s(light_speed, n, k, Z)
 print('Exact Energy',energy_1s - light_speed**2, flush = True)
@@ -51,7 +52,7 @@ spinor_H.init_small_components(prec/10)
 spinor_H.normalize()
 
 Peps = vp.ScalingProjector(mra,prec)
-f = lambda x: nucpot.CoulombHFYGB(x, origin, Z, prec)
+f = lambda x: nucpot.GausChD(x, origin, Z, atom)
 V_tree = Peps(f)
 
 default_der = 'PH'
