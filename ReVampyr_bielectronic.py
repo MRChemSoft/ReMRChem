@@ -30,7 +30,9 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-5,
                         help='put the precision')
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str,
-                        help='put the precision')
+                        help='put the coulomb or gaunt')
+    parser.add_argument('-v', '--potential', dest='potential', type=str, default='PoCh',
+                        help='tell me wich model for V you want to use PoCh, SmoothingHFYGB, CoulombHFYGB, uHFYGB, HomChSph, FTwoPaChDi, GausChD')
     args = parser.parse_args()
 
     assert args.atype != 'H', 'Please consider only atoms with more than one electran'
@@ -38,6 +40,8 @@ if __name__ == '__main__':
     assert args.charge > 1.0, 'Please consider only atoms with more than one electron'
 
     assert args.coulgau in ['coulomb', 'gaunt'], 'Please, specify coulgau in a rigth way – coloumb or gaunt'
+
+    assert args.potential in ['PoCh', 'SmoothingHFYGB', 'CoulombHFYGB', 'uHFYGB', 'HomChSph', 'FTwoPaChDi', 'GausChD'], 'Please, specify V'
 
 ################# Define Paramters ###########################
 light_speed = 137.03604 
@@ -52,7 +56,7 @@ atom = args.atype
 mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order)
 prec = args.prec
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
-print("call MRA DONE")
+print('call MRA DONE')
 
 ################# Define Gaussian function ########## 
 a_coeff = 3.0
@@ -62,7 +66,7 @@ gauss_tree = vp.FunctionTree(mra)
 vp.advanced.build_grid(out=gauss_tree, inp=gauss)
 vp.advanced.project(prec=prec, out=gauss_tree, inp=gauss)
 gauss_tree.normalize()
-print("Define Gaussian Function DONE")
+print('Define Gaussian Function DONE')
 
 ################ Define orbital as complex function ######################
 orb.orbital4c.mra = mra
@@ -70,7 +74,7 @@ orb.orbital4c.light_speed = light_speed
 cf.complex_fcn.mra = mra
 complexfc = cf.complex_fcn()
 complexfc.copy_fcns(real=gauss_tree)
-print("Define orbital as a complex function DONE")
+print('Define orbital as a complex function DONE')
 
 ################ Define spinorbitals ########## 
 spinorb1 = orb.orbital4c()
@@ -82,19 +86,47 @@ spinorb2 = orb.orbital4c()
 spinorb2.copy_components(Lb=complexfc)
 spinorb2.init_small_components(prec/10)
 spinorb2.normalize()
-print("Define spinorbitals DONE")
+print('Define spinorbitals DONE')
 
 ################### Define V potential ######################
-Peps = vp.ScalingProjector(mra,prec)
-f = lambda x: nucpot.PoCh(x, origin, Z)
-V_tree = Peps(f)
+if args.potential == 'PoCh':
+   Peps = vp.ScalingProjector(mra,prec)
+   f = lambda x: nucpot.PoCh(x, origin, Z)
+   V_tree = Peps(f)
+elif args.potential == 'SmoothingHFYGB':
+   Peps = vp.ScalingProjector(mra,prec)
+   f = lambda x: nucpot.SmoothingHFYGB(Z, prec)
+   V_tree = Peps(f)
+elif args.potential == 'CoulombHFYGB':
+   Peps = vp.ScalingProjector(mra,prec)
+   f = lambda x: nucpot.CoulombHFYGB(x, origin, Z, prec)
+   V_tree = Peps(f)
+elif args.potential == 'uHFYGB':
+   Peps = vp.ScalingProjector(mra,prec)
+   f = lambda x: nucpot.uHFYGB(x)
+   V_tree = Peps(f)
+elif args.potential == 'HomChSph':
+   Peps = vp.ScalingProjector(mra,prec)
+   f = lambda x: nucpot.HomChSph(x, origin, Z, atom)
+   V_tree = Peps(f)
+elif args.potential == 'FTwoPaChDi':
+   Peps = vp.ScalingProjector(mra,prec)
+   Pua = vp.PoissonOperator(mra, prec)
+   f = lambda x: nucpot.FTwoPaChDi(x, origin, Z, atom)
+   rho_tree = Peps(f)
+   V_tree = Pua(rho_tree) * (4 * np.pi)
+elif args.potential == 'GausChD':
+   Peps = vp.ScalingProjector(mra,prec)
+   f = lambda x: nucpot.GausChD(x, origin, Z, atom)
+   V_tree = Peps(f)
+
 default_der = 'PH'
-print("Define V Potetintal DONE")
+print('Define V Potetintal', args.potential, 'DONE')
 
 
 #############################START WITH CALCULATION###################################
-if args.coulgau == "coulomb":
-   print("Hartræ-Føck (Cøulømbic bielectric interåctiøn)")
+if args.coulgau == 'coulomb':
+   print('Hartræ-Føck (Cøulømbic bielectric interåctiøn)')
    error_norm = 1
 
    while error_norm > prec:
@@ -167,7 +199,7 @@ if args.coulgau == "coulomb":
 
        # Total Energy with J = K approximation
        E_tot_JK = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22)
-       print("E_total(Coulomb) approximiation", E_tot_JK - (2.0 *light_speed**2))
+       print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
 
 
        # Calculation of necessary potential contributions to Hellmotz
@@ -201,7 +233,7 @@ if args.coulgau == "coulomb":
        delta_psi_2 = new_orbital_2 - spinorb2
        orbital_error = delta_psi_1 + delta_psi_2
        error_norm = np.sqrt(orbital_error.squaredNorm())
-       print("Orbital_Error norm", error_norm)
+       print('Orbital_Error norm', error_norm)
 
 
        # Compute overlap
@@ -306,12 +338,12 @@ if args.coulgau == "coulomb":
 
    # Total Energy with J = K approximation
    E_tot_JK = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22)
-   print("E_total(Coulomb) approximiation", E_tot_JK - 2.0 *(light_speed**2))
+   print('E_total(Coulomb) approximiation', E_tot_JK - 2.0 *(light_speed**2))
 
 
 #########################################################END###########################################################################
-elif args.coulgau == "gaunt":
-   print("Hartræ-Føck (Cøulømbic-Gåunt bielectric interåctiøn)")
+elif args.coulgau == 'gaunt':
+   print('Hartræ-Føck (Cøulømbic-Gåunt bielectric interåctiøn)')
    error_norm = 1
    while error_norm > prec:
 
@@ -424,7 +456,7 @@ elif args.coulgau == "gaunt":
 
        # Total Energy with J = K approximation
        E_tot = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22 - E_GJ11 - E_GJ22 + E_Gxc11 + E_Gxc22)
-       print("E_total(Coulomb&Gaunt) approximiation", E_tot - 2.0 * (light_speed**2))
+       print('E_total (Coulomb & Gaunt) approximiation', E_tot - 2.0 * (light_speed**2))
 
        # Calculation of necessary potential contributions to Hellmotz
        CJ_spinorb1 = orb.apply_potential(1.0, J11, spinorb1, prec)
@@ -461,7 +493,7 @@ elif args.coulgau == "gaunt":
        delta_psi_2 = new_orbital_2 - spinorb2
        orbital_error = delta_psi_1 + delta_psi_2
        error_norm = np.sqrt(orbital_error.squaredNorm())
-       print("Orbital_Error norm", error_norm)
+       print('Orbital_Error norm', error_norm)
 
 
        # Compute overlap
@@ -603,5 +635,5 @@ elif args.coulgau == "gaunt":
 
    # Total Energy with J = K approximation
    E_tot = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22 - E_GJ11 - E_GJ22 + E_Gxc11 + E_Gxc22)
-   print("E_total(Coulomb&Gaunt) approximiation", E_tot - 2.0 * (light_speed**2))
+   print('E_total (Coulomb & Gaunt) approximiation', E_tot - 2.0 * (light_speed**2))
 #########################################################END###########################################################################
