@@ -3,18 +3,18 @@ import copy as cp
 from scipy.special import erf
 
 
-def PoCh(position, center , charge):
+def point_charge(position, center , charge):
     d2 = ((position[0] - center[0])**2 +
           (position[1] - center[1])**2 +
           (position[2] - center[2])**2)
     distance = np.sqrt(d2)
     return charge / distance
 
-def SmoothingHFYGB(charge, prec):
+def smoothing_HFYGB(charge, prec):
     factor = 0.00435 * prec / charge**5
     return factor**(1./3.)
     
-def CoulombHFYGB(position, center, charge, precision):
+def coulomb_HFYGB(position, center, charge, precision):
     d2 = ((position[0] - center[0])**2 +
           (position[1] - center[1])**2 +
           (position[2] - center[2])**2)
@@ -27,7 +27,7 @@ def uHFYGB(r):
     u = erf(r)/r + (1/(3*np.sqrt(np.pi)))*(np.exp(-(r**2)) + 16*np.exp(-4*r**2))
     return u
 
-def HomChSph(position, center, charge, atom):
+def homogeneus_charge_sphere(position, center, charge, atom):
     fileObj = open("./orbital4c/param_V.txt", "r")
     for line in fileObj:
         if not line.startswith("#"):
@@ -53,7 +53,7 @@ def HomChSph(position, center, charge, atom):
           factor = 1.0  
     return prec * factor
 
-def FTwoPaChDi(position, center, charge, atom):
+def fermi_two_parameters_charge_distribution(position, center, charge, atom):
     fileObj = open("./orbital4c/param_V.txt", "r")
     for line in fileObj:
         if not line.startswith("#"):
@@ -74,7 +74,7 @@ def FTwoPaChDi(position, center, charge, atom):
     Fermi = np.exp(k * ((distance - C)/T))
     return charge / (1.0 + Fermi)
 
-def GausChD(position, center, charge, atom):
+def gaussian_charge_distribution(position, center, charge, atom):
     fileObj = open("./orbital4c/param_V.txt", "r")
     for line in fileObj:
         if not line.startswith("#"):
