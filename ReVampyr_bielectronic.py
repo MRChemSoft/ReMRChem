@@ -35,8 +35,8 @@ if __name__ == '__main__':
                         help='put the precision')
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
-    parser.add_argument('-v', '--potential', dest='potential', type=str, default='point_charge',
-                        help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, fermi_dirac, gaussian')
+    parser.add_argument('-v', '--potential', dest='potential', type=str, default='PoCh',
+                        help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, fermi_two_parameters_charge_distribution, gaussian_charge_distribution')
     args = parser.parse_args()
 
     assert args.atype != 'H', 'Please consider only atoms with more than one electran'
@@ -110,17 +110,9 @@ if args.potential == 'point_charge':
     Peps = vp.ScalingProjector(mra,prec)
     f = lambda x: nucpot.point_charge(x, origin, Z)
     V_tree = Peps(f)
-elif args.potential == 'smoothing_HFYGB':
-    Peps = vp.ScalingProjector(mra,prec)
-    f = lambda x: nucpot.smoothing_HFYGB(Z, prec)
-    V_tree = Peps(f)
 elif args.potential == 'coulomb_HFYGB':
     Peps = vp.ScalingProjector(mra,prec)
     f = lambda x: nucpot.coulomb_HFYGB(x, origin, Z, prec)
-    V_tree = Peps(f)
-elif args.potential == 'uHFYGB':
-    Peps = vp.ScalingProjector(mra,prec)
-    f = lambda x: nucpot.uHFYGB(x)
     V_tree = Peps(f)
 elif args.potential == 'homogeneus_charge_sphere':
     Peps = vp.ScalingProjector(mra,prec)
@@ -133,12 +125,14 @@ elif args.potential == 'fermi_two_parameters_charge_distribution':
     rho_tree = Peps(f)
     V_tree = Pua(rho_tree) * (4 * np.pi)
 elif args.potential == 'gaussian_charge_distribution':
+    print("FIXME!")
+    exit(-1)
     Peps = vp.ScalingProjector(mra,prec)
     f = lambda x: nucpot.gaussian_charge_distribution(x, origin, Z, atom)
     V_tree = Peps(f)
 
-default_der = args.deriv
-print('Define V Potetintal', args.potential, 'DONE')
+default_der = 'PH'
+print('Define V Potential', args.potential, 'DONE')
 
 
 #############################START WITH CALCULATION###################################
