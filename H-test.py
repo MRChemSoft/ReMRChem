@@ -52,7 +52,10 @@ spinor_H.init_small_components(prec/10)
 spinor_H.normalize()
 
 Peps = vp.ScalingProjector(mra,prec)
-f = lambda x: nucpot.GausChD(x, origin, Z, atom)
+print("before", origin, Z, prec)
+#f = lambda x: nucpot.point_charge(x, origin, Z)
+f = lambda x: nucpot.coulomb_HFYGB(x, origin, Z, prec)
+#f = lambda x: nucpot.homogeneus_charge_sphere(x, origin, Z, atom)
 V_tree = Peps(f)
 
 default_der = 'PH'
