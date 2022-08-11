@@ -10,14 +10,14 @@ from scipy.constants import hbar
 light_speed = 137.035999084
 Z = 1
 
-mra = vp.MultiResolutionAnalysis(box=[-60,60], order=10)
-prec = 1.0e-7
+mra = vp.MultiResolutionAnalysis(box=[-60,60], order=13)
+prec = 1.0e-8
 origin1 = [0.1, 0.2, -0.7]  # origin moved to avoid placing the nuclar charge on a node
 origin2 = [0.1, 0.2,  1.3]  # origin moved to avoid placing the nuclar charge on a node
 
 def VH2(x, origin1, origin2, Z1, Z2, prec):
-    V1 = nucpot.CoulombHFYGB(x, origin1, Z1, prec)
-    V2 = nucpot.CoulombHFYGB(x, origin2, Z2, prec)
+    V1 = nucpot.coulomb_HFYGB(x, origin1, Z1, prec)
+    V2 = nucpot.coulomb_HFYGB(x, origin2, Z2, prec)
     return V1 + V2
 
 orb.orbital4c.light_speed = light_speed

@@ -19,21 +19,17 @@ importlib.reload(orb)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
-    parser.add_argument('-a', '--atype', dest='atype', type=str, default='He',
+    parser.add_argument('-a', '--atype', dest='atype', type=str,
                         help='put the atom type')
-    parser.add_argument('-d', '--derivative', dest='deriv', type=str, default='PH',
-                        help='put the type of derivative')
-    #parser.add_argument('-s', '--soc', dest='soc', type=str, default='no',
-    #                    help='estimate or not spin-orbit-coupling')
-    parser.add_argument('-z', '--charge', dest='charge', type=float, default=2.0,
+    parser.add_argument('-z', '--charge', dest='charge', type=float,
                         help='put the atom charge')
-    parser.add_argument('-b', '--box', dest='box', type=int, default=60,
+    parser.add_argument('-b', '--box', dest='box', type=int, default=30,
                         help='put the box dimension')
     parser.add_argument('-o', '--order', dest='order', type=int, default=8,
                         help='put the order of Polinomial')
     parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-5,
                         help='put the precision')
-    parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
+    parser.add_argument('-e', '--coulgau', dest='coulgau', type=str,
                         help='put the coulomb or gaunt')
     parser.add_argument('-v', '--potential', dest='potential', type=str, default='PoCh',
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, fermi_two_parameters_charge_distribution, gaussian_charge_distribution')
@@ -43,13 +39,12 @@ if __name__ == '__main__':
 
     assert args.charge > 1.0, 'Please consider only atoms with more than one electron'
 
-    assert args.coulgau in ['coulomb', 'gaunt'], 'Please, specify coulgau in a rigth way – coulomb or gaunt'
+    assert args.coulgau in ['coulomb', 'gaunt'], 'Please, specify coulgau in a rigth way – coloumb or gaunt'
 
     assert args.potential in ['point_charge', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'fermi_two_parameters_charge_distribution', 'gaussian_charge_distribution'], 'Please, specify V'
 
 ################# Define Paramters ###########################
-light_speed = 137.03599913900001
-#light_speed = 2000000
+light_speed = 137.03604 
 alpha = 1/light_speed
 k = -1
 l = 0
@@ -61,7 +56,6 @@ atom = args.atype
 mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order)
 prec = args.prec
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
-#origin = [0.0, 0.0, 0.0]
 print('call MRA DONE')
 
 ################# Define Gaussian function ########## 
@@ -87,18 +81,11 @@ spinorb1 = orb.orbital4c()
 spinorb1.copy_components(La=complexfc)
 spinorb1.init_small_components(prec/10)
 spinorb1.normalize()
-cspinorb1 = spinorb1.complex_conj()
-#print('spinorb1',spinorb1)
-#print('cspinorb1',cspinorb1)
 
 spinorb2 = orb.orbital4c()
 spinorb2.copy_components(Lb=complexfc)
 spinorb2.init_small_components(prec/10)
 spinorb2.normalize()
-cspinorb2 = spinorb2.complex_conj()
-#print('spinorb2',spinorb2)
-#print('cspinorb2',cspinorb2)
-
 print('Define spinorbitals DONE')
 
 ################### Define V potential ######################
@@ -347,12 +334,8 @@ if args.coulgau == 'coulomb':
     E_tot_JK = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22)
     print('E_total(Coulomb) approximiation', E_tot_JK - 2.0 *(light_speed**2))
 
-   #x = np.arange(-59.999, 59.999, 0.001)
-   #for x_i in x:
-   #    if abs(spinorb1.real([x_i, 59.999, 59.999])) > 0.01:
-   #        print(spinorb1.real([x_i, 59.999, 59.999]))
 
-#####################################################END COULOMB & START GAUNT#######################################################################
+#########################################################END###########################################################################
 elif args.coulgau == 'gaunt':
     print('Hartræ-Føck (Cøulømbic-Gåunt bielectric interåctiøn)')
     error_norm = 1
