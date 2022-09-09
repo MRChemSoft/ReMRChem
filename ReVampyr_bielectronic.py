@@ -19,32 +19,32 @@ importlib.reload(orb)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
-    parser.add_argument('-a', '--atype', dest='atype', type=str,
+    parser.add_argument('-a', '--atype', dest='atype', type=str, default='He',
                         help='put the atom type')
-    parser.add_argument('-z', '--charge', dest='charge', type=float,
+    parser.add_argument('-z', '--charge', dest='charge', type=float, default=2.0,
                         help='put the atom charge')
-    parser.add_argument('-b', '--box', dest='box', type=int, default=30,
+    parser.add_argument('-b', '--box', dest='box', type=int, default=60,
                         help='put the box dimension')
     parser.add_argument('-o', '--order', dest='order', type=int, default=8,
                         help='put the order of Polinomial')
-    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-5,
+    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-6,
                         help='put the precision')
-    parser.add_argument('-e', '--coulgau', dest='coulgau', type=str,
+    parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
-    parser.add_argument('-v', '--potential', dest='potential', type=str, default='PoCh',
-                        help='tell me wich model for V you want to use point_charge, smoothing_HFYGB, coulomb_HFYGB, uHFYGB, homogeneus_charge_sphere, fermi_two_parameters_charge_distribution, gaussian_charge_distribution')
+    parser.add_argument('-v', '--potential', dest='potential', type=str, default='point_charge',
+                        help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, fermi_dirac, gaussian')
     args = parser.parse_args()
 
     assert args.atype != 'H', 'Please consider only atoms with more than one electran'
 
     assert args.charge > 1.0, 'Please consider only atoms with more than one electron'
 
-    assert args.coulgau in ['coulomb', 'gaunt'], 'Please, specify coulgau in a rigth way – coloumb or gaunt'
+    assert args.coulgau in ['coulomb', 'gaunt'], 'Please, specify coulgau in a rigth way – coulomb or gaunt'
 
-    assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'uHFYGB', 'homogeneus_charge_sphere', 'fermi_two_parameters_charge_distribution', 'gaussian_charge_distribution'], 'Please, specify V'
+    assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'fermi_dirac', 'gaussian'], 'Please, specify V'
 
 ################# Define Paramters ###########################
-light_speed = 137.03604 
+light_speed = 137.03604
 alpha = 1/light_speed
 k = -1
 l = 0
@@ -93,32 +93,26 @@ if args.potential == 'point_charge':
    Peps = vp.ScalingProjector(mra,prec)
    f = lambda x: nucpot.point_charge(x, origin, Z)
    V_tree = Peps(f)
-elif args.potential == 'smoothing_HFYGB':
-   Peps = vp.ScalingProjector(mra,prec)
-   f = lambda x: nucpot.smoothing_HFYGB(Z, prec)
-   V_tree = Peps(f)
 elif args.potential == 'coulomb_HFYGB':
    Peps = vp.ScalingProjector(mra,prec)
    f = lambda x: nucpot.coulomb_HFYGB(x, origin, Z, prec)
-   V_tree = Peps(f)
-elif args.potential == 'uHFYGB':
-   Peps = vp.ScalingProjector(mra,prec)
-   f = lambda x: nucpot.uHFYGB(x)
    V_tree = Peps(f)
 elif args.potential == 'homogeneus_charge_sphere':
    Peps = vp.ScalingProjector(mra,prec)
    f = lambda x: nucpot.homogeneus_charge_sphere(x, origin, Z, atom)
    V_tree = Peps(f)
-elif args.potential == 'fermi_two_parameters_charge_distribution':
+elif args.potential == 'fermi_dirac':
    Peps = vp.ScalingProjector(mra,prec)
    Pua = vp.PoissonOperator(mra, prec)
-   f = lambda x: nucpot.fermi_two_parameters_charge_distribution(x, origin, Z, atom)
+   f = lambda x: nucpot.fermi_dirac(x, origin, Z, atom)
    rho_tree = Peps(f)
    V_tree = Pua(rho_tree) * (4 * np.pi)
-elif args.potential == 'gaussian_charge_distribution':
+elif args.potential == 'gaussian':
    Peps = vp.ScalingProjector(mra,prec)
-   f = lambda x: nucpot.gaussian_charge_distribution(x, origin, Z, atom)
+   Pua = vp.PoissonOperator(mra, prec)
+   f = lambda x: nucpot.gaussian(x, origin, Z, atom)
    V_tree = Peps(f)
+#   V_tree = Pua(rho_tree) * (4 * np.pi)
 
 default_der = 'PH'
 print('Define V Potetintal', args.potential, 'DONE')
@@ -386,8 +380,8 @@ elif args.coulgau == 'gaunt':
 
        # Gaunt: Direct (GJ) and Exchange (GK)
        # Definition of alpha(orbital)
-       alpha_1 = orb.alpha(spinorb1, 0) + orb.alpha(spinorb1, 1) + orb.alpha(spinorb1, 2)
-       alpha_2 = orb.alpha(spinorb1, 0) + orb.alpha(spinorb1, 1) + orb.alpha(spinorb1, 2)
+       alpha_1 = spinorb1.alpha(0) + spinorb1.alpha(1) + spinorb1.alpha(2)
+       alpha_2 = spinorb2.alpha(0) + spinorb2.alpha(1) + spinorb2.alpha(2)
 
 
        # Definition of orbital * alpha(orbital)
@@ -565,8 +559,8 @@ elif args.coulgau == 'gaunt':
 
    # Gaunt: Direct (GJ) and Exchange (GK)
    # Definition of alpha(orbital)
-   alpha_1 = orb.alpha(spinorb1, 0) + orb.alpha(spinorb1, 1) + orb.alpha(spinorb1, 2)
-   alpha_2 = orb.alpha(spinorb1, 0) + orb.alpha(spinorb1, 1) + orb.alpha(spinorb1, 2)
+   alpha_1 = spinorb1.alpha(0) + spinorb1.alpha(1) + spinorb1.alpha(2)
+   alpha_2 = spinorb2.alpha(0) + spinorb2.alpha(1) + spinorb2.alpha(2)
 
 
    # Definition of orbital * alpha(orbital)
