@@ -129,7 +129,7 @@ class orbital4c:
         
     def derivative(self, dir = 0, der = 'ABGV'):
         orb_der = orbital4c()
-        for comp,func in self.components.items():
+        for comp,func in self.comp_array.items():
             orb_der[comp] = func.derivative(dir, der) 
         return orb_der
     
@@ -147,6 +147,12 @@ class orbital4c:
             grad.append(comp)
         return grad
     
+    def complex_conj(self):
+        orb_out = orbital4c()
+        for key in self.comp_dict.keys():
+            orb_out[key] = self[key].complex_conj() 
+        return orb_out
+
     def density(self, prec):
         density = vp.FunctionTree(self.mra)
         add_vector = []
@@ -155,7 +161,7 @@ class orbital4c:
             if(temp.squaredNorm() > 0):
                 add_vector.append((1.0,temp))
         vp.advanced.add(prec/10, density, add_vector)
-        return density
+        return density    
 
     def exchange(self, other, prec):
         exchange = vp.FunctionTree(self.mra)
@@ -168,6 +174,34 @@ class orbital4c:
                 add_vector.append((1.0,temp))    
         vp.advanced.add(prec/10, exchange, add_vector)
         return exchange
+
+    def alpha_exchange(self, other, prec):
+        alpha_exchange = vp.FunctionTree(self.mra)
+        add_vector = []
+        for comp in self.comp_dict.keys():
+            func_i = self[comp]
+            func_j = other[comp]
+            temp = func_i.alpha_exchange(func_j, prec)
+            if(temp.squaredNorm() > 0):
+                add_vector.append((1.0,temp))    
+        vp.advanced.add(prec/10, alpha_exchange, add_vector)
+        return alpha_exchange    
+
+    def overlap_density(self, other, prec):
+        density = cf.complex_fcn()
+        add_vector_real = []
+        add_vector_imag = []
+        for comp in self.comp_dict.keys():
+            func_i = self[comp]
+            func_j = other[comp]
+            temp = func_i * func_j
+            if(temp.real.squaredNorm() > 0):
+                add_vector_real.append((1.0,temp.real))
+            if(temp.imag.squaredNorm() > 0):
+                add_vector_imag.append((1.0,temp.imag))                    
+        vp.advanced.add(prec/10, density.real, add_vector_real)
+        vp.advanced.add(prec/10, density.imag, add_vector_imag)
+        return density
 
     def alpha(self,direction):
         out_orb = orbital4c()
@@ -223,6 +257,17 @@ class orbital4c:
             out_real += cr
             out_imag += ci
         return out_real, out_imag
+
+    def pota(self, other):
+        out_real = 0
+        out_imag = 0
+        for comp in self.comp_dict.keys():
+            factor = 1
+#            if('S' in comp) factor = c**2
+            cr, ci = self[comp].pota(other[comp])
+            out_real += cr
+            out_imag += ci
+        return out_real, out_imag
 #    
 # here we should consider emulating the behavior of MRChem operators
 #
@@ -244,6 +289,14 @@ def apply_potential(factor, potential, orbital, prec):
         if orbital[comp].squaredNorm() > 0:
             out_orbital[comp] = cf.apply_potential(factor, potential, orbital[comp], prec)
     return out_orbital
+
+def apply_complex_potential(factor, potential, orbital, prec):
+    out_orbital = orbital4c()
+    for comp in orbital.comp_dict:
+        if orbital[comp].squaredNorm() > 0:
+            out_orbital[comp] = potential * orbital[comp] 
+    return out_orbital
+
 #
 # Keep this for now to maybe enable precise addition later
 #

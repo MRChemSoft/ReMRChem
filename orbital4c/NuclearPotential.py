@@ -10,22 +10,20 @@ def point_charge(position, center , charge):
     distance = np.sqrt(d2)
     return charge / distance
 
-def smoothing_HFYGB(charge, prec):
-    factor = 0.00435 * prec / charge**5
-    return factor**(1./3.)
-    
 def coulomb_HFYGB(position, center, charge, precision):
     d2 = ((position[0] - center[0])**2 +
           (position[1] - center[1])**2 +
           (position[2] - center[2])**2)
     distance = np.sqrt(d2)
-    factor = SmoothingHFYGB(charge, precision)
-    value = uHFYGB(distance / factor)
+    def smoothing_HFYGB(charge, prec):
+        factor = 0.00435 * prec / charge**5
+        return factor**(1./3.)
+    def uHFYGB(r):
+        u = erf(r)/r + (1/(3*np.sqrt(np.pi)))*(np.exp(-(r**2)) + 16*np.exp(-4*r**2))
+        return u
+    factor = smoothing_HFYGB(charge, precision)
+    value = uHFYGB(distance/factor)
     return charge * value / factor
-
-def uHFYGB(r):
-    u = erf(r)/r + (1/(3*np.sqrt(np.pi)))*(np.exp(-(r**2)) + 16*np.exp(-4*r**2))
-    return u
 
 def homogeneus_charge_sphere(position, center, charge, atom):
     fileObj = open("./orbital4c/param_V.txt", "r")
@@ -39,7 +37,7 @@ def homogeneus_charge_sphere(position, center, charge, atom):
                print("Data file not correclty formatted! Please check it!")
     fileObj.close()
     RMS = float(RMS)
-    RMS2 = RMS**2.0    
+    RMS2 = RMS**2.0
     d2 = ((position[0] - center[0]) ** 2 +
           (position[1] - center[1]) ** 2 +
           (position[2] - center[2]) ** 2)
@@ -53,7 +51,7 @@ def homogeneus_charge_sphere(position, center, charge, atom):
           factor = 1.0  
     return prec * factor
 
-def fermi_two_parameters_charge_distribution(position, center, charge, atom):
+def fermi_dirac(position, center, charge, atom):
     fileObj = open("./orbital4c/param_V.txt", "r")
     for line in fileObj:
         if not line.startswith("#"):
@@ -71,17 +69,17 @@ def fermi_two_parameters_charge_distribution(position, center, charge, atom):
     distance = np.sqrt(d2)
     k = 4 * np.log(3)
     T = 2.30
-    Fermi = np.exp(k * ((distance - C)/T))
-    return charge / (1.0 + Fermi)
+    Fermi =  np.exp(k * (distance - C)/T)
+    return (charge/2.0) / (1.0 + Fermi)
 
-def gaussian_charge_distribution(position, center, charge, atom):
+def gaussian(position, center, charge, atom):
     fileObj = open("./orbital4c/param_V.txt", "r")
     for line in fileObj:
         if not line.startswith("#"):
             line = line.strip().split()
             if len(line) == 4:
                if line[0] == atom:
-                   epsilon = line[3]
+                  epsilon = line[3]
             else:
                print("Data file not correclty formatted! Please check it!")
     fileObj.close()
@@ -90,5 +88,10 @@ def gaussian_charge_distribution(position, center, charge, atom):
           (position[1] - center[1]) ** 2 +
           (position[2] - center[2]) ** 2)
     distance = np.sqrt(d2)
-    u_func = erf((epsilon**1.5) * distance)
-    return (charge / distance) * u_func
+#    z = (epsilon/np.pi)
+#    rho0 = charge  * np.power(z,1.5)
+#    y = np.exp(-epsilon * (distance**2.0))
+    prec = charge / distance 
+    u = erf(np.sqrt(epsilon) * distance)
+#    return rho0 * y
+    return prec * u
