@@ -1,34 +1,45 @@
-########## Define Enviroment #################
-from orbital4c import complex_fcn as cf
-from orbital4c import orbital as orb
-from orbital4c import NuclearPotential as nucpot
+#################################### RELATIVISTIC VAMPYR ####################################
+from vampyr import vampyr3d as vp
+
+####################################     BASIC MODULES   ####################################
+import numpy as np
+import numpy.linalg as LA
+import argparse
+#####
 from scipy.constants import hbar
 from scipy.linalg import eig, inv
 from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
-from vampyr import vampyr3d as vp
 
-import argparse
-import numpy as np
-import numpy.linalg as LA
-import sys, getopt
-
+####################################  DEVELOPED MODULES  ####################################
 import importlib
 importlib.reload(orb)
+#####
+from orbital4c import complex_fcn as cf
+from orbital4c import orbital as orb
+from orbital4c import nuclear_potential as nucpot
+from orbital4c import operators as opr
 
 
+####################################       INPUT        ####################################
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
     parser.add_argument('-a', '--atype', dest='atype', type=str, default='He',
                         help='put the atom type')
     parser.add_argument('-d', '--derivative', dest='deriv', type=str, default='PH',
                         help='put the type of derivative')
-    #parser.add_argument('-s', '--soc', dest='soc', type=str, default='no',
-    #                    help='estimate or not spin-orbit-coupling')
     parser.add_argument('-z', '--charge', dest='charge', type=float, default=2.0,
                         help='put the atom charge')
     parser.add_argument('-b', '--box', dest='box', type=int, default=60,
                         help='put the box dimension')
+    parser.add_argument('-cx', '--center_x', dest='cx', type=float, default=0.0,
+                        help='position of nucleus in x')
+    parser.add_argument('-cy', '--center_y', dest='cy', type=float, default=0.0,
+                        help='position of nucleus in y')
+    parser.add_argument('-cz', '--center_z', dest='cz', type=float, default=0.0,
+                        help='position of nucleus in z')
+    parser.add_argument('-l', '--light_speed', dest='lux_speed', type=float, default=137.03599913900001,
+                        help='light of speed')
     parser.add_argument('-o', '--order', dest='order', type=int, default=8,
                         help='put the order of Polinomial')
     parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-5,
@@ -49,11 +60,8 @@ if __name__ == '__main__':
 
     assert args.deriv in ['PH', 'BS'], 'Please, specify the type of derivative'
 
-    #assert args.deriv in ['yes', 'no'], 'Please, specify if activate or not the spin-orbit-coupling'
-
-################# Define Paramters ###########################
-light_speed = 137.03599913900001
-#light_speed = 2000000
+####################################     PARAMETERS     ####################################
+light_speed = args.lux_speed
 alpha = 1/light_speed
 k = -1
 l = 0
@@ -61,12 +69,13 @@ n = 1
 m = 0.5
 Z = args.charge
 atom = args.atype
-################# Call MRA #######################
+
+####################################   MULTI RESOLUTION ANALYSIS  ####################################
 mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order)
 prec = args.prec
-origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
-#origin = [0.0, 0.0, 0.0]
+origin = [args.cx, args.cy, args.cz]
 print('call MRA DONE')
+
 
 ################# Define Gaussian function ########## 
 a_coeff = 3.0
