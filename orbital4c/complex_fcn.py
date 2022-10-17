@@ -100,6 +100,13 @@ class complex_fcn:
         der_func = complex_fcn()
         der_func.init_fcn(re_der, im_der)
         return der_func
+
+    def complex_conj(self):
+        output = complex_fcn()
+        output.real = self.real 
+        output.imag = -1.0 * self.imag
+        return output
+       
         
     def density(self, prec):
         density = vp.FunctionTree(self.mra)
@@ -134,12 +141,34 @@ class complex_fcn:
             vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
         if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
             vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
-        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
+        if(self.real.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
             vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
         if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
             vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
         vp.advanced.add(prec/10, exchange, [a_, b_, c_, d_])
         return exchange
+
+    def alpha_exchange(self, other, prec):
+        alpha_exchange = vp.FunctionTree(self.mra)
+        add_vector = []
+        a_ = vp.FunctionTree(self.mra)
+        a_.setZero()
+        b_ = vp.FunctionTree(self.mra)
+        b_.setZero()
+        c_ = vp.FunctionTree(other.mra)
+        c_.setZero()
+        d_ = vp.FunctionTree(other.mra)
+        d_.setZero()        
+        if(self.real.squaredNorm() > 0 and other.real.squaredNorm() > 0):
+            vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
+        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
+            vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
+        if(self.real.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
+            vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
+        if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
+            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
+        vp.advanced.add(prec/10, alpha_exchange, [a_, b_])
+        return alpha_exchange
     
     def dot(self, other):
         out_real = 0
@@ -158,6 +187,25 @@ class complex_fcn:
            out_imag -= vp.dot(func_b, func_c)
         return out_real, out_imag
 
+
+    def pota(self, other):
+        out_real = 0
+        out_imag = 0
+        func_a = self.real
+        func_b = self.imag
+        func_c = other.real
+        func_d = other.imag
+        if(func_a.squaredNorm() > 0 and func_c.squaredNorm() > 0):
+           out_real += vp.dot(func_a, func_c)
+        if(func_b.squaredNorm() > 0 and func_d.squaredNorm() > 0):
+           out_real += vp.dot(func_b, func_d)
+        if(func_a.squaredNorm() > 0 and func_d.squaredNorm() > 0):
+           out_imag -= vp.dot(func_a, func_d)
+        if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
+           out_imag += vp.dot(func_b, func_c)
+        return out_real, out_imag
+
+
 #Not too happy about this design. Potential is only a real FunctionTree...
 def apply_potential(factor, potential, func, prec):
     output = complex_fcn()
@@ -174,4 +222,18 @@ def apply_helmholtz(func, energy, light_speed, prec):
     if(func.imag.squaredNorm() > 0):
         vp.advanced.apply(prec, out_func.imag, H, func.imag)
     return out_func
+
+def apply_poisson(func, mra, prec):
+    out_func = complex_fcn()
+    Pua = vp.PoissonOperator(mra, prec)
+    if(func.real.squaredNorm() > 0):
+        vp.advanced.apply(prec, out_func.real, Pua, func.real)
+    if(func.imag.squaredNorm() > 0):
+        vp.advanced.apply(prec, out_func.imag, Pua, func.imag)
+    return out_func
+
+
+
+
+
 

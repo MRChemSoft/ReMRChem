@@ -69,8 +69,8 @@ def fermi_dirac(position, center, charge, atom):
     distance = np.sqrt(d2)
     k = 4 * np.log(3)
     T = 2.30
-    Fermi =  np.exp(k * ((distance - C)/T))
-    return (2.0 * charge) / (1.0 + Fermi)
+    Fermi =  np.exp(k * (distance - C)/T)
+    return (charge/2.0) / (1.0 + Fermi)
 
 def gaussian(position, center, charge, atom):
     fileObj = open("./orbital4c/param_V.txt", "r")
