@@ -47,7 +47,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
     parser.add_argument('-v', '--potential', dest='potential', type=str, default='point_charge',
-                        help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, fermi_dirac, gaussian')
+                        help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     args = parser.parse_args()
 
     assert args.atype != 'H', 'Please consider only atoms with more than one electran'
@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     assert args.coulgau in ['coulomb', 'gaunt'], 'Please, specify coulgau in a rigth way – coulomb or gaunt'
 
-    assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'fermi_dirac', 'gaussian'], 'Please, specify V'
+    assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
 
     assert args.deriv in ['PH', 'BS'], 'Please, specify the type of derivative'
 
@@ -76,45 +76,15 @@ prec = args.prec
 origin = [args.cx, args.cy, args.cz]
 print('call MRA DONE')
 
-
-################# Define Gaussian function ########## 
-a_coeff = 3.0
-b_coeff = np.sqrt(a_coeff/np.pi)**3
-gauss = vp.GaussFunc(b_coeff, a_coeff, origin)
-gauss_tree = vp.FunctionTree(mra)
-vp.advanced.build_grid(out=gauss_tree, inp=gauss)
-vp.advanced.project(prec=prec, out=gauss_tree, inp=gauss)
-gauss_tree.normalize()
-print('Define Gaussian Function DONE')
-
-################ Define orbital as complex function ######################
-orb.orbital4c.mra = mra
-orb.orbital4c.light_speed = light_speed
-cf.complex_fcn.mra = mra
-complexfc = cf.complex_fcn()
-complexfc.copy_fcns(real=gauss_tree)
-print('Define orbital as a complex function DONE')
-
-################ Define spinorbitals ########## 
-spinorb1 = orb.orbital4c()
-spinorb1.copy_components(La=complexfc)
-spinorb1.init_small_components(prec/10)
-spinorb1.normalize()
+####################################      DEFINE SPINORBITALS     ####################################
+spinorb1  = opr.spinorb_generator(La)
 cspinorb1 = spinorb1.complex_conj()
-#print('spinorb1',spinorb1)
-#print('cspinorb1',cspinorb1)
 
-spinorb2 = orb.orbital4c()
-spinorb2.copy_components(Lb=complexfc)
-spinorb2.init_small_components(prec/10)
-spinorb2.normalize()
+spinorb2  = opr.spinorb_generator(Lb)
 cspinorb2 = spinorb2.complex_conj()
-#print('spinorb2',spinorb2)
-#print('cspinorb2',cspinorb2)
-
 print('Define spinorbitals DONE')
 
-################### Define V potential ######################
+####################################    DEFINE NUCLEAR POTENTIAL  ####################################
 if args.potential == 'point_charge':
    Peps = vp.ScalingProjector(mra,prec/10)
    f = lambda x: nucpot.point_charge(x, origin, Z)
