@@ -51,26 +51,6 @@ def homogeneus_charge_sphere(position, center, charge, atom):
           factor = 1.0  
     return prec * factor
 
-def fermi_dirac(position, center, charge, atom):
-    fileObj = open("./orbital4c/param_V.txt", "r")
-    for line in fileObj:
-        if not line.startswith("#"):
-            line = line.strip().split()
-            if len(line) == 4:
-               if line[0] == atom:
-                   C = line[2]
-            else:
-               print("Data file not correclty formatted! Please check it!")
-    fileObj.close()
-    C = float(C)
-    d2 = ((position[0] - center[0]) ** 2 +
-          (position[1] - center[1]) ** 2 +
-          (position[2] - center[2]) ** 2)
-    distance = np.sqrt(d2)
-    k = 4 * np.log(3)
-    T = 2.30
-    Fermi =  np.exp(k * (distance - C)/T)
-    return (charge/2.0) / (1.0 + Fermi)
 
 def gaussian(position, center, charge, atom):
     fileObj = open("./orbital4c/param_V.txt", "r")
@@ -79,7 +59,7 @@ def gaussian(position, center, charge, atom):
             line = line.strip().split()
             if len(line) == 4:
                if line[0] == atom:
-                  epsilon = line[3]
+                  epsilon = line[2]
             else:
                print("Data file not correclty formatted! Please check it!")
     fileObj.close()
@@ -88,10 +68,6 @@ def gaussian(position, center, charge, atom):
           (position[1] - center[1]) ** 2 +
           (position[2] - center[2]) ** 2)
     distance = np.sqrt(d2)
-#    z = (epsilon/np.pi)
-#    rho0 = charge  * np.power(z,1.5)
-#    y = np.exp(-epsilon * (distance**2.0))
     prec = charge / distance 
     u = erf(np.sqrt(epsilon) * distance)
-#    return rho0 * y
     return prec * u

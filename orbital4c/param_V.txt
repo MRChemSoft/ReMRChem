@@ -1,13 +1,12 @@
 # In the first column Root mean square radius of the nucleus for the finite nucleus models
 # in atomic units (1 a.u. = a0 , the Bohr radius)
-# In the second column Half charge radius in the Fermi model in atomic units (1 a.u. = a0), which is called C
-# In the third column Exponential parameter in the Gaussian model in atomic units (1 a.u. = 1/a0^2, which is called Epsilon.
-H    2.6569547399e-05     1.3223400000e-05      2.1248239171e+09
-He   3.5849373401e-05     2.6317156849e-05      1.1671538870e+09
-Ne   5.3654104231e-05     5.0449447293e-05      5.2105715255e+08
-Ar   6.4800211825e-05     6.8888709658e-05      3.5722217300e+08
-Kr   7.9959560033e-05     9.1668391309e-05      2.3461213272e+08
-Xe   9.1209776425e-05     1.0776168501e-05      1.8030529331e+08
-Rn   1.0642976299e-04     1.2894197396e-04      1.3242350205e+08
-U    1.0867476102e-04     1.3202606322e-04      1.2700881714e+08
-Pu   1.0949065967e-04     1.3314484402e-04      1.2512299012e+08
+# In the second column Exponential parameter in the Gaussian model in atomic units (1 a.u. = 1/a0^2, which is called Epsilon.
+H    2.6569547399e-05    2.1248239171e+09
+He   3.5849373401e-05    1.1671538870e+09
+Ne   5.3654104231e-05    5.2105715255e+08
+Ar   6.4800211825e-05    3.5722217300e+08
+Kr   7.9959560033e-05    2.3461213272e+08
+Xe   9.1209776425e-05    1.8030529331e+08
+Rn   1.0642976299e-04    1.3242350205e+08
+U    1.0867476102e-04    1.2700881714e+08
+Pu   1.0949065967e-04    1.2512299012e+08
