@@ -125,12 +125,10 @@ if args.coulgau == 'coulomb':
    while error_norm > prec:
 
         # Initialize operators for first iteration
-        J_1 = opr.CouloumbOperator(mra, spinorb1, prec)
-        print('ready J_1', J_1)
-        J_2 = opr.CouloumbOperator(mra, spinorb2, prec)
-        print('ready J_2', J_2)
+        J = opr.CouloumbOperator(mra, spinorb1, spinorb2, prec)
+        print('ready J', J)
 
-#        K_n = ExchangeOperator(mra, spinorb1, prec)
+#        K_n = ExchangeOperator(mra, spinorb1, spinorb2, prec)
 
 ##       # Definition of different densities
 #       n_11 = spinorb1.density(prec)
