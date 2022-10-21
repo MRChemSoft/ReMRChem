@@ -46,8 +46,8 @@ if __name__ == '__main__':
                         help='put the order of Polinomial')
     parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-5,
                         help='put the precision')
-#    parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
-#                        help='put the coulomb or gaunt')
+    parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
+                        help='put the coulomb or gaunt')
     parser.add_argument('-v', '--potential', dest='potential', type=str, default='point_charge',
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     args = parser.parse_args()
@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     assert args.charge > 1.0, 'Please consider only atoms with more than one electron'
 
-#    assert args.coulgau in ['coulomb', 'gaunt'], 'Please, specify coulgau in a rigth way – coulomb or gaunt'
+    assert args.coulgau in ['coulomb', 'gaunt'], 'Please, specify coulgau in a rigth way – coulomb or gaunt'
 
     assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
 
@@ -118,18 +118,20 @@ print('Define V Potetintal', args.potential, 'DONE')
 #
 #
 ##############################START WITH CALCULATION###################################
-#if args.coulgau == 'coulomb':
-#   print('Hartræ-Føck (Cøulømbic bielectric interåctiøn)')
-#   error_norm = 1
-#
-#   while error_norm > prec:
-#
-#        # Initialize operators for first iteration
-#        J_1 = opr.CouloumbOperator(mra, spinorb1, precision)
-#        J_2 = opr.CouloumbOperator(mra, spinorb2, precision)
-#
-#        K_n = ExchangeOperator(mra, Phi_n, precision)
-#
+if args.coulgau == 'coulomb':
+   print('Hartræ-Føck (Cøulømbic bielectric interåctiøn)')
+   error_norm = 1
+
+   while error_norm > prec:
+
+        # Initialize operators for first iteration
+        J_1 = opr.CouloumbOperator(mra, spinorb1, prec)
+        print('ready J_1', J_1)
+        J_2 = opr.CouloumbOperator(mra, spinorb2, prec)
+        print('ready J_2', J_2)
+
+#        K_n = ExchangeOperator(mra, spinorb1, prec)
+
 ##       # Definition of different densities
 #       n_11 = spinorb1.density(prec)
 #       n_12 = spinorb1.exchange(spinorb2, prec)

@@ -45,15 +45,32 @@ class SpinorbGenerator():
         phi.normalize()
         return phi
 
-##class ExchangeOperator():
-##
-##    def __init__(self, mra, Psi, prec):
-##        self.mra = mra
-##        self.Psi = Psi
-##        self.prec = prec
-##        self.poisson = vp.PoissonOperator(mra=mra, prec=self.prec)
-##
-##    def __call__(self, Phi):
+class CouloumbOperator():
+    def __init__(self, mra, Psi, prec):
+        self.mra = mra
+        self.Psi = Psi
+        self.prec = prec
+        self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
+        self.potential = None
+        self.setup()
+
+    def setup(self):
+        rho = self.Psi.density(self.prec)
+        rho.crop(self.prec)
+        self.potential = (4.0*np.pi)*self.poisson(rho).crop(self.prec)
+
+    def __call__(self, Phi):
+        return self.potential*phi
+
+#class ExchangeOperator():
+#
+#    def __init__(self, mra, Psi, phi prec):
+#        self.mra = mra
+#        self.Psi = Psi
+#        self.prec = prec
+#        self.poisson = vp.PoissonOperator(mra=mra, prec=self.prec)
+#
+#    def __call__(self, Phi):
 #        Phi_out = []
 #        for j in range(len(Phi)):
 #            V_j0 = self.poisson(Phi[j].exchange(self.Psi[0],self.prec))
@@ -65,25 +82,10 @@ class SpinorbGenerator():
 #            Phi_out.append(tmp)
 #        return np.array([phi for phi in Phi_out])
 #
-#
-##class CouloumbOperator():
-##    def __init__(self, mra, Psi, prec):
-##        self.mra = mra
-##        self.Psi = Psi
-##        self.prec = prec
-##        self.poisson = vp.PoissonOperator(mra=mra, prec=self.prec)
-##        self.potential = None
-##        self.setup()
-##
-##    def setup(self):
-##        rho = self.Psi.density(self.prec)
-##        rho.crop(self.prec)
-##        self.potential = (4.0*np.pi)*self.poisson(rho).crop(self.prec)
-##
-##    def __call__(self, Phi):
-##        return self.potential*phi
-##
-##
+
+
+
+
 #class GauntExchange():
 #    def __init__(self, mra, Psi, prec):
 #        self.mra = mra
