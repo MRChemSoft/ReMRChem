@@ -3,7 +3,6 @@ from orbital4c import complex_fcn as cf
 from orbital4c import orbital     as orb
 from vampyr    import vampyr3d    as vp
 
-
 class SpinorbGenerator():
 
     def __init__(self, mra, guessorb, c, origin, prec):
@@ -46,25 +45,17 @@ class SpinorbGenerator():
         return phi
 
 class CouloumbOperator():
-    def __init__(self, mra, Psi, Phi, prec):
+    def __init__(self, mra, prec):
         self.mra = mra
-        self.Psi = Psi
-        self.Phi = Phi
         self.prec = prec
         self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
         self.potential = None
-        self.setup()
-
-    def setup(self):
-        rho1 = self.Psi.density(self.prec)
-        rho1.crop(self.prec)
-        rho2 = self.Phi.density(self.prec)
-        rho2.crop(self.prec)
-        rho = rho1 + rho2 
-        self.potential = (4.0*np.pi)*self.poisson(rho).crop(self.prec)
         
-    def __call__(self, so):
-        return self.potential*so
+    def __call__(self, Phi):
+        rho = Phi.density(self.prec)
+        rho.crop(self.prec)
+        self.potential = (4.0*np.pi)*self.poisson(rho).crop(self.prec)
+        return self.potential*Phi
 
 class ExchangeOperator():
 
