@@ -131,6 +131,43 @@ if args.coulgau == 'coulomb':
         K = opr.ExchangeOperator(mra, prec)
         print('ready K', K)
 
+        # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
+        hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
+        hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
+        print('hd_psi_1', hd_psi_1)
+        print('hd_psi_2', hd_psi_2)
+
+        # Applying nuclear potential to spin orbit 1 and 2
+        v_spinorb1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
+        v_spinorb2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec) 
+        #print('v_spinorb1', v_spinorb1)
+        #print('v_spinorb2', v_spinorb2)
+
+        # Definition of full 4c hamitoninan
+        add_psi_1 = hd_psi_1 + v_spinorb1
+        add_psi_2 = hd_psi_2 + v_spinorb2
+        print('add_psi_1', add_psi_1)
+        print('add_psi_2', add_psi_2)
+ 
+        # Calculate Fij Fock matrix
+        energy_11, imag_11 = spinorb1.dot(add_psi_1)
+        energy_12, imag_12 = spinorb1.dot(add_psi_2)
+        energy_21, imag_21 = spinorb2.dot(add_psi_1)
+        energy_22, imag_22 = spinorb2.dot(add_psi_2)
+        print('energy_11', energy_11)
+        print('energy_12', energy_12) 
+        print('energy_21', energy_21)
+        print('energy_22', energy_22)        
+
+        # Apply potential operator to all orbitals
+        V1 = v_spinorb1 + 2*J(spinorb1) - K(spinorb1, spinorb2)
+        V2 = v_spinorb2 + 2*J(spinorb2) - K(spinorb1, spinorb2)
+        #print('V1', V1)
+        #print('V2', V2)
+
+
+
+
 ##       # Definition of different densities
 #       n_11 = spinorb1.density(prec)
 #       n_12 = spinorb1.exchange(spinorb2, prec)
