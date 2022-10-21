@@ -66,29 +66,18 @@ class CouloumbOperator():
     def __call__(self, so):
         return self.potential*so
 
-#class ExchangeOperator():
-#
-#    def __init__(self, mra, Psi, Phi prec):
-#        self.mra = mra
-#        self.Psi = Psi
-#        self.prec = prec
-#        self.poisson = vp.PoissonOperator(mra=mra, prec=self.prec)
-#
-#    def __call__(self, Phi):
-#        Phi_out = []
-#        for j in range(len(Phi)):
-#            V_j0 = self.poisson(Phi[j].exchange(self.Psi[0],self.prec))
-#            tmp = (self.Psi[0]  * V_j0)
-#            for i in range(1, len(self.Psi)):
-#                V_ji = self.poisson(Phi[j].exchange(self.Psi[i],self.prec))
-#                tmp += (self.Psi[i]  * V_ji)
-#            tmp *= (4.0*np.pi)
-#            Phi_out.append(tmp)
-#        return np.array([phi for phi in Phi_out])
-#
-#
+class ExchangeOperator():
 
+    def __init__(self, mra, prec):
+        self.mra = mra
+        self.prec = prec
+        self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
 
+    def __call__(self, Phi, Psi):
+        V_ij = self.poisson(Phi.exchange(Psi,self.prec))
+        V_ij *= (4.0*np.pi)
+        tmp = V_ij * Psi 
+        return tmp
 
 #class GauntExchange():
 #    def __init__(self, mra, Psi, prec):

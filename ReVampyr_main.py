@@ -128,7 +128,8 @@ if args.coulgau == 'coulomb':
         J = opr.CouloumbOperator(mra, spinorb1, spinorb2, prec)
         print('ready J', J)
 
-#        K_n = ExchangeOperator(mra, spinorb1, spinorb2, prec)
+        K = opr.ExchangeOperator(mra, prec)
+        print('ready K', K)
 
 ##       # Definition of different densities
 #       n_11 = spinorb1.density(prec)
