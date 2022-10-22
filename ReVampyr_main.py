@@ -315,6 +315,7 @@ elif args.coulgau == 'gaunt':
         #print('ready J', J)
         K = opr.ExchangeOperator(mra, prec)
         #print('ready K', K)
+
         
         # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
@@ -337,166 +338,79 @@ elif args.coulgau == 'gaunt':
 
         #GAUNT: Direct (GJ) and Exchange (GK)
         #Definition of alpha(orbital)
-        alpha_10 =  spinorb1.alpha(0)
-        alpha_11 =  spinorb1.alpha(1)
-        alpha_12 =  spinorb1.alpha(2)
+        alpha10 =  spinorb1.alpha(0)
+        alpha11 =  spinorb1.alpha(1)
+        alpha12 =  spinorb1.alpha(2)
  
-
-        alpha_20 =  spinorb2.alpha(0)
-        alpha_21 =  spinorb2.alpha(1)
-        alpha_22 =  spinorb2.alpha(2)    
+        
+        alpha20 =  spinorb2.alpha(0)
+        alpha21 =  spinorb2.alpha(1)
+        alpha22 =  spinorb2.alpha(2)    
 
 
         GCO = opr.GauntCouloumbOperator(mra, prec)
+        GEO = opr.GauntExchangeOperator(mra, prec)
 
-
-        GJ11_0_alpha10 = GCO(alpha_10,cspinorb1)
-        GJ11_1_alpha11 = GCO(alpha_11,cspinorb1)
-        GJ11_2_alpha12 = GCO(alpha_12,cspinorb1)
+        GJ11_0_alpha10 = GCO(alpha10, cspinorb1)
+        GJ11_1_alpha11 = GCO(alpha11, cspinorb1)
+        GJ11_2_alpha12 = GCO(alpha12, cspinorb1)
         
-        GJ22_0_alpha20 = GCO(alpha_20,cspinorb2)
-        GJ22_1_alpha21 = GCO(alpha_21,cspinorb2)
-        GJ22_2_alpha22 = GCO(alpha_22,cspinorb2)
+        GJ22_0_alpha20 = GCO(alpha20, cspinorb2)
+        GJ22_1_alpha21 = GCO(alpha21, cspinorb2)
+        GJ22_2_alpha22 = GCO(alpha22, cspinorb2)
+
+        GK12_0_alpha10 = GEO(alpha10, alpha20, cspinorb1)
+        GK12_1_alpha11 = GEO(alpha11, alpha21, cspinorb1)
+        GK12_2_alpha12 = GEO(alpha12, alpha22, cspinorb1)
+
+        GK21_0_alpha20 = GEO(alpha20, alpha10, cspinorb2)
+        GK21_1_alpha21 = GEO(alpha20, alpha10, cspinorb2)
+        GK21_2_alpha22 = GEO(alpha20, alpha10, cspinorb2)
 
 
 
+        # Calculate Fij Fock matrix
+        F_11, imag_F_11 = spinorb1.dot(add_psi_1)
+        F_12, imag_F_12 = spinorb1.dot(add_psi_2)
+        F_21, imag_F_21 = spinorb2.dot(add_psi_1)
+        F_22, imag_F_22 = spinorb2.dot(add_psi_2)
+        #print('energy_11', energy_11)
+        #print('energy_12', energy_12) 
+        #print('energy_21', energy_21)
+        #print('energy_22', energy_22)
+
+        # Apply potential operator to all orbitals
+        V1 = v_spinorb1 + J(spinorb1) - K(spinorb1, spinorb2) - F_12*spinorb2
+        V2 = v_spinorb2 + J(spinorb2) - K(spinorb2, spinorb1) - F_21*spinorb1
+        #print('V1', V1)
+        #print('V2', V2)
+        
+        E_H1, imag_H1 = cspinorb1.dot(J(spinorb1))
+        E_xc1, imag_K1 = cspinorb1.dot(K(spinorb1, spinorb2))
+        E_H2, imag_H2 = cspinorb2.dot(J(spinorb2))
+        E_xc2, imag_K1 = cspinorb2.dot(K(spinorb2, spinorb1))
+        
+        energy_1 = F_11 + E_H1 - E_xc1
+        energy_2 = F_22 + E_H2 - E_xc2
+        print('Energy_Spin_Orbit_1', energy_1 - light_speed**2)
+        print('Energy_Spin_Orbit_2', energy_2 - light_speed**2)
 
 
-
-
-         
-#        #Defintion of orbital * alpha(orbital)
-#        cspinorb1_alpha10 = cspinorb1.overlap_density(alpha_10, prec)
-#        cspinorb1_alpha11 = cspinorb1.overlap_density(alpha_11, prec)
-#        cspinorb1_alpha12 = cspinorb1.overlap_density(alpha_12, prec)
-#
-#        cspinorb1_alpha20 = cspinorb1.overlap_density(alpha_20, prec)
-#        cspinorb1_alpha21 = cspinorb1.overlap_density(alpha_21, prec)
-#        cspinorb1_alpha22 = cspinorb1.overlap_density(alpha_22, prec)
-#        
-#        cspinorb2_alpha10 = cspinorb2.overlap_density(alpha_10, prec)
-#        cspinorb2_alpha11 = cspinorb2.overlap_density(alpha_11, prec)
-#        cspinorb2_alpha12 = cspinorb2.overlap_density(alpha_12, prec)
-#        
-#        cspinorb2_alpha20 = cspinorb2.overlap_density(alpha_20, prec)
-#        cspinorb2_alpha21 = cspinorb2.overlap_density(alpha_21, prec)
-#        cspinorb2_alpha22 = cspinorb2.overlap_density(alpha_22, prec)
-#        
-#             
-#        #Definition of GJx
-#        GJ11_Re0 = Pua(cspinorb1_alpha10.real) * (2.0 * np.pi)
-#        GJ11_Re1 = Pua(cspinorb1_alpha11.real) * (2.0 * np.pi)
-#        GJ11_Re2 = Pua(cspinorb1_alpha12.real) * (2.0 * np.pi)
-#        
-#        GJ22_Re0 = Pua(cspinorb2_alpha20.real) * (2.0 * np.pi)
-#        GJ22_Re1 = Pua(cspinorb2_alpha21.real) * (2.0 * np.pi)
-#        GJ22_Re2 = Pua(cspinorb2_alpha22.real) * (2.0 * np.pi)
-#        
-#        GJ11_Im0 = Pua(cspinorb1_alpha10.imag) * (2.0 * np.pi)
-#        GJ11_Im1 = Pua(cspinorb1_alpha11.imag) * (2.0 * np.pi)
-#        GJ11_Im2 = Pua(cspinorb1_alpha12.imag) * (2.0 * np.pi)
-#        
-#
-#
-#        GJ22_Im0 = Pua(cspinorb2_alpha20.imag) * (2.0 * np.pi)
-#        GJ22_Im1 = Pua(cspinorb2_alpha21.imag) * (2.0 * np.pi)
-#        GJ22_Im2 = Pua(cspinorb2_alpha22.imag) * (2.0 * np.pi)
-#       
-#       
-#        GJ11_0 = cf.complex_fcn()
-#        GJ11_0.real = GJ11_Re0
-#        GJ11_0.imag = GJ11_Im0
-#        GJ11_1 = cf.complex_fcn()
-#        GJ11_1.real = GJ11_Re1
-#        GJ11_1.imag = GJ11_Im1
-#        GJ11_2 = cf.complex_fcn()
-#        GJ11_2.real = GJ11_Re2
-#        GJ11_2.imag = GJ11_Im2
-#    
-#        GJ22_0 = cf.complex_fcn()
-#        GJ22_0.real = GJ22_Re0
-#        GJ22_0.imag = GJ22_Im0
-#        GJ22_1 = cf.complex_fcn()
-#        GJ22_1.real = GJ22_Re1
-#        GJ22_1.imag = GJ22_Im1
-#        GJ22_2 = cf.complex_fcn()
-#        GJ22_2.real = GJ22_Re2
-#        GJ22_2.imag = GJ22_Im2
-#          
-#   
-#       #Definition of GKx
-#       GK12_Re0 = Pua(cspinorb1_alpha20.real) * (2.0 * np.pi)
-#       GK12_Re1 = Pua(cspinorb1_alpha21.real) * (2.0 * np.pi)
-#       GK12_Re2 = Pua(cspinorb1_alpha22.real) * (2.0 * np.pi)
-#       GK21_Re0 = Pua(cspinorb2_alpha10.real) * (2.0 * np.pi)
-#       GK21_Re1 = Pua(cspinorb2_alpha11.real) * (2.0 * np.pi)
-#       GK21_Re2 = Pua(cspinorb2_alpha12.real) * (2.0 * np.pi)
-#       GK12_Im0 = Pua(cspinorb1_alpha20.imag) * (2.0 * np.pi)
-#       GK12_Im1 = Pua(cspinorb1_alpha21.imag) * (2.0 * np.pi)
-#       GK12_Im2 = Pua(cspinorb1_alpha22.imag) * (2.0 * np.pi)
-#       GK21_Im0 = Pua(cspinorb2_alpha10.imag) * (2.0 * np.pi)
-#       GK21_Im1 = Pua(cspinorb2_alpha11.imag) * (2.0 * np.pi)
-#       GK21_Im2 = Pua(cspinorb2_alpha12.imag) * (2.0 * np.pi)
-#       
-#          
-#       GK12_0 = cf.complex_fcn()
-#       GK12_0.real = GK12_Re0
-#       GK12_0.imag = GK12_Im0
-#       GK12_1 = cf.complex_fcn()
-#       GK12_1.real = GK12_Re1
-#       GK12_1.imag = GK12_Im1
-#       GK12_2 = cf.complex_fcn()
-#       GK12_2.real = GK12_Re2
-#       GK12_2.imag = GK12_Im2
-#   
-#       GK21_0 = cf.complex_fcn()
-#       GK21_0.real = GK21_Re0
-#       GK21_0.imag = GK21_Im0
-#       GK21_1 = cf.complex_fcn()
-#       GK21_1.real = GK21_Re1
-#       GK21_1.imag = GK21_Im1
-#       GK21_2 = cf.complex_fcn()
-#       GK21_2.real = GK21_Re2
-#       GK21_2.imag = GK21_Im2
-#
-#
-#       # Calculation of necessary potential contributions to Helmotz and Energy 
-#       CJ_spinorb1   = orb.apply_potential(1.0, J11, spinorb1, prec)
-#       CK_spinorb1   = orb.apply_potential(1.0, K2, spinorb2, prec)
-#
-#       CJ_spinorb2   = orb.apply_potential(1.0, J22, spinorb2, prec)
-#       CK_spinorb2   = orb.apply_potential(1.0, K1, spinorb1, prec)
-#
-#       GJ11_0_alpha10 = orb.apply_complex_potential(1.0, GJ11_0, alpha_10, prec)
-#       GJ11_1_alpha11 = orb.apply_complex_potential(1.0, GJ11_1, alpha_11, prec)
-#       GJ11_2_alpha12 = orb.apply_complex_potential(1.0, GJ11_2, alpha_12, prec)
-#       GJ22_0_alpha20 = orb.apply_complex_potential(1.0, GJ22_0, alpha_20, prec)
-#       GJ22_1_alpha21 = orb.apply_complex_potential(1.0, GJ22_1, alpha_21, prec)
-#       GJ22_2_alpha22 = orb.apply_complex_potential(1.0, GJ22_2, alpha_22, prec)
-#       
-#       GK12_0_alpha10 = orb.apply_complex_potential(1.0, GK12_0, alpha_10, prec)
-#       GK12_1_alpha11 = orb.apply_complex_potential(1.0, GK12_1, alpha_11, prec)
-#       GK12_2_alpha12 = orb.apply_complex_potential(1.0, GK12_2, alpha_12, prec)
-#       GK21_0_alpha20 = orb.apply_complex_potential(1.0, GK21_0, alpha_20, prec)
-#       GK21_1_alpha21 = orb.apply_complex_potential(1.0, GK21_1, alpha_21, prec)
-#       GK21_2_alpha22 = orb.apply_complex_potential(1.0, GK21_2, alpha_22, prec)
-#
-#
-#       # Definition of Energy Hartree of Fock matrix
-#       E_GJ110, imag_E_GJ110 = spinorb1.dot(GJ11_0_alpha10)
-#       E_GJ111, imag_E_GJ111 = spinorb1.dot(GJ11_1_alpha11)
-#       E_GJ112, imag_E_GJ112 = spinorb1.dot(GJ11_2_alpha12)
-#       E_GJ220, imag_E_GJ220 = spinorb2.dot(GJ22_0_alpha20)
-#       E_GJ221, imag_E_GJ221 = spinorb2.dot(GJ22_1_alpha21)
-#       E_GJ222, imag_E_GJ222 = spinorb2.dot(GJ22_2_alpha22)
-#    
-#
-#       E_Gxc120, imag_E_Gxc120 = spinorb2.dot(GK12_0_alpha10)
-#       E_Gxc121, imag_E_Gxc121 = spinorb2.dot(GK12_1_alpha11)
-#       E_Gxc122, imag_E_Gxc122 = spinorb2.dot(GK12_2_alpha12)
-#       E_Gxc210, imag_E_Gxc210 = spinorb1.dot(GK21_0_alpha20)
-#       E_Gxc211, imag_E_Gxc211 = spinorb1.dot(GK21_1_alpha21)
-#       E_Gxc212, imag_E_Gxc212 = spinorb1.dot(GK21_2_alpha22)
+        # Definition of Energy Hartree of Fock matrix
+        E_GJ110, imag_E_GJ110 = spinorb1.dot(GJ11_0_alpha10)
+        E_GJ111, imag_E_GJ111 = spinorb1.dot(GJ11_1_alpha11)
+        E_GJ112, imag_E_GJ112 = spinorb1.dot(GJ11_2_alpha12)
+        E_GJ220, imag_E_GJ220 = spinorb2.dot(GJ22_0_alpha20)
+        E_GJ221, imag_E_GJ221 = spinorb2.dot(GJ22_1_alpha21)
+        E_GJ222, imag_E_GJ222 = spinorb2.dot(GJ22_2_alpha22)
+     
+ 
+        E_Gxc120, imag_E_Gxc120 = spinorb2.dot(GK12_0_alpha10)
+        E_Gxc121, imag_E_Gxc121 = spinorb2.dot(GK12_1_alpha11)
+        E_Gxc122, imag_E_Gxc122 = spinorb2.dot(GK12_2_alpha12)
+        E_Gxc210, imag_E_Gxc210 = spinorb1.dot(GK21_0_alpha20)
+        E_Gxc211, imag_E_Gxc211 = spinorb1.dot(GK21_1_alpha21)
+        E_Gxc212, imag_E_Gxc212 = spinorb1.dot(GK21_2_alpha22)
 #
 #
 #       E_GJ = E_GJ110 + E_GJ111 + E_GJ112 + E_GJ220 + E_GJ221 + E_GJ222

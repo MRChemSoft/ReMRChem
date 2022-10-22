@@ -94,44 +94,25 @@ class GauntCouloumbOperator():
         return self.potential
 
 
-#class GauntExchange():
-#    def __init__(self, mra, Psi, prec):
-#        self.mra = mra
-#        self.Psi = Psi
-#        self.prec = prec
-#        self.poisson = vp.PoissonOperator(mra=mra, prec=self.prec)
-#
-#    def __call__(self, Phi):
-#        Phi_out = []
-#        for j in range(len(Phi)):
-#            gamma = self.Psi[0].alpha(self.prec)
-#            V_j0 = self.poisson(Phi[j].exchange(gamma[0],self.prec))
-#            tmp = (self.Psi[0] * V_j0)
-#            for i in range(1, len(self.Psi)):
-#                V_ji = self.poisson(Phi[j].exchange(gamma[i],self.prec))
-#                tmp += (gamma[i] * V_ji)
-#            tmp *= (4.0*np.pi)
-#            Phi_out.append(tmp)
-#        return np.array([phi for phi in Phi_out]) 
-# 
-#
-#
-#class GauntDirect():
-#    def __init__(self, mra, Psi, prec):
-#        self.mra = mra
-#        self.Psi = Psi
-#        self.prec = prec
-#        self.poisson = vp.PoissonOperator(mra=mra, prec=self.prec)
-#        self.potential = None
-#        self.setup()
-#
-#    def setup(self):
-#        gamma = self.Psi[0].alpha(self.prec)
-#        rho = self.Psi[0].exchange(gamma[0],self.prec)
-#        for i in range(1, len(self.Psi)):
-#            rho += self.Psi[i].exchange(gamma[0],self.prec)
-#        self.potential = (4.0*np.pi)*self.poisson(rho)
-#
-#    def __call__(self, Phi):
-#        return np.array([(self.potential*phi) for phi in Phi])
 
+class GauntExchangeOperator():
+    def __init__(self, mra, prec):
+        self.mra = mra
+        self.prec = prec
+        self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
+        self.potential = None
+        
+    def __call__(self, alpha1, alpha2, cPhi1):
+        cPhi1_alpha2 = cPhi1.overlap_density(alpha2, prec)
+
+        GK12_Re0 = self.poisson(cPhi1_alpha2.real) * (2.0 * np.pi)  
+        
+        GK12_Im0 = self.poisson(cPhi1_alpha2.imag) * (2.0 * np.pi)
+
+        GK12 = cf.complex_fcn()
+        GK12.real = GK12_Re0
+        GK12.imag = GK12_Im0  
+
+        self.potential = orb.apply_complex_potential(1.0, GK12, alpha1, prec)    
+
+        return self.potential
