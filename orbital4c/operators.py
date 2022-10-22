@@ -70,6 +70,30 @@ class ExchangeOperator():
         tmp = V_ij * Psi 
         return tmp
 
+
+class GauntCouloumbOperator():
+    def __init__(self, mra, prec):
+        self.mra = mra
+        self.prec = prec
+        self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
+        self.potential = None
+        
+    def __call__(self, alpha, cPhi):
+        cPhi_alpha  = cPhi.overlap_density(alpha, prec)
+     
+        GJ_Re = self.poisson(cPhi_alpha.real) * (2.0 * np.pi)
+
+        GJ_Im = self.poisson(cPhi_alpha.imag) * (2.0 * np.pi)
+
+        GJ = cf.complex_fcn()
+        GJ.real = GJ_Re0
+        GJ.imag = GJ_Im0
+
+        self.potential = orb.apply_complex_potential(1.0, GJ, alpha, prec)
+
+        return self.potential
+
+
 #class GauntExchange():
 #    def __init__(self, mra, Psi, prec):
 #        self.mra = mra

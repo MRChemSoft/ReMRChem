@@ -304,110 +304,124 @@ if args.coulgau == 'coulomb':
 
 #
 ######################################################END COULOMB & START GAUNT#######################################################################
-#elif args.coulgau == 'gaunt':
-#   print('Hartræ-Føck (Cøulømbic-Gåunt bielectric interåctiøn)')
-#   error_norm = 1
-#   while error_norm > prec:
+elif args.coulgau == 'gaunt':
+    print('Hartræ-Føck (Cøulømbic-Gåunt bielectric interåctiøn)')
+    error_norm = 1
+    while error_norm > prec:
+
+        # Initialize operators for first iteration
+        J = opr.CouloumbOperator(mra, prec)
+
+        #print('ready J', J)
+        K = opr.ExchangeOperator(mra, prec)
+        #print('ready K', K)
+        
+        # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
+        hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
+        hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
+        #print('hd_psi_1', hd_psi_1)
+        #print('hd_psi_2', hd_psi_2)
+        
+        # Applying nuclear potential to spin orbit 1 and 2
+        v_spinorb1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
+        v_spinorb2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec) 
+        #print('v_spinorb1', v_spinorb1)
+        #print('v_spinorb2', v_spinorb2)
+        
+        # Definition of full 4c hamitoninan
+        add_psi_1 = hd_psi_1 + v_spinorb1
+        add_psi_2 = hd_psi_2 + v_spinorb2
+        #print('add_psi_1', add_psi_1)
+        #print('add_psi_2', add_psi_2)
+
+
+        #GAUNT: Direct (GJ) and Exchange (GK)
+        #Definition of alpha(orbital)
+        alpha_10 =  spinorb1.alpha(0)
+        alpha_11 =  spinorb1.alpha(1)
+        alpha_12 =  spinorb1.alpha(2)
+ 
+
+        alpha_20 =  spinorb2.alpha(0)
+        alpha_21 =  spinorb2.alpha(1)
+        alpha_22 =  spinorb2.alpha(2)    
+
+
+        GCO = opr.GauntCouloumbOperator(mra, prec)
+
+
+        GJ11_0_alpha10 = GCO(alpha_10,cspinorb1)
+        GJ11_1_alpha11 = GCO(alpha_11,cspinorb1)
+        GJ11_2_alpha12 = GCO(alpha_12,cspinorb1)
+        
+        GJ22_0_alpha20 = GCO(alpha_20,cspinorb2)
+        GJ22_1_alpha21 = GCO(alpha_21,cspinorb2)
+        GJ22_2_alpha22 = GCO(alpha_22,cspinorb2)
+
+
+
+
+
+
+
+         
+#        #Defintion of orbital * alpha(orbital)
+#        cspinorb1_alpha10 = cspinorb1.overlap_density(alpha_10, prec)
+#        cspinorb1_alpha11 = cspinorb1.overlap_density(alpha_11, prec)
+#        cspinorb1_alpha12 = cspinorb1.overlap_density(alpha_12, prec)
 #
-#       # Definition of different densities
-#       n_11 = spinorb1.density(prec)
-#       n_12 = spinorb1.exchange(spinorb2, prec)
-#       n_21 = spinorb2.exchange(spinorb1, prec)
-#       n_22 = spinorb2.density(prec)
-#
-#
-#       # Definition of Poisson operator
-#       Pua = vp.PoissonOperator(mra, prec)
-#
-#
-#       # Defintion of Jx
-#       J11 = Pua(n_11) * (4 * np.pi)
-#       J12 = Pua(n_12) * (4 * np.pi)
-#       J21 = Pua(n_21) * (4 * np.pi)
-#       J22 = Pua(n_22) * (4 * np.pi)
-#
-#
-#       # Definition of Kx
-#       K1 = Pua(n_12) * (4 * np.pi)
-#       K2 = Pua(n_21) * (4 * np.pi)
-#
-#
-#       # Definition of Energy Hartree of Fock matrix
-#       E_H11 = vp.dot(n_11, J11)
-#       E_H12 = vp.dot(n_12, J12)
-#       E_H21 = vp.dot(n_21, J21)
-#       E_H22 = vp.dot(n_22, J22)
-#
-#
-#       # Definition of Energy Exchange of Fock matrix
-#       E_xc11 = vp.dot(n_12, K2)
-#       E_xc12 = vp.dot(n_12, K1)
-#       E_xc21 = vp.dot(n_21, K2)
-#       E_xc22 = vp.dot(n_21, K1)
-#
-#
-#       #GAUNT: Direct (GJ) and Exchange (GK)
-#       #Definition of alpha(orbital)
-#       alpha_10 =  spinorb1.alpha(0)
-#       alpha_11 =  spinorb1.alpha(1)
-#       alpha_12 =  spinorb1.alpha(2)
-#       
-#       alpha_20 =  spinorb2.alpha(0)
-#       alpha_21 =  spinorb2.alpha(1)
-#       alpha_22 =  spinorb2.alpha(2)    
-#         
-#       #Defintion of orbital * alpha(orbital)
-#       cspinorb1_alpha10 = cspinorb1.overlap_density(alpha_10, prec)
-#       cspinorb1_alpha11 = cspinorb1.overlap_density(alpha_11, prec)
-#       cspinorb1_alpha12 = cspinorb1.overlap_density(alpha_12, prec)
-#       
-#       cspinorb1_alpha20 = cspinorb1.overlap_density(alpha_20, prec)
-#       cspinorb1_alpha21 = cspinorb1.overlap_density(alpha_21, prec)
-#       cspinorb1_alpha22 = cspinorb1.overlap_density(alpha_22, prec)
-#       
-#       cspinorb2_alpha10 = cspinorb2.overlap_density(alpha_10, prec)
-#       cspinorb2_alpha11 = cspinorb2.overlap_density(alpha_11, prec)
-#       cspinorb2_alpha12 = cspinorb2.overlap_density(alpha_12, prec)
-#       
-#       cspinorb2_alpha20 = cspinorb2.overlap_density(alpha_20, prec)
-#       cspinorb2_alpha21 = cspinorb2.overlap_density(alpha_21, prec)
-#       cspinorb2_alpha22 = cspinorb2.overlap_density(alpha_22, prec)
-#       
+#        cspinorb1_alpha20 = cspinorb1.overlap_density(alpha_20, prec)
+#        cspinorb1_alpha21 = cspinorb1.overlap_density(alpha_21, prec)
+#        cspinorb1_alpha22 = cspinorb1.overlap_density(alpha_22, prec)
+#        
+#        cspinorb2_alpha10 = cspinorb2.overlap_density(alpha_10, prec)
+#        cspinorb2_alpha11 = cspinorb2.overlap_density(alpha_11, prec)
+#        cspinorb2_alpha12 = cspinorb2.overlap_density(alpha_12, prec)
+#        
+#        cspinorb2_alpha20 = cspinorb2.overlap_density(alpha_20, prec)
+#        cspinorb2_alpha21 = cspinorb2.overlap_density(alpha_21, prec)
+#        cspinorb2_alpha22 = cspinorb2.overlap_density(alpha_22, prec)
+#        
 #             
-#       #Definition of GJx
-#       GJ11_Re0 = Pua(cspinorb1_alpha10.real) * (2.0 * np.pi)
-#       GJ11_Re1 = Pua(cspinorb1_alpha11.real) * (2.0 * np.pi)
-#       GJ11_Re2 = Pua(cspinorb1_alpha12.real) * (2.0 * np.pi)
-#       GJ22_Re0 = Pua(cspinorb2_alpha20.real) * (2.0 * np.pi)
-#       GJ22_Re1 = Pua(cspinorb2_alpha21.real) * (2.0 * np.pi)
-#       GJ22_Re2 = Pua(cspinorb2_alpha22.real) * (2.0 * np.pi)
-#       GJ11_Im0 = Pua(cspinorb1_alpha10.imag) * (2.0 * np.pi)
-#       GJ11_Im1 = Pua(cspinorb1_alpha11.imag) * (2.0 * np.pi)
-#       GJ11_Im2 = Pua(cspinorb1_alpha12.imag) * (2.0 * np.pi)
-#       GJ22_Im0 = Pua(cspinorb2_alpha20.imag) * (2.0 * np.pi)
-#       GJ22_Im1 = Pua(cspinorb2_alpha21.imag) * (2.0 * np.pi)
-#       GJ22_Im2 = Pua(cspinorb2_alpha22.imag) * (2.0 * np.pi)
+#        #Definition of GJx
+#        GJ11_Re0 = Pua(cspinorb1_alpha10.real) * (2.0 * np.pi)
+#        GJ11_Re1 = Pua(cspinorb1_alpha11.real) * (2.0 * np.pi)
+#        GJ11_Re2 = Pua(cspinorb1_alpha12.real) * (2.0 * np.pi)
+#        
+#        GJ22_Re0 = Pua(cspinorb2_alpha20.real) * (2.0 * np.pi)
+#        GJ22_Re1 = Pua(cspinorb2_alpha21.real) * (2.0 * np.pi)
+#        GJ22_Re2 = Pua(cspinorb2_alpha22.real) * (2.0 * np.pi)
+#        
+#        GJ11_Im0 = Pua(cspinorb1_alpha10.imag) * (2.0 * np.pi)
+#        GJ11_Im1 = Pua(cspinorb1_alpha11.imag) * (2.0 * np.pi)
+#        GJ11_Im2 = Pua(cspinorb1_alpha12.imag) * (2.0 * np.pi)
+#        
+#
+#
+#        GJ22_Im0 = Pua(cspinorb2_alpha20.imag) * (2.0 * np.pi)
+#        GJ22_Im1 = Pua(cspinorb2_alpha21.imag) * (2.0 * np.pi)
+#        GJ22_Im2 = Pua(cspinorb2_alpha22.imag) * (2.0 * np.pi)
 #       
 #       
-#       GJ11_0 = cf.complex_fcn()
-#       GJ11_0.real = GJ11_Re0
-#       GJ11_0.imag = GJ11_Im0
-#       GJ11_1 = cf.complex_fcn()
-#       GJ11_1.real = GJ11_Re1
-#       GJ11_1.imag = GJ11_Im1
-#       GJ11_2 = cf.complex_fcn()
-#       GJ11_2.real = GJ11_Re2
-#       GJ11_2.imag = GJ11_Im2
-#   
-#       GJ22_0 = cf.complex_fcn()
-#       GJ22_0.real = GJ22_Re0
-#       GJ22_0.imag = GJ22_Im0
-#       GJ22_1 = cf.complex_fcn()
-#       GJ22_1.real = GJ22_Re1
-#       GJ22_1.imag = GJ22_Im1
-#       GJ22_2 = cf.complex_fcn()
-#       GJ22_2.real = GJ22_Re2
-#       GJ22_2.imag = GJ22_Im2
+#        GJ11_0 = cf.complex_fcn()
+#        GJ11_0.real = GJ11_Re0
+#        GJ11_0.imag = GJ11_Im0
+#        GJ11_1 = cf.complex_fcn()
+#        GJ11_1.real = GJ11_Re1
+#        GJ11_1.imag = GJ11_Im1
+#        GJ11_2 = cf.complex_fcn()
+#        GJ11_2.real = GJ11_Re2
+#        GJ11_2.imag = GJ11_Im2
+#    
+#        GJ22_0 = cf.complex_fcn()
+#        GJ22_0.real = GJ22_Re0
+#        GJ22_0.imag = GJ22_Im0
+#        GJ22_1 = cf.complex_fcn()
+#        GJ22_1.real = GJ22_Re1
+#        GJ22_1.imag = GJ22_Im1
+#        GJ22_2 = cf.complex_fcn()
+#        GJ22_2.real = GJ22_Re2
+#        GJ22_2.imag = GJ22_Im2
 #          
 #   
 #       #Definition of GKx
