@@ -172,12 +172,16 @@ if args.coulgau == 'coulomb':
         #print('V2', V2)
 
 
-        E_H1, imag_H1 = cspinorb1.dot(J(spinorb1))
-        E_xc1, imag_K1 = cspinorb1.dot(K(spinorb1, spinorb2))
-    
+        #cE_H1, cimag_H1 = cspinorb1.dot(J(spinorb1))
+        #print('cE_H1', cE_H1)
+        E_H1,  imag_H1 = spinorb1.dot(J(spinorb1))
+        #print('E_H1', E_H1)
+        E_xc1, imag_K1 = spinorb1.dot(K(spinorb1, spinorb2))
+        #print('E_xc1', E_xc1)
 
-        E_H2, imag_H2 = cspinorb2.dot(J(spinorb2))
-        E_xc2, imag_K1 = cspinorb2.dot(K(spinorb2, spinorb1))
+
+        E_H2,  imag_H2 = spinorb2.dot(J(spinorb2))
+        E_xc2, imag_K2 = spinorb2.dot(K(spinorb2, spinorb1))
     
 
         energy_1 = F_11 + E_H1 - E_xc1
@@ -284,12 +288,12 @@ if args.coulgau == 'coulomb':
     #print('V2', V2)
     
 
-    E_H1, imag_H1 = cspinorb1.dot(J(spinorb1))
-    E_xc1, imag_K1 = cspinorb1.dot(K(spinorb1, spinorb2))
+    E_H1,  imag_H1 = spinorb1.dot(J(spinorb1))
+    E_xc1, imag_K1 = spinorb1.dot(K(spinorb1, spinorb2))
     
 
-    E_H2, imag_H2 = cspinorb2.dot(J(spinorb2))
-    E_xc2, imag_K1 = cspinorb2.dot(K(spinorb2, spinorb1))
+    E_H2,  imag_H2 = spinorb2.dot(J(spinorb2))
+    E_xc2, imag_K2 = spinorb2.dot(K(spinorb2, spinorb1))
     
 
     energy_1 = F_11 + E_H1 - E_xc1
