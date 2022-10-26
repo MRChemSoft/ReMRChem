@@ -87,6 +87,8 @@ spinorb1 = SG('La')
 cspinorb1 = spinorb1.complex_conj()
 spinorb2  = SG('Lb')
 cspinorb2 = spinorb2.complex_conj()
+spinorbv = [spinorb1, spinorb2]
+cspinorbv = [cspinorb1, cspinorb2]
 print('Define spinorbitals DONE')
 
 ####################################    DEFINE NUCLEAR POTENTIAL  ####################################
@@ -125,11 +127,11 @@ if args.coulgau == 'coulomb':
     while error_norm > prec:
 
         # Initialize operators for first iteration
-        J = opr.CouloumbOperator(mra, prec)
-        #print('ready J', J)
+        J = opr.CouloumbOperator(mra, prec, spinorbv)
+        print('ready J', J)
 
 
-        K = opr.ExchangeOperator(mra, prec)
+        K = opr.ExchangeOperator(mra, prec, spinorbv)
         #print('ready K', K)
 
 

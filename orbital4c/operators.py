@@ -44,18 +44,26 @@ class SpinorbGenerator():
         phi.normalize()
         return phi
 
+
 class CouloumbOperator():
-    def __init__(self, mra, prec):
+    def __init__(self, mra, prec, Psi):
         self.mra = mra
         self.prec = prec
+        self.Psi = Psi
         self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
         self.potential = None
-        
-    def __call__(self, Phi):
-        rho = Phi.density(self.prec)
+        self.setup()
+
+    def setup(self):
+        rho = self.Psi[0].density(self.prec)
+        for i in range(1, len(self.Psi)):
+            rho += self.Psi[i].density(self.prec)
         rho.crop(self.prec)
         self.potential = (4.0*np.pi)*self.poisson(rho).crop(self.prec)
-        return self.potential*Phi
+        
+    def __call__(self, Phi):
+        return np.array([(self.potential*phi).crop(self.prec) for phi in Phi])
+
 
 class ExchangeOperator():
 
