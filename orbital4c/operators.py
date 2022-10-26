@@ -60,27 +60,25 @@ class CoulombDirectOperator():
             rho += self.Psi[i].density(self.prec)
         rho.crop(self.prec)
         self.potential = (4.0*np.pi)*self.poisson(rho).crop(self.prec)
-        
+
     def __call__(self, Phi):
-        return np.array([(self.potential*phi).crop(self.prec) for phi in Phi])
+        return self.potential * Phi
 
 
 class CoulombExchangeOperator():
-
     def __init__(self, mra, prec, Psi):
         self.mra = mra
         self.prec = prec
         self.Psi = Psi
-        self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
-    
+        self.poisson = vp.PoissonOperator(mra=mra, prec=self.prec)
+
     def __call__(self, Phi):
-        
         Phi_out = []
         for j in range(len(Phi)):
-            V_j0 = self.poisson(Phi[j] * self.Psi[0])
+            V_j0 = self.poisson(Phi[j].exchange(self.Psi[0], self.prec))
             tmp = (self.Psi[0] * V_j0).crop(self.prec)
             for i in range(1, len(self.Psi)):
-                V_ji = self.poisson(Phi[j] * self.Psi[i])
+                V_ji = self.poisson(Phi[j].exchange(self.Psi[i], self.prec))
                 tmp += (self.Psi[i] * V_ji).crop(self.prec)
             tmp *= 4.0*np.pi
             Phi_out.append(tmp)

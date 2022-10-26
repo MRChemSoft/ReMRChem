@@ -138,24 +138,38 @@ if args.coulgau == 'coulomb':
         # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
         hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
-        #print('hd_psi_1', hd_psi_1)
-        #print('hd_psi_2', hd_psi_2)
+        print('hd_psi_1', hd_psi_1)
+        print('hd_psi_2', hd_psi_2)
 
 
         # Applying nuclear potential to spin orbit 1 and 2
         v_spinorb1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
         v_spinorb2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec) 
-        #print('v_spinorb1', v_spinorb1)
-        #print('v_spinorb2', v_spinorb2)
+        print('v_spinorb1', v_spinorb1)
+        print('v_spinorb2', v_spinorb2)
 
 
         # Definition of full 4c hamitoninan
         add_psi_1 = hd_psi_1 + v_spinorb1
         add_psi_2 = hd_psi_2 + v_spinorb2
-        #print('add_psi_1', add_psi_1)
-        #print('add_psi_2', add_psi_2)
+        print('add_psi_1', add_psi_1)
+        print('add_psi_2', add_psi_2)
 
- 
+
+        # Apply potential operator to all orbitals
+        V1 = v_spinorb1 + J(spinorb1) - K(spinorb1) - F_12*spinorb2
+        V2 = v_spinorb2 + J(spinorb2) - K(spinorb2) - F_21*spinorb1
+        print('V1', V1)
+        print('V2', V2)
+
+
+        E_H1,  imag_H1 = spinorb1.dot(J(spinorb1))
+        E_xc1, imag_xc1 = spinorb1.dot(K(spinorb1))
+
+        E_H2,  imag_H2 = spinorb2.dot(J(spinorb2))
+        E_xc2, imag_K2 = spinorb2.dot(K(spinorb2))
+    
+
         # Calculate Fij Fock matrix
         F_11, imag_F_11 = spinorb1.dot(add_psi_1)
         F_12, imag_F_12 = spinorb1.dot(add_psi_2)
@@ -164,27 +178,13 @@ if args.coulgau == 'coulomb':
         #print('energy_11', energy_11)
         #print('energy_12', energy_12) 
         #print('energy_21', energy_21)
-        #print('energy_22', energy_22)       
+        #print('energy_22', energy_22) 
 
 
-        # Apply potential operator to all orbitals
-        V1 = v_spinorb1 + J(spinorb1) - K(spinorb1, spinorb2) - F_12*spinorb2
-        V2 = v_spinorb2 + J(spinorb2) - K(spinorb2, spinorb1) - F_21*spinorb1
-        #print('V1', V1)
-        #print('V2', V2)
 
 
-        #cE_H1, cimag_H1 = cspinorb1.dot(J(spinorb1))
-        #print('cE_H1', cE_H1)
-        E_H1,  imag_H1 = spinorb1.dot(J(spinorb1))
-        #print('E_H1', E_H1)
-        E_xc1, imag_K1 = spinorb1.dot(K(spinorb1, spinorb2))
-        #print('E_xc1', E_xc1)
 
 
-        E_H2,  imag_H2 = spinorb2.dot(J(spinorb2))
-        E_xc2, imag_K2 = spinorb2.dot(K(spinorb2, spinorb1))
-    
 
         energy_1 = F_11 + E_H1 - E_xc1
         energy_2 = F_22 + E_H2 - E_xc2
