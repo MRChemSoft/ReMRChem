@@ -127,12 +127,12 @@ if args.coulgau == 'coulomb':
     while error_norm > prec:
 
         # Initialize operators for first iteration
-        J = opr.CouloumbOperator(mra, prec, spinorbv)
+        J = opr.CoulombDirectOperator(mra, prec, spinorbv)
         print('ready J', J)
 
 
-        K = opr.ExchangeOperator(mra, prec, spinorbv)
-        #print('ready K', K)
+        K = opr.CoulombExchangeOperator(mra, prec, spinorbv)
+        print('ready K', K)
 
 
         # Definiton of Dirac Hamiltonian for spin orbit 1 and 2

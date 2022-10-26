@@ -45,7 +45,7 @@ class SpinorbGenerator():
         return phi
 
 
-class CouloumbOperator():
+class CoulombDirectOperator():
     def __init__(self, mra, prec, Psi):
         self.mra = mra
         self.prec = prec
@@ -65,21 +65,29 @@ class CouloumbOperator():
         return np.array([(self.potential*phi).crop(self.prec) for phi in Phi])
 
 
-class ExchangeOperator():
+class CoulombExchangeOperator():
 
-    def __init__(self, mra, prec):
+    def __init__(self, mra, prec, Psi):
         self.mra = mra
         self.prec = prec
+        self.Psi = Psi
         self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
+    
+    def __call__(self, Phi):
+        
+        Phi_out = []
+        for j in range(len(Phi)):
+            V_j0 = self.poisson(Phi[j] * self.Psi[0])
+            tmp = (self.Psi[0] * V_j0).crop(self.prec)
+            for i in range(1, len(self.Psi)):
+                V_ji = self.poisson(Phi[j] * self.Psi[i])
+                tmp += (self.Psi[i] * V_ji).crop(self.prec)
+            tmp *= 4.0*np.pi
+            Phi_out.append(tmp)
+        return np.array([phi.crop(self.prec) for phi in Phi_out])
 
-    def __call__(self, Phi, Psi):
-        V_ij = self.poisson(Phi.exchange(Psi,self.prec))
-        V_ij *= (4.0*np.pi)
-        tmp = V_ij * Psi 
-        return tmp
 
-
-class GauntCouloumbOperator():
+class GauntDirectOperator():
     def __init__(self, mra, prec):
         self.mra = mra
         self.prec = prec
