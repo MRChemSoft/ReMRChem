@@ -81,7 +81,7 @@ class CoulombExchangeOperator():
         self.potential = (V_j0 * self.Psi[0])
         for i in range(1, len(self.Psi)):
             V_ji = self.poisson(self.Psi[i].exchange(Phi, self.prec))
-            self.potential += (V_ji * self.Psi[i] )
+            self.potential += (V_ji * self.Psi[i])
         self.potential *= 4.0*np.pi
         return self.potential
 
@@ -178,7 +178,6 @@ class Orthogonalize():
 
         # Compute Overlap Matrix
         S_tilde = np.array([[s_11, s_12], [s_21, s_22]])
-
         # Compute U matrix
         sigma, U = LA.eig(S_tilde)
 
@@ -187,8 +186,8 @@ class Orthogonalize():
         
         self.Psio = Sm5[0, 0] * self.Psi + Sm5[0, 1] * self.Phi
         self.Phio = Sm5[1, 0] * self.Psi + Sm5[1, 1] * self.Phi
-        self.Psio.crop(self.prec)
-        self.Phio.crop(self.prec)    
+        #self.Psio.crop(self.prec)
+        #self.Phio.crop(self.prec)    
 
     def __call__(self, label):
         if label == 'spinorb1':

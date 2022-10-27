@@ -157,7 +157,7 @@ if args.coulgau == 'coulomb':
 
         # Apply potential operator to all orbitals
         V1 = v_spinorb1 + J(spinorb1) - K(spinorb1) - F('F12')*spinorb2
-        V2 = v_spinorb2 + J(spinorb2) - K(spinorb2) - F('F21')*spinorb2
+        V2 = v_spinorb2 + J(spinorb2) - K(spinorb2) - F('F21')*spinorb1
         #print('V1', V1)
         #print('V2', V2)
 
@@ -186,7 +186,7 @@ if args.coulgau == 'coulomb':
 
         spinorb1 = O('spinorb1')
         spinorb2 = O('spinorb2')
-
+        spinorbv = [spinorb1, spinorb2]
 #
 #   ##########
 # Initialize operators for first iteration
