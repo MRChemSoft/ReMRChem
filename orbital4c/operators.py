@@ -34,12 +34,12 @@ class SpinorbGenerator():
 
     def __call__(self, component):
         phi = orb.orbital4c()
-        if component == "La":
+        if component == 'La':
             phi.copy_components(La=self.complexfc)
-        elif component == "Lb":
+        elif component == 'Lb':
             phi.copy_components(Lb=self.complexfc)
         else:
-            "Invalid component"
+            'Invalid component'
         phi.init_small_components(self.prec/10)
         phi.normalize()
         return phi
@@ -71,18 +71,83 @@ class CoulombExchangeOperator():
         self.prec = prec
         self.Psi = Psi
         self.poisson = vp.PoissonOperator(mra=mra, prec=self.prec)
+        self.potential = None
 
     def __call__(self, Phi):
-        Phi_out = []
-        for j in range(len(Phi)):
-            V_j0 = self.poisson(Phi[j].exchange(self.Psi[0], self.prec))
-            tmp = (self.Psi[0] * V_j0).crop(self.prec)
-            for i in range(1, len(self.Psi)):
-                V_ji = self.poisson(Phi[j].exchange(self.Psi[i], self.prec))
-                tmp += (self.Psi[i] * V_ji).crop(self.prec)
-            tmp *= 4.0*np.pi
-            Phi_out.append(tmp)
-        return np.array([phi.crop(self.prec) for phi in Phi_out])
+        V_ji = self.poisson(self.Psi[0].exchange(Phi, self.prec))
+        for i in range(1, len(self.Psi)):
+            V_ji += self.poisson(self.Psi[i].exchange(Phi, self.prec))
+        V_ji *= 4.0*np.pi
+        self.potential  =  V_ji * self.Psi[0]
+        for i in range(1, len(self.Psi)):
+            self.potential  +=  V_ji * self.Psi[i]
+        return self.potential
+
+
+class FockMatrix1():
+    def __init__(self, prec, default_der, J, K, v_spinorbv, Psi):
+        self.prec = prec
+        self.default_der = default_der
+        self.v_spinorbv = v_spinorbv
+        self.J = J 
+        self.K = K
+        self.Psi = Psi
+        self.energy11 = None
+        self.energy12 = None
+        self.energy21 = None
+        self.energy22 = None
+        self.setup()
+
+    def setup(self):
+        #Definiton of Dirac Hamiltonian for spin orbit 1 and 2
+        hd_psi_1 = orb.apply_dirac_hamiltonian(self.Psi[0], self.prec, 0.0, der = self.default_der)
+        hd_psi_2 = orb.apply_dirac_hamiltonian(self.Psi[1], self.prec, 0.0, der = self.default_der)
+
+
+        # Definition of full 4c hamitoninan
+        add_psi_1 = hd_psi_1 + self.v_spinorbv[0]
+        add_psi_2 = hd_psi_2 + self.v_spinorbv[1]
+
+
+        energy_11, imag_11 = self.Psi[0].dot(add_psi_1)
+        energy_12, imag_12 = self.Psi[0].dot(add_psi_2)
+        energy_21, imag_21 = self.Psi[1].dot(add_psi_1)
+        energy_22, imag_22 = self.Psi[1].dot(add_psi_2)
+
+
+        E_H11,  imag_H1 = self.Psi[0].dot(self.J(self.Psi[0]))
+        E_H12,  imag_H1 = self.Psi[0].dot(self.J(self.Psi[1]))
+        E_H21,  imag_H1 = self.Psi[1].dot(self.J(self.Psi[0]))
+        E_H22,  imag_H2 = self.Psi[1].dot(self.J(self.Psi[1]))
+
+
+        E_xc11, imag_xc11 = self.Psi[0].dot(self.K(self.Psi[0]))
+        E_xc12, imag_xc12 = self.Psi[0].dot(self.K(self.Psi[1]))
+        E_xc21, imag_xc21 = self.Psi[1].dot(self.K(self.Psi[0]))
+        E_xc22, imag_xc22 = self.Psi[1].dot(self.K(self.Psi[1]))
+
+
+        self.energy11 = energy_11 + E_H11 - E_xc11
+        self.energy12 = energy_12 + E_H12 - E_xc12
+        self.energy21 = energy_21 + E_H21 - E_xc21
+        self.energy22 = energy_22 + E_H22 - E_xc22
+
+        self.energytot = self.energy11 + self.energy22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22)
+
+        
+    def __call__(self, label):
+        if label == 'orb1':
+            self.energy = self.energy11
+        elif label == 'orb2':
+            self.energy = self.energy22
+        elif label == 'F_12':
+            self.energy = self.energy12
+        elif label == 'F_21':
+            self.energy = self.energy21
+        elif label == 'tot':
+            self.energy = self.energytot
+            'Invalid component'
+        return self.energy
 
 
 class GauntDirectOperator():
