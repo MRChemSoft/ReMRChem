@@ -1,7 +1,9 @@
 import numpy as np
+import numpy.linalg as LA
 from orbital4c import complex_fcn as cf
 from orbital4c import orbital     as orb
 from vampyr    import vampyr3d    as vp
+
 
 class SpinorbGenerator():
 
@@ -73,14 +75,14 @@ class CoulombExchangeOperator():
         self.poisson = vp.PoissonOperator(mra=mra, prec=self.prec)
         self.potential = None
 
+
     def __call__(self, Phi):
-        V_ji = self.poisson(self.Psi[0].exchange(Phi, self.prec))
+        V_j0 = self.poisson(self.Psi[0].exchange(Phi, self.prec))
+        self.potential = (V_j0 * self.Psi[0])
         for i in range(1, len(self.Psi)):
-            V_ji += self.poisson(self.Psi[i].exchange(Phi, self.prec))
-        V_ji *= 4.0*np.pi
-        self.potential  =  V_ji * self.Psi[0]
-        for i in range(1, len(self.Psi)):
-            self.potential  +=  V_ji * self.Psi[i]
+            V_ji = self.poisson(self.Psi[i].exchange(Phi, self.prec))
+            self.potential += (V_ji * self.Psi[i] )
+        self.potential *= 4.0*np.pi
         return self.potential
 
 
@@ -96,6 +98,8 @@ class FockMatrix1():
         self.energy12 = None
         self.energy21 = None
         self.energy22 = None
+        self.energytot = None
+        self.energy = None
         self.setup()
 
     def setup(self):
@@ -146,8 +150,54 @@ class FockMatrix1():
             self.energy = self.energy21
         elif label == 'tot':
             self.energy = self.energytot
+        else:
             'Invalid component'
         return self.energy
+
+
+class Orthogonalize():
+    def __init__(self, prec, Psi, Phi):
+        self.prec = prec
+        self.Psi = Psi
+        self.Phi = Phi
+        self.Psio = None
+        self.Phio = None
+        self.xi = None
+        self.setup()
+
+    def setup(self):
+        dot_11 = self.Psi.dot(self.Psi)
+        dot_12 = self.Psi.dot(self.Phi)
+        dot_21 = self.Phi.dot(self.Psi)
+        dot_22 = self.Phi.dot(self.Phi)
+
+        s_11 = dot_11[0] + 1j * dot_11[1]
+        s_12 = dot_12[0] + 1j * dot_12[1]
+        s_21 = dot_21[0] + 1j * dot_21[1]
+        s_22 = dot_22[0] + 1j * dot_22[1]
+
+        # Compute Overlap Matrix
+        S_tilde = np.array([[s_11, s_12], [s_21, s_22]])
+
+        # Compute U matrix
+        sigma, U = LA.eig(S_tilde)
+
+        # Compute matrix S^-1/2
+        Sm5 = U @ np.diag(sigma ** (-0.5)) @ U.transpose()
+        
+        self.Psio = Sm5[0, 0] * self.Psi + Sm5[0, 1] * self.Phi
+        self.Phio = Sm5[1, 0] * self.Psi + Sm5[1, 1] * self.Phi
+        self.Psio.crop(self.prec)
+        self.Phio.crop(self.prec)    
+
+    def __call__(self, label):
+        if label == 'spinorb1':
+            self.xi = self.Psio
+        elif label == 'spinorb2':
+            self.xi = self.Phio
+        else:
+            'Invalid component'
+        return self.xi
 
 
 class GauntDirectOperator():

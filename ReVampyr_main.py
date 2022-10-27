@@ -128,11 +128,11 @@ if args.coulgau == 'coulomb':
 
         # Initialize operators for first iteration
         J = opr.CoulombDirectOperator(mra, prec, spinorbv)
-        print('ready J', J)
+        #print('ready J', J)
 
 
         K = opr.CoulombExchangeOperator(mra, prec, spinorbv)
-        print('ready K', K)
+        #print('ready K', K)
 
 
         # Applying nuclear potential to spin orbit 1 and 2
@@ -144,37 +144,31 @@ if args.coulgau == 'coulomb':
 
 
         #Calculate the Fock matrix (Fij)
-
         F = opr.FockMatrix1(prec, default_der, J, K, v_spinorbv, spinorbv)
 
-        E1 = F('orb1')
-        E2 = F('orb2')
-
-        print('Energy_Spin_Orbit_1', E1 - light_speed**2)
-        print('Energy_Spin_Orbit_2', E2 - light_speed**2)
+        # Orbital Energy
+        print('Energy_Spin_Orbit_1', F('orb1') - light_speed**2)
+        print('Energy_Spin_Orbit_2', F('orb2') - light_speed**2)
 
 
-        # Total Energy with J = K approximation
-        E_tot_JK = F('tot')
-        print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
+        # Total Energy 
+        print('E_total(Coulomb) approximiation', F('tot') - (2.0 *light_speed**2))
 
 
         # Apply potential operator to all orbitals
         V1 = v_spinorb1 + J(spinorb1) - K(spinorb1) - F('F12')*spinorb2
         V2 = v_spinorb2 + J(spinorb2) - K(spinorb2) - F('F21')*spinorb2
-        print('V1', V1)
-        print('V2', V2)
-
-
+        #print('V1', V1)
+        #print('V2', V2)
 
 
         # Calculation of Helmotz
-        tmp_1 = orb.apply_helmholtz(V1, energy_1, prec)
-        tmp_2 = orb.apply_helmholtz(V2, energy_2, prec)
-        new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, energy_1, der = default_der)
+        tmp_1 = orb.apply_helmholtz(V1, F('orb1'), prec)
+        tmp_2 = orb.apply_helmholtz(V2, F('orb2'), prec)
+        new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, F('orb1'), der = default_der)
         new_orbital_1 *= 0.5/light_speed**2
         new_orbital_1.normalize()
-        new_orbital_2 = orb.apply_dirac_hamiltonian(tmp_2, prec, energy_2, der = default_der)
+        new_orbital_2 = orb.apply_dirac_hamiltonian(tmp_2, prec, F('orb2'), der = default_der)
         new_orbital_2 *= 0.5/light_speed**2
         new_orbital_2.normalize()
 
@@ -188,97 +182,36 @@ if args.coulgau == 'coulomb':
  
  
         # Compute overlap
-        dot_11 = new_orbital_1.dot(new_orbital_1)
-        dot_12 = new_orbital_1.dot(new_orbital_2)
-        dot_21 = new_orbital_2.dot(new_orbital_1)
-        dot_22 = new_orbital_2.dot(new_orbital_2)
+        O = opr.Orthogonalize(prec, new_orbital_1, new_orbital_2)
 
-        s_11 = dot_11[0] + 1j * dot_11[1]
-        s_12 = dot_12[0] + 1j * dot_12[1]
-        s_21 = dot_21[0] + 1j * dot_21[1]
-        s_22 = dot_22[0] + 1j * dot_22[1]
-
-        # Compute Overlap Matrix
-        S_tilde = np.array([[s_11, s_12], [s_21, s_22]])
-
-        # Compute U matrix
-        sigma, U = LA.eig(S_tilde)
-
-        # Compute matrix S^-1/2
-        Sm5 = U @ np.diag(sigma ** (-0.5)) @ U.transpose()
-        spinorb1 = Sm5[0, 0] * new_orbital_1 + Sm5[0, 1] * new_orbital_2
-        spinorb2 = Sm5[1, 0] * new_orbital_1 + Sm5[1, 1] * new_orbital_2
-        spinorb1.crop(prec)
-        spinorb2.crop(prec)    
+        spinorb1 = O('spinorb1')
+        spinorb2 = O('spinorb2')
 
 #
 #   ##########
-    # Initialize operators for first iteration
-    J = opr.CouloumbOperator(mra, prec)
+# Initialize operators for first iteration
+    J = opr.CoulombDirectOperator(mra, prec, spinorbv)
     #print('ready J', J)
-
-     
-    K = opr.ExchangeOperator(mra, prec)
+    
+    K = opr.CoulombExchangeOperator(mra, prec, spinorbv)
     #print('ready K', K)
     
-
-    # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
-    hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
-    hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
-    #print('hd_psi_1', hd_psi_1)
-    #print('hd_psi_2', hd_psi_2)
-    
-
     # Applying nuclear potential to spin orbit 1 and 2
     v_spinorb1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
-    v_spinorb2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec) 
+    v_spinorb2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec)
+    v_spinorbv = [v_spinorb1, v_spinorb2]
     #print('v_spinorb1', v_spinorb1)
     #print('v_spinorb2', v_spinorb2)
+    #Calculate the Fock matrix (Fij)
     
-
-    # Definition of full 4c hamitoninan
-    add_psi_1 = hd_psi_1 + v_spinorb1
-    add_psi_2 = hd_psi_2 + v_spinorb2
-    #print('add_psi_1', add_psi_1)
-    #print('add_psi_2', add_psi_2)
+    F = opr.FockMatrix1(prec, default_der, J, K, v_spinorbv, spinorbv)
     
-
-    # Calculate Fij Fock matrix
-    F_11, imag_F_11 = spinorb1.dot(add_psi_1)
-    F_12, imag_F_12 = spinorb1.dot(add_psi_2)
-    F_21, imag_F_21 = spinorb2.dot(add_psi_1)
-    F_22, imag_F_22 = spinorb2.dot(add_psi_2)
-    #print('energy_11', energy_11)
-    #print('energy_12', energy_12) 
-    #print('energy_21', energy_21)
-    #print('energy_22', energy_22)       
+    # Orbital Energy
+    print('Energy_Spin_Orbit_1', F('orb1') - light_speed**2)
+    print('Energy_Spin_Orbit_2', F('orb2') - light_speed**2)
     
-
-    # Apply potential operator to all orbitals
-    V1 = v_spinorb1 + J(spinorb1) - K(spinorb1, spinorb2) - F_12*spinorb2
-    V2 = v_spinorb2 + J(spinorb2) - K(spinorb2, spinorb1) - F_21*spinorb1
-    #print('V1', V1)
-    #print('V2', V2)
-    
-
-    E_H1,  imag_H1 = spinorb1.dot(J(spinorb1))
-    E_xc1, imag_K1 = spinorb1.dot(K(spinorb1, spinorb2))
-    
-
-    E_H2,  imag_H2 = spinorb2.dot(J(spinorb2))
-    E_xc2, imag_K2 = spinorb2.dot(K(spinorb2, spinorb1))
-    
-
-    energy_1 = F_11 + E_H1 - E_xc1
-    energy_2 = F_22 + E_H2 - E_xc2
-    print('Energy_Spin_Orbit_1', energy_1 - light_speed**2)
-    print('Energy_Spin_Orbit_2', energy_2 - light_speed**2)
-      
-      
-    # Total Energy with J = K approximation
-    E_tot_JK = energy_1 + energy_2 - 0.5 * (E_H1 + E_H2 - E_xc1 - E_xc2)
-    print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
-
+    # Total Energy 
+    print('E_total(Coulomb) approximiation', F('tot') - (2.0 *light_speed**2))
 #
 ######################################################END COULOMB & START GAUNT#######################################################################
 elif args.coulgau == 'gaunt':
