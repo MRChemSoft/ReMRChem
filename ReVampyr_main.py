@@ -138,27 +138,29 @@ if args.coulgau == 'coulomb':
         # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
         hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
-        print('hd_psi_1', hd_psi_1)
-        print('hd_psi_2', hd_psi_2)
+        #print('hd_psi_1', hd_psi_1)
+        #print('hd_psi_2', hd_psi_2)
 
 
         # Applying nuclear potential to spin orbit 1 and 2
         v_spinorb1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
         v_spinorb2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec) 
-        print('v_spinorb1', v_spinorb1)
-        print('v_spinorb2', v_spinorb2)
+        #print('v_spinorb1', v_spinorb1)
+        #print('v_spinorb2', v_spinorb2)
 
 
         # Definition of full 4c hamitoninan
         add_psi_1 = hd_psi_1 + v_spinorb1
         add_psi_2 = hd_psi_2 + v_spinorb2
-        print('add_psi_1', add_psi_1)
-        print('add_psi_2', add_psi_2)
+        #print('add_psi_1', add_psi_1)
+        #print('add_psi_2', add_psi_2)
 
 
         # Apply potential operator to all orbitals
-        V1 = v_spinorb1 + J(spinorb1) - K(spinorb1) - F_12*spinorb2
-        V2 = v_spinorb2 + J(spinorb2) - K(spinorb2) - F_21*spinorb1
+        V1 = v_spinorb1 + J(spinorb1) - K(spinorb1) 
+        #- F_12*spinorb2
+        V2 = v_spinorb2 + J(spinorb2) - K(spinorb2) 
+        #- F_21*spinorb1
         print('V1', V1)
         print('V2', V2)
 
