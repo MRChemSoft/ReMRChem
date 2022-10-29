@@ -200,51 +200,36 @@ class Orthogonalize():
 
 
 class GauntDirectOperator():
-    def __init__(self, mra, prec, Psi, cPsi):
+    def __init__(self, mra, prec, Psi, cPsi, alpha0, alpha1, alpha2):
         self.mra = mra
         self.prec = prec
         self.Psi = Psi
         self.cPsi = cPsi
         self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
-        self.alpha0 = None
-        self.alpha1 = None
-        self.alpha2 = None
+        self.alpha0 = alpha0
+        self.alpha1 = alpha1
+        self.alpha2 = alpha2
         self.GJ = None
         self.potential = None
         self.setup()
 
-    def setup(self):
-        #Definition of alpha(orbital
-        self.alpha0 = []
-        self.alpha0[0] = self.Psi[0].alpha(0) 
-        for i in range(1, len(self.Psi)):
-            self.alpha0[i] =  self.Psi[i].alpha(0)
-        
-        self.alpha1 = []
-        self.alpha1[0] = self.Psi[0].alpha(1)
-        for i in range(1, len(self.Psi)):
-            self.alpha1[i] =  self.Psi[i].alpha(1)
-        
-        self.alpha2 = []
-        self.alpha2[0] = self.Psi[0].alpha(2)
-        for i in range(1, len(self.Psi)):
-            self.alpha2[i] =  self.Psi[i].alpha(2)
-        
-
-        cPsi_alpha0  = self.cPsi[0].overlap_density(self.alpha0[0], prec)
+    def setup(self):       
+        cPsi_alpha0  = self.cPsi[0].overlap_density(self.alpha0[0], self.prec)
         for i in range(1, len(self.cPsi)):
-            cPsi_alpha0 +=  self.cPsi[i].overlap_density(self.alpha0[i], prec)
-        
+            cPsi_alpha0 +=  self.cPsi[i].overlap_density(self.alpha0[i], self.prec)
+        cPsi_alpha0 = cPsi_alpha0
 
-        cPsi_alpha1  = self.cPsi[0].overlap_density(self.alpha1[0], prec)
+
+        cPsi_alpha1  = self.cPsi[0].overlap_density(self.alpha1[0], self.prec)
         for i in range(1, len(self.cPsi)):
-            cPsi_alpha1 +=  self.cPsi[i].overlap_density(self.alpha1[i], prec)
-        
+            cPsi_alpha1 +=  self.cPsi[i].overlap_density(self.alpha1[i], self.prec)
+        cPsi_alpha1 = cPsi_alpha1
 
-        cPsi_alpha2  = self.cPsi[0].overlap_density(self.alpha2[0], prec)
+
+        cPsi_alpha2  = self.cPsi[0].overlap_density(self.alpha2[0], self.prec)
         for i in range(1, len(self.cPsi)):
-            cPsi_alpha2 +=  self.cPsi[i].overlap_density(self.alpha2[i], prec)
-
+            cPsi_alpha2 +=  self.cPsi[i].overlap_density(self.alpha2[i], self.prec)
+        cPsi_alpha2 = cPsi_alpha2 
         
 
         GJ0_Re = self.poisson(cPsi_alpha0.real) * (2.0 * np.pi)
@@ -290,64 +275,64 @@ class GauntDirectOperator():
 
 
 class GauntExchangeOperator():
-    def __init__(self, mra, prec, Psi, cPsi):
+    def __init__(self, mra, prec, Psi, cPsi, alpha0, alpha1, alpha2):
         self.mra = mra
         self.prec = prec
         self.Psi = Psi
         self.cPsi = cPsi
         self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
-        self.alpha0 = None
-        self.alpha1 = None
-        self.alpha2 = None
+        self.alpha0 = alpha0
+        self.alpha1 = alpha1
+        self.alpha2 = alpha2
         self.GK = None
         self.potential = None
-        self.setup()
-
-    def setup(self):
-        #Definition of alpha(orbital
-        self.alpha0 = []
-        self.alpha0[0] = self.Psi[0].alpha(0) 
-        for i in range(1, len(self.Psi)):
-            self.alpha0[i] =  self.Psi[i].alpha(0)
-        
-        self.alpha1 = []
-        self.alpha1[0] = self.Psi[0].alpha(1)
-        for i in range(1, len(self.Psi)):
-            self.alpha1[i] =  self.Psi[i].alpha(1)
-        
-        self.alpha2 = []
-        self.alpha2[0] = self.Psi[0].alpha(2)
-        for i in range(1, len(self.Psi)):
-            self.alpha2[i] =  self.Psi[i].alpha(2)
         
         
 
     def __call__(self, label):
         if label == 'spinorb1':
-            cPsi_alpha0  = self.cPsi[0].overlap_density(self.alpha0[0], prec)
-            for i in range(1, len(self.cPsi)):
-                cPsi_alpha0 +=  self.cPsi[i].overlap_density(self.alpha0[0], prec)
             
-            cPsi_alpha1  = self.cPsi[0].overlap_density(self.alpha1[0], prec)
+            cPsi_alpha0  = self.cPsi[0].overlap_density(self.alpha0[0], self.prec)
             for i in range(1, len(self.cPsi)):
-                cPsi_alpha1 +=  self.cPsi[i].overlap_density(self.alpha1[0], prec)
-            
-            cPsi_alpha2  = self.cPsi[0].overlap_density(self.alpha2[0], prec)
+                cPsi_alpha0 +=  self.cPsi[i].overlap_density(self.alpha0[0], self.prec)
+            cPsi_alpha0 = cPsi_alpha0
+
+
+            cPsi_alpha1  = self.cPsi[0].overlap_density(self.alpha1[0], self.prec)
             for i in range(1, len(self.cPsi)):
-                cPsi_alpha2 +=  self.cPsi[i].overlap_density(self.alpha2[0], prec)
+                cPsi_alpha1 +=  self.cPsi[i].overlap_density(self.alpha1[0], self.prec)
+            cPsi_alpha1 = cPsi_alpha1
+
+
+            cPsi_alpha2  = self.cPsi[0].overlap_density(self.alpha2[0], self.prec)
+            for i in range(1, len(self.cPsi)):
+                cPsi_alpha2 +=  self.cPsi[i].overlap_density(self.alpha2[0], self.prec)
+            cPsi_alpha2 = cPsi_alpha2
+
+
         elif label == 'spinorb2':
-            cPsi_alpha0  = self.cPsi[0].overlap_density(self.alpha0[1], prec)
+
+            cPsi_alpha0  = self.cPsi[0].overlap_density(self.alpha0[1], self.prec)
             for i in range(1, len(self.cPsi)):
-                cPsi_alpha0 +=  self.cPsi[i].overlap_density(self.alpha0[1], prec)
-            
-            cPsi_alpha1  = self.cPsi[0].overlap_density(self.alpha1[1], prec)
+                cPsi_alpha0 +=  self.cPsi[i].overlap_density(self.alpha0[1], self.prec)
+            cPsi_alpha0 = cPsi_alpha0
+
+
+            cPsi_alpha1  = self.cPsi[0].overlap_density(self.alpha1[1], self.prec)
             for i in range(1, len(self.cPsi)):
-                cPsi_alpha1 +=  self.cPsi[i].overlap_density(self.alpha1[1], prec)
-            
-            cPsi_alpha2  = self.cPsi[0].overlap_density(self.alpha2[1], prec)
+                cPsi_alpha1 +=  self.cPsi[i].overlap_density(self.alpha1[1], self.prec)
+            cPsi_alpha1 = cPsi_alpha1
+
+
+            cPsi_alpha2  = self.cPsi[0].overlap_density(self.alpha2[1], self.prec)
             for i in range(1, len(self.cPsi)):
-                cPsi_alpha2 +=  self.cPsi[i].overlap_density(self.alpha2[1], prec)
+                cPsi_alpha2 +=  self.cPsi[i].overlap_density(self.alpha2[1], self.prec)
+            cPsi_alpha2 = cPsi_alpha2
+
+
         else:
+
+
             'Invalid component'
 
 
@@ -378,16 +363,18 @@ class GauntExchangeOperator():
 
 
         if label == 'spinorb1':
-            a = orb.apply_complex_potential(1.0, self.GJ, self.alpha0[0], prec)
-            b = orb.apply_complex_potential(1.0, self.GJ, self.alpha1[0], prec)
-            c = orb.apply_complex_potential(1.0, self.GJ, self.alpha2[0], prec)
+            
+            a = orb.apply_complex_potential(1.0, self.GJ, self.alpha0[0], self.prec)
+            b = orb.apply_complex_potential(1.0, self.GJ, self.alpha1[0], self.prec)
+            c = orb.apply_complex_potential(1.0, self.GJ, self.alpha2[0], self.prec)
             self.potential = a + b + c 
+        
         elif label == 'spinorb2':
-            a = orb.apply_complex_potential(1.0, self.GJ, self.alpha0[1], prec)
-            b = orb.apply_complex_potential(1.0, self.GJ, self.alpha1[1], prec)
-            c = orb.apply_complex_potential(1.0, self.GJ, self.alpha2[1], prec)
+            
+            a = orb.apply_complex_potential(1.0, self.GJ, self.alpha0[1], self.prec)
+            b = orb.apply_complex_potential(1.0, self.GJ, self.alpha1[1], self.prec)
+            c = orb.apply_complex_potential(1.0, self.GJ, self.alpha2[1], self.prec)
             self.potential = a + b + c 
-
 
         return self.potential
 
@@ -508,7 +495,7 @@ class FockMatrix2():
         
         E_GK22 = E_GK220 + E_GK221 + E_GK222
      
-     
+
         self.energy11 = energy_11 + E_H11 - E_xc11 - E_GH11 + E_Gxc11 
         self.energy12 = energy_12 + E_H12 - E_xc12 - E_GH12 + E_Gxc12
         self.energy21 = energy_21 + E_H21 - E_xc21 - E_GH21 + E_Gxc21

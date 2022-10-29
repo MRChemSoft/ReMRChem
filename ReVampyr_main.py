@@ -220,6 +220,19 @@ elif args.coulgau == 'gaunt':
     while error_norm > prec:
 
 
+        alpha_10 =  spinorb1.alpha(0)
+        alpha_11 =  spinorb1.alpha(1)
+        alpha_12 =  spinorb1.alpha(2)
+
+        alpha_20 =  spinorb2.alpha(0)
+        alpha_21 =  spinorb2.alpha(1)
+        alpha_22 =  spinorb2.alpha(2)
+
+        alphav0 = [alpha_10, alpha_10]
+        alphav1 = [alpha_11, alpha_11]
+        alphav2 = [alpha_12, alpha_12]
+
+
         # Initialize operators for first iteration
         J = opr.CoulombDirectOperator(mra, prec, spinorbv)
         #print('ready J', J)
@@ -229,10 +242,10 @@ elif args.coulgau == 'gaunt':
         #print('ready K', K)
 
 
-        GJ = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv)
+        GJ = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav0, alphav1, alphav2)
         #print('ready GJ', GJ)
         
-        GK = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv)
+        GK = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav0, alphav1, alphav2)
         #print('ready GK', GK)
 
 
@@ -329,5 +342,5 @@ elif args.coulgau == 'gaunt':
 
     # Total Energy 
     print('E_total(Coulomb & Gaunt) approximiation', F('tot') - (2.0 *light_speed**2))
-    
+
 ##########################################################END###########################################################################
