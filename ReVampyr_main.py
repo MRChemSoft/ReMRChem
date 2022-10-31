@@ -228,9 +228,9 @@ elif args.coulgau == 'gaunt':
         alpha_21 =  spinorb2.alpha(1)
         alpha_22 =  spinorb2.alpha(2)
 
-        alphav0 = [alpha_10, alpha_10]
-        alphav1 = [alpha_11, alpha_11]
-        alphav2 = [alpha_12, alpha_12]
+        alphav0 = [alpha_10, alpha_20]
+        alphav1 = [alpha_11, alpha_21]
+        alphav2 = [alpha_12, alpha_22]
 
 
         # Initialize operators for first iteration
@@ -339,9 +339,9 @@ elif args.coulgau == 'gaunt':
     alpha_22 =  spinorb2.alpha(2)
     
 
-    alphav0 = [alpha_10, alpha_10]
-    alphav1 = [alpha_11, alpha_11]
-    alphav2 = [alpha_12, alpha_12]
+    alphav0 = [alpha_10, alpha_20]
+    alphav1 = [alpha_11, alpha_21]
+    alphav2 = [alpha_12, alpha_22]
 
 
     # Initialize operators for first iteration
