@@ -321,71 +321,53 @@ class FockMatrix2():
 
         #############################################################################
 
-        GJ0_1 = orb.apply_complex_potential(1.0, self.GJ0, self.alpha0[0], self.prec) 
-        GJ1_1 = orb.apply_complex_potential(1.0, self.GJ1, self.alpha1[0], self.prec) 
-        GJ2_1 = orb.apply_complex_potential(1.0, self.GJ2, self.alpha2[0], self.prec)
-
-        GJ0_2 = orb.apply_complex_potential(1.0, self.GJ0, self.alpha0[1], self.prec)
-        GJ1_2 = orb.apply_complex_potential(1.0, self.GJ1, self.alpha1[1], self.prec)
-        GJ2_2 = orb.apply_complex_potential(1.0, self.GJ2, self.alpha2[1], self.prec)
-
-        E_GH0_11,  imag_GH0_11 = self.Psi[0].dot(GJ0_1)
-        E_GH1_11,  imag_GH1_11 = self.Psi[0].dot(GJ1_1)
-        E_GH2_11,  imag_GH2_11 = self.Psi[0].dot(GJ2_1)
+        E_GH0_11,  imag_GH0_11 = self.Psi[0].dot(self.GJ0(self.alpha0[0]))
+        E_GH1_11,  imag_GH1_11 = self.Psi[0].dot(self.GJ1(self.alpha1[0]))
+        E_GH2_11,  imag_GH2_11 = self.Psi[0].dot(self.GJ2(self.alpha2[0]))
 
         E_GH11 = E_GH0_11 + E_GH1_11 + E_GH2_11
         
-        E_GH0_12,  imag_GH0_12 = self.Psi[0].dot(GJ0_2)
-        E_GH1_12,  imag_GH1_12 = self.Psi[0].dot(GJ1_2)
-        E_GH2_12,  imag_GH2_12 = self.Psi[0].dot(GJ2_2)
+        E_GH0_12,  imag_GH0_12 = self.Psi[0].dot(self.GJ0(self.alpha0[1]))
+        E_GH1_12,  imag_GH1_12 = self.Psi[0].dot(self.GJ1(self.alpha1[1]))
+        E_GH2_12,  imag_GH2_12 = self.Psi[0].dot(self.GJ2(self.alpha2[1]))
 
         E_GH12 = E_GH0_12 + E_GH1_12 + E_GH2_12
 
-        E_GH0_21,  imag_GH0_21 = self.Psi[1].dot(GJ0_1)
-        E_GH1_21,  imag_GH1_21 = self.Psi[1].dot(GJ1_1)
-        E_GH2_21,  imag_GH2_21 = self.Psi[1].dot(GJ2_1)
+        E_GH0_21,  imag_GH0_21 = self.Psi[1].dot(self.GJ0(self.alpha0[0]))
+        E_GH1_21,  imag_GH1_21 = self.Psi[1].dot(self.GJ1(self.alpha1[0]))
+        E_GH2_21,  imag_GH2_21 = self.Psi[1].dot(self.GJ2(self.alpha2[0]))
 
         E_GH21 = E_GH0_21 + E_GH1_21 + E_GH2_21
 
-        E_GH0_22,  imag_GH0_22 = self.Psi[1].dot(GJ0_2)
-        E_GH1_22,  imag_GH1_22 = self.Psi[1].dot(GJ1_2)
-        E_GH2_22,  imag_GH2_22 = self.Psi[1].dot(GJ2_2)
+        E_GH0_22,  imag_GH0_22 = self.Psi[1].dot(self.GJ0(self.alpha0[1]))
+        E_GH1_22,  imag_GH1_22 = self.Psi[1].dot(self.GJ1(self.alpha1[1]))
+        E_GH2_22,  imag_GH2_22 = self.Psi[1].dot(self.GJ2(self.alpha2[1]))
         
         E_GH22 = E_GH0_22 + E_GH1_22 + E_GH2_22
 
         #############################################################################
 
-        GK0_1 = orb.apply_complex_potential(1.0, self.GK0, self.alpha0[0], self.prec)
-        GK1_1 = orb.apply_complex_potential(1.0, self.GK1, self.alpha1[0], self.prec)
-        GK2_1 = orb.apply_complex_potential(1.0, self.GK2, self.alpha2[0], self.prec)
-
-
-        GK0_2 = orb.apply_complex_potential(1.0, self.GK0, self.alpha0[1], self.prec)
-        GK1_2 = orb.apply_complex_potential(1.0, self.GK1, self.alpha1[1], self.prec)
-        GK2_2 = orb.apply_complex_potential(1.0, self.GK2, self.alpha2[1], self.prec)
-
-
-        E_GK0_11,  imag_GK0_11 = self.Psi[0].dot(GK0_1)
-        E_GK1_11,  imag_GK1_11 = self.Psi[0].dot(GK1_1)
-        E_GK2_11,  imag_GK2_11 = self.Psi[0].dot(GK2_1)
+        E_GK0_11,  imag_GK0_11 = self.Psi[0].dot(self.GK0(self.alpha0[0]))
+        E_GK1_11,  imag_GK1_11 = self.Psi[0].dot(self.GK1(self.alpha1[0]))
+        E_GK2_11,  imag_GK2_11 = self.Psi[0].dot(self.GK2(self.alpha2[0]))
 
         E_GK11 = E_GK0_11 + E_GK1_11 + E_GK2_11
         
-        E_GK0_12,  imag_GK0_12 = self.Psi[0].dot(GK0_2)
-        E_GK1_12,  imag_GK1_12 = self.Psi[0].dot(GK1_2)
-        E_GK2_12,  imag_GK2_12 = self.Psi[0].dot(GK2_2)
+        E_GK0_12,  imag_GK0_12 = self.Psi[0].dot(self.GK0(self.alpha0[1]))
+        E_GK1_12,  imag_GK1_12 = self.Psi[0].dot(self.GK1(self.alpha1[1]))
+        E_GK2_12,  imag_GK2_12 = self.Psi[0].dot(self.GK2(self.alpha2[1]))
 
         E_GK12 = E_GK0_12 + E_GK1_12 + E_GK2_12
 
-        E_GK0_21,  imag_GK0_21 = self.Psi[1].dot(GK0_1)
-        E_GK1_21,  imag_GK1_21 = self.Psi[1].dot(GK1_1)
-        E_GK2_21,  imag_GK2_21 = self.Psi[1].dot(GK2_1)
+        E_GK0_21,  imag_GK0_21 = self.Psi[1].dot(self.GK0(self.alpha0[0]))
+        E_GK1_21,  imag_GK1_21 = self.Psi[1].dot(self.GK1(self.alpha1[0]))
+        E_GK2_21,  imag_GK2_21 = self.Psi[1].dot(self.GK2(self.alpha2[0]))
 
         E_GK21 = E_GK0_21 + E_GK1_21 + E_GK2_21
 
-        E_GK0_22,  imag_GK0_22 = self.Psi[1].dot(GK0_2)
-        E_GK1_22,  imag_GK1_22 = self.Psi[1].dot(GK1_2)
-        E_GK2_22,  imag_GK2_22 = self.Psi[1].dot(GK2_2)
+        E_GK0_22,  imag_GK0_22 = self.Psi[1].dot(self.GK0(self.alpha0[1]))
+        E_GK1_22,  imag_GK1_22 = self.Psi[1].dot(self.GK1(self.alpha1[1]))
+        E_GK2_22,  imag_GK2_22 = self.Psi[1].dot(self.GK2(self.alpha2[1]))
 
         E_GK22 = E_GK0_22 + E_GK1_22 + E_GK2_22
 
