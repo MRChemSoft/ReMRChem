@@ -257,9 +257,12 @@ elif args.coulgau == 'gaunt':
         GK2 = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav2)
         print('ready GK2', GK2)
 
-        GK0_1 = GK0(alpha_10)
+
+        #GJ0_1 = GJ0(alpha_10)
+        #GK0_1 = GK0(alpha_10)
         ##GJ0_1 = orb.apply_complex_potential(1.0, GJ0, alpha_10, prec)
-        print('GK0_1', GK0_1)
+        #print('GJ0_1', GJ0_1)
+        #print('GK0_1', GK0_1)
 
 
         # Applying nuclear potential to spin orbit 1 and 2

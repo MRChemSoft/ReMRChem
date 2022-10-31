@@ -215,15 +215,20 @@ class GauntDirectOperator():
         cPsi_alpha  = self.cPsi[0].overlap_density(self.alpha[0], self.prec)
         for i in range(1, len(self.cPsi)):
             cPsi_alpha +=  self.cPsi[i].overlap_density(self.alpha[i], self.prec)
-        cPsi_alpha = cPsi_alpha
  
 
         self.GJ = cf.complex_fcn()
         GJ_Re = self.poisson(cPsi_alpha.real) * (2.0 * np.pi)
         GJ_Re.crop(self.prec)
 
+
         GJ_Im = self.poisson(cPsi_alpha.imag) * (2.0 * np.pi)
         GJ_Im.crop(self.prec)                      
+
+
+        self.GJ = cf.complex_fcn()
+        self.GJ.real = GJ_Re
+        self.GJ.imag = GJ_Im 
 
 
     def __call__(self, alpha):
@@ -242,25 +247,27 @@ class GauntExchangeOperator():
         self.GK = None
         self.potential = None
         
-        
 
     def __call__(self, alpha):      
-        cPsi_alpha  = self.cPsi[0].overlap_density(alpha[0], self.prec)
+        cPsi_alpha  = self.cPsi[0].overlap_density(alpha, self.prec)
         for i in range(1, len(self.cPsi)):
-            cPsi_alpha +=  self.cPsi[i].overlap_density(alpha[0], self.prec)
-        cPsi_alpha = cPsi_alpha
+            cPsi_alpha +=  self.cPsi[i].overlap_density(alpha, self.prec)
 
 
-        self.GK = cf.complex_fcn()
         GK_Re = self.poisson(cPsi_alpha.real) * (2.0 * np.pi)
         GK_Re.crop(self.prec)
 
 
         GK_Im = self.poisson(cPsi_alpha.imag) * (2.0 * np.pi)
         GK_Im.crop(self.prec)
-                        
 
-        self.potential = orb.apply_complex_potential(1.0, self.GK, self.alpha[0], self.prec)
+                   
+        self.GK = cf.complex_fcn()
+        self.GK.real = GK_Re
+        self.GK.imag = GK_Im                
+
+
+        self.potential = orb.apply_complex_potential(1.0, self.GK, alpha, self.prec)
         return self.potential
 
 
