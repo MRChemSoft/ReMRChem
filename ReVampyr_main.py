@@ -279,10 +279,19 @@ elif args.coulgau == 'gaunt':
 
 
         # Apply potential operator to all orbitals
-        V1 = v_spinorb1 + J(spinorb1) - K(spinorb1) - GJ('spinorb1') + GK('spinorb1') - F('F12')*spinorb2
-        V2 = v_spinorb2 + J(spinorb2) - K(spinorb2) - GJ('spinorb2') + GK('spinorb2') - F('F21')*spinorb1
-        #print('V1', V1)
-        #print('V2', V2)
+        GJ_1 = GJ0(alpha_10) + GJ1(alpha_11) + GJ2(alpha_12)
+        GJ_2 = GJ0(alpha_20) + GJ1(alpha_21) + GJ2(alpha_22)
+        print('ready GJ_1', GJ_1)
+
+        GK_1 = GK0(alpha_10) + GK1(alpha_11) + GK2(alpha_12)
+        GK_2 = GK0(alpha_20) + GK1(alpha_21) + GK2(alpha_22)
+        print('ready GK_1', GK_1)
+
+
+        V1 = v_spinorb1 + J(spinorb1) - K(spinorb1) - GJ_1 + GK_1 - F('F12')*spinorb2
+        V2 = v_spinorb2 + J(spinorb2) - K(spinorb2) - GJ_2 + GK_2 - F('F21')*spinorb1
+        print('V1', V1)
+        print('V2', V2)
 
 
         # Calculation of Helmotz
@@ -351,7 +360,7 @@ elif args.coulgau == 'gaunt':
     print('ready GK1', GK1)
     GK = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav2)
     print('ready GK2', GK2)
-    
+
 
     # Applying nuclear potential to spin orbit 1 and 2
     v_spinorb1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
