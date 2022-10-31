@@ -242,12 +242,20 @@ elif args.coulgau == 'gaunt':
         #print('ready K', K)
 
 
-        GJ = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav0, alphav1, alphav2)
-        #print('ready GJ', GJ)
-        
-        GK = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav0, alphav1, alphav2)
-        #print('ready GK', GK)
+        GJ0 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav0)
+        print('ready GJ0', GJ0)
+        GJ1 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav1)
+        print('ready GJ1', GJ1)
+        GJ2 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav2)
+        print('ready GJ2', GJ2)
 
+
+        GK0 = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav0)
+        print('ready GK0', GK0)
+        GK1 = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav1)
+        print('ready GK1', GK1)
+        GK2 = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav2)
+        print('ready GK2', GK2)
 
 
         # Applying nuclear potential to spin orbit 1 and 2
@@ -259,7 +267,7 @@ elif args.coulgau == 'gaunt':
 
 
         #Calculate the Fock matrix (Fij)
-        F = opr.FockMatrix2(prec, default_der, J, K, GJ, GK, v_spinorbv, spinorbv)
+        F = opr.FockMatrix2(prec, default_der, J, K, GJ0, GJ1, GJ2, GK0, GK1, GK2, v_spinorbv, spinorbv, alphav0, alphav1, alphav2)
 
         # Orbital Energy
         print('Energy_Spin_Orbit_1', F('orb1') - light_speed**2)
@@ -305,7 +313,21 @@ elif args.coulgau == 'gaunt':
 
     
     ##########
-         
+    alpha_10 =  spinorb1.alpha(0)
+    alpha_11 =  spinorb1.alpha(1)
+    alpha_12 =  spinorb1.alpha(2)
+
+    
+    alpha_20 =  spinorb2.alpha(0)
+    alpha_21 =  spinorb2.alpha(1)
+    alpha_22 =  spinorb2.alpha(2)
+    
+
+    alphav0 = [alpha_10, alpha_10]
+    alphav1 = [alpha_11, alpha_11]
+    alphav2 = [alpha_12, alpha_12]
+
+
     # Initialize operators for first iteration
     J = opr.CoulombDirectOperator(mra, prec, spinorbv)
     #print('ready J', J)
@@ -315,13 +337,21 @@ elif args.coulgau == 'gaunt':
     #print('ready K', K)
 
 
-    GJ = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv)
-    #print('ready GJ', GJ)
-        
-        
-    GK = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv)
-    #print('ready GK', GK)
+    GJ0 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav0)
+    print('ready GJ0', GJ0)
+    GJ1 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav1)
+    print('ready GJ1', GJ1)
+    GJ2 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav2)
+    print('ready GJ2', GJ2)
 
+
+    GK = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav0)
+    print('ready GK0', GK0)
+    GK = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav1)
+    print('ready GK1', GK1)
+    GK = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav2)
+    print('ready GK2', GK2)
+    
 
     # Applying nuclear potential to spin orbit 1 and 2
     v_spinorb1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
@@ -332,7 +362,7 @@ elif args.coulgau == 'gaunt':
 
 
     #Calculate the Fock matrix (Fij)
-    F = opr.FockMatrix2(prec, default_der, J, K, GJ, GK, v_spinorbv, spinorbv)
+    F = opr.FockMatrix2(prec, default_der, J, K, GJ0, GJ1, GJ2, GK0, GK1, GK2, v_spinorbv, spinorbv, alphav0, alphav1, alphav2)
 
     
     # Orbital Energy
