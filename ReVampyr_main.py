@@ -363,7 +363,6 @@ elif args.coulgau == 'gaunt':
     print('ready GJ', GJ)
 
 
-
     GK = opr.GauntExchangeOperator(mra, prec, cspinorbv)
     print('ready GK', GK)
 
