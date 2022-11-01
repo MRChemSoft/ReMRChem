@@ -228,9 +228,15 @@ elif args.coulgau == 'gaunt':
         alpha_21 =  spinorb2.alpha(1)
         alpha_22 =  spinorb2.alpha(2)
 
-        alphav0 = [alpha_10, alpha_20]
-        alphav1 = [alpha_11, alpha_21]
-        alphav2 = [alpha_12, alpha_22]
+
+        alphav1 = [alpha_10, alpha_11, alpha_12]
+        alphav2 = [alpha_20, alpha_21, alpha_22]
+
+        alphav = np.matrix([[*alphav1], [*alphav2]])
+        #print('alphav', alphav.shape)
+        #print("alphav matrix", alphav)
+        #print("alphb colomn", alphav[:,0]) #all in the column
+        #print("alphav1", alphav[0,:]) # all in the row
 
 
         # Initialize operators for first iteration
@@ -242,19 +248,19 @@ elif args.coulgau == 'gaunt':
         #print('ready K', K)
 
 
-        GJ0 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav0)
-        #print('ready GJ0', GJ0)
-        GJ1 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav1)
+        GJ = opr.GauntDirectOperator(mra, prec, cspinorbv, alphav)
+        print('ready GJ', GJ)
+        #GJ1 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav1)
         #print('ready GJ1', GJ1)
-        GJ2 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav2)
+        #GJ2 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav2)
         #print('ready GJ2', GJ2)
 
 
-        GK0 = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav0)
-        #print('ready GK0', GK0)
-        GK1 = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav1)
+        GK = opr.GauntExchangeOperator(mra, prec, cspinorbv)
+        print('ready GK', GK)
+        #GK1 = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav1)
         #print('ready GK1', GK1)
-        GK2 = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav2)
+        #GK2 = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav2)
         #print('ready GK2', GK2)
 
 
@@ -274,7 +280,7 @@ elif args.coulgau == 'gaunt':
 
 
         #Calculate the Fock matrix (Fij)
-        F = opr.FockMatrix2(prec, default_der, J, K, GJ0, GJ1, GJ2, GK0, GK1, GK2, v_spinorbv, spinorbv, alphav0, alphav1, alphav2)
+        F = opr.FockMatrix2(prec, default_der, J, K, GJ, GK, v_spinorbv, spinorbv, alphav1, alphav2)
 
         # Orbital Energy
         print('Energy_Spin_Orbit_1', F('orb1') - light_speed**2)
@@ -286,17 +292,17 @@ elif args.coulgau == 'gaunt':
 
 
         # Apply potential operator to all orbitals
-        GJ_1 = GJ0(alpha_10) + GJ1(alpha_11) + GJ2(alpha_12)
-        GJ_2 = GJ0(alpha_20) + GJ1(alpha_21) + GJ2(alpha_22)
+        #GJ_1 = GJ0(alpha_10) + GJ1(alpha_11) + GJ2(alpha_12)
+        #GJ_2 = GJ0(alpha_20) + GJ1(alpha_21) + GJ2(alpha_22)
         #print('ready GJ_1', GJ_1)
 
-        GK_1 = GK0(alpha_10) + GK1(alpha_11) + GK2(alpha_12)
-        GK_2 = GK0(alpha_20) + GK1(alpha_21) + GK2(alpha_22)
+        #GK_1 = GK0(alpha_10) + GK1(alpha_11) + GK2(alpha_12)
+        #GK_2 = GK0(alpha_20) + GK1(alpha_21) + GK2(alpha_22)
         #print('ready GK_1', GK_1)
 
 
-        V1 = v_spinorb1 + J(spinorb1) - K(spinorb1) - GJ_1 + GK_1 - F('F12')*spinorb2
-        V2 = v_spinorb2 + J(spinorb2) - K(spinorb2) - GJ_2 + GK_2 - F('F21')*spinorb1
+        V1 = v_spinorb1 + J(spinorb1) - K(spinorb1) - GJ(alphav1) + GK(alphav1) - F('F12')*spinorb2
+        V2 = v_spinorb2 + J(spinorb2) - K(spinorb2) - GJ(alphav2) + GK(alphav2) - F('F21')*spinorb1
         #print('V1', V1)
         #print('V2', V2)
 
@@ -333,15 +339,15 @@ elif args.coulgau == 'gaunt':
     alpha_11 =  spinorb1.alpha(1)
     alpha_12 =  spinorb1.alpha(2)
 
-    
     alpha_20 =  spinorb2.alpha(0)
     alpha_21 =  spinorb2.alpha(1)
     alpha_22 =  spinorb2.alpha(2)
-    
 
-    alphav0 = [alpha_10, alpha_20]
-    alphav1 = [alpha_11, alpha_21]
-    alphav2 = [alpha_12, alpha_22]
+
+    alphav1 = [alpha_10, alpha_11, alpha_12]
+    alphav2 = [alpha_20, alpha_21, alpha_22]
+
+    alphav = np.matrix([[*alphav1], [*alphav2]])
 
 
     # Initialize operators for first iteration
@@ -353,20 +359,13 @@ elif args.coulgau == 'gaunt':
     #print('ready K', K)
 
 
-    GJ0 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav0)
-    #print('ready GJ0', GJ0)
-    GJ1 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav1)
-    #print('ready GJ1', GJ1)
-    GJ2 = opr.GauntDirectOperator(mra, prec, spinorbv, cspinorbv, alphav2)
-    #print('ready GJ2', GJ2)
+    GJ = opr.GauntDirectOperator(mra, prec, cspinorbv, alphav)
+    print('ready GJ', GJ)
 
 
-    GK = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav0)
-    #print('ready GK0', GK0)
-    GK = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav1)
-    #print('ready GK1', GK1)
-    GK = opr.GauntExchangeOperator(mra, prec, spinorbv, cspinorbv, alphav2)
-    #print('ready GK2', GK2)
+
+    GK = opr.GauntExchangeOperator(mra, prec, cspinorbv)
+    print('ready GK', GK)
 
 
     # Applying nuclear potential to spin orbit 1 and 2
@@ -378,9 +377,9 @@ elif args.coulgau == 'gaunt':
 
 
     #Calculate the Fock matrix (Fij)
-    F = opr.FockMatrix2(prec, default_der, J, K, GJ0, GJ1, GJ2, GK0, GK1, GK2, v_spinorbv, spinorbv, alphav0, alphav1, alphav2)
+    F = opr.FockMatrix2(prec, default_der, J, K, GJ, GK, v_spinorbv, spinorbv, alphav1, alphav2)
 
-    
+
     # Orbital Energy
     print('Energy_Spin_Orbit_1', F('orb1') - light_speed**2)
     print('Energy_Spin_Orbit_2', F('orb2') - light_speed**2)
