@@ -27,6 +27,14 @@ if __name__ == '__main__':
                         help='put the atom charge')
     parser.add_argument('-b', '--box', dest='box', type=int, default=60,
                         help='put the box dimension')
+    parser.add_argument('-cx', '--center_x', dest='cx', type=float, default=0.0,
+                        help='position of nucleus in x')
+    parser.add_argument('-cy', '--center_y', dest='cy', type=float, default=0.0,
+                        help='position of nucleus in y')
+    parser.add_argument('-cz', '--center_z', dest='cz', type=float, default=0.0,
+                        help='position of nucleus in z')
+    parser.add_argument('-l', '--light_speed', dest='lux_speed', type=float, default=137.03599913900001,
+                        help='light of speed')
     parser.add_argument('-o', '--order', dest='order', type=int, default=8,
                         help='put the order of Polinomial')
     parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-5,
@@ -34,7 +42,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
     parser.add_argument('-v', '--potential', dest='potential', type=str, default='point_charge',
-                        help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, fermi_dirac, gaussian')
+                        help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     args = parser.parse_args()
 
     assert args.atype != 'H', 'Please consider only atoms with more than one electran'
@@ -43,13 +51,13 @@ if __name__ == '__main__':
 
     assert args.coulgau in ['coulomb', 'gaunt'], 'Please, specify coulgau in a rigth way – coulomb or gaunt'
 
-    assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'fermi_dirac', 'gaussian'], 'Please, specify V'
+    assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
 
     assert args.deriv in ['PH', 'BS'], 'Please, specify the type of derivative'
 
+
 ################# Define Paramters ###########################
-light_speed = 137.03599913900001
-#light_speed = 2000000
+light_speed = args.lux_speed
 alpha = 1/light_speed
 k = -1
 l = 0
@@ -60,8 +68,7 @@ atom = args.atype
 ################# Call MRA #######################
 mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order)
 prec = args.prec
-origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
-#origin = [0.0, 0.0, 0.0]
+origin = [args.cx, args.cy, args.cz]
 print('call MRA DONE')
 
 ################# Define Gaussian function ########## 
@@ -140,28 +147,20 @@ if args.coulgau == 'coulomb':
         n_21 = spinorb2.exchange(spinorb1, prec)
         n_22 = spinorb2.density(prec)
 
-
         # Definition of Poisson operator
         Pua = vp.PoissonOperator(mra, prec)
 
-        # Defintion of Jx
-        J1 = Pua(n_11) * (4 * np.pi)
-        J2 = Pua(n_22) * (4 * np.pi)
-
+        # Defintion of J
+        J = Pua(n_11 + n_22) * (4 * np.pi)
+        #print('J', J)
 
         # Definition of Kx
-        K1 = Pua(n_12) * (4 * np.pi)
-        K2 = Pua(n_21) * (4 * np.pi)
-
-
-        # Definition of Energy Hartree of Fock matrix
-        E_H1 = vp.dot(n_11, J1)
-        E_H2 = vp.dot(n_22, J2)
-
-
-        # Definition of Energy Exchange of Fock matrix
-        E_xc1 = vp.dot(n_12, K2)
-        E_xc2 = vp.dot(n_21, K1)
+        K1a = Pua(n_21) * (4 * np.pi)
+        K1b = Pua(n_11) * (4 * np.pi)
+        K2a = Pua(n_12) * (4 * np.pi)
+        K2b = Pua(n_22) * (4 * np.pi)
+        #print('K1a', K1a)
+        #print('K2b', K2b)
 
 
         # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
@@ -179,47 +178,69 @@ if args.coulgau == 'coulomb':
         add_psi_2 = hd_psi_2 + v_psi_2
 
 
-        # Calculate Fij Fock matrix    
+        # Calculation of necessary potential contributions to Hellmotz
+        J_spinorb1  = orb.apply_potential(1.0, J, spinorb1, prec)
+        J_spinorb2  = orb.apply_potential(1.0, J, spinorb2, prec)        
+
+
+        Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb2, prec)
+        Kb_spinorb1  = orb.apply_potential(1.0, K1b, spinorb1, prec)
+        Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb1, prec)
+        Kb_spinorb2  = orb.apply_potential(1.0, K2b, spinorb2, prec)
+
+
+        K_spinorb1 = Ka_spinorb1 + Kb_spinorb1
+        K_spinorb2 = Ka_spinorb2 + Kb_spinorb2
+        #print('K_spinorb1', K_spinorb1)
+
+
+        E_H11, imag_H11 = spinorb1.dot(J_spinorb1)
+        E_H12, imag_H12 = spinorb1.dot(J_spinorb2)
+        E_H21, imag_H21 = spinorb2.dot(J_spinorb1)
+        E_H22, imag_H22 = spinorb2.dot(J_spinorb2)
+             
+             
+        E_K11, imag_K11 = spinorb1.dot(K_spinorb1)
+        E_K12, imag_K12 = spinorb1.dot(K_spinorb2)
+        E_K21, imag_K21 = spinorb2.dot(K_spinorb1)
+        E_K22, imag_K22 = spinorb2.dot(K_spinorb2)
+
+
+        # Orbital Energy calculation
         energy_11, imag_11 = spinorb1.dot(add_psi_1)
         energy_12, imag_12 = spinorb1.dot(add_psi_2)
         energy_21, imag_21 = spinorb2.dot(add_psi_1)
         energy_22, imag_22 = spinorb2.dot(add_psi_2)
 
 
-        # Orbital Energy calculation
-        energy_11 = energy_11 + E_H1 - E_xc1
-        energy_22 = energy_22 + E_H2 - E_xc2
-        print('Energy_Spin_Orbit_1', energy_11 - light_speed**2)
-        print('Energy_Spin_Orbit_2', energy_22 - light_speed**2)
+        # Calculate Fij Fock matrix
+        F_11 = energy_11 + E_H11 - E_K11
+        F_12 = energy_12 + E_H12 - E_K12
+        F_21 = energy_21 + E_H21 - E_K21
+        F_22 = energy_22 + E_H22 - E_K22
+        
+
+        # Orbital Energy
+        print('Energy_Spin_Orbit_1', F_11 - light_speed**2)
+        print('Energy_Spin_Orbit_2', F_22 - light_speed**2)
 
 
-        # Total Energy with J = K approximation
-        E_tot_JK = energy_11 + energy_22 - 0.5 * (E_H1 + E_H2 - E_xc1 - E_xc2)
+        # Total Energy 
+        E_tot_JK = F_11 + F_22 - 0.5 * (E_H11 + E_H22 - E_K11 - E_K22)
         print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
 
 
-        # Calculation of necessary potential contributions to Hellmotz
-        J_spinorb1   = orb.apply_potential(1.0, J1, spinorb1, prec)
-        K_spinorb1   = orb.apply_potential(1.0, K2, spinorb2, prec)
-        F12_spinorb2 =  energy_12 * spinorb2
-
-
-        J_spinorb2   = orb.apply_potential(1.0, J2, spinorb2, prec)
-        K_spinorb2   = orb.apply_potential(1.0, K1, spinorb1, prec)
-        F21_spinorb1 = energy_21 * spinorb1
-
-
-        V_J_K_spinorb1 = v_psi_1 + J_spinorb1 - K_spinorb1 - F12_spinorb2
-        V_J_K_spinorb2 = v_psi_2 + J_spinorb2 - K_spinorb2 - F21_spinorb1
+        V_J_K_spinorb1 = v_psi_1 + J_spinorb1 - K_spinorb1 - (F_12 * spinorb2)
+        V_J_K_spinorb2 = v_psi_2 + J_spinorb2 - K_spinorb2 - (F_21 * spinorb1)
 
 
         # Calculation of Helmotz
-        tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, energy_11, prec)
-        tmp_2 = orb.apply_helmholtz(V_J_K_spinorb2, energy_22, prec)
-        new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, energy_11, der = default_der)
+        tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, F_11, prec)
+        tmp_2 = orb.apply_helmholtz(V_J_K_spinorb2, F_22, prec)
+        new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, F_11, der = default_der)
         new_orbital_1 *= 0.5/light_speed**2
         new_orbital_1.normalize()
-        new_orbital_2 = orb.apply_dirac_hamiltonian(tmp_2, prec, energy_22, der = default_der)
+        new_orbital_2 = orb.apply_dirac_hamiltonian(tmp_2, prec, F_22, der = default_der)
         new_orbital_2 *= 0.5/light_speed**2
         new_orbital_2.normalize()
 
@@ -270,29 +291,20 @@ if args.coulgau == 'coulomb':
     n_21 = spinorb2.exchange(spinorb1, prec)
     n_22 = spinorb2.density(prec)
 
-
     # Definition of Poisson operator
     Pua = vp.PoissonOperator(mra, prec)
 
-
-    # Defintion of Jx
-    J1 = Pua(n_11) * (4 * np.pi)
-    J2 = Pua(n_22) * (4 * np.pi)
-
+    # Defintion of J
+    J = Pua(n_11 + n_22) * (4 * np.pi)
+    #print('J', J)
 
     # Definition of Kx
-    K1 = Pua(n_12) * (4 * np.pi)
-    K2 = Pua(n_21) * (4 * np.pi)
-
-
-    # Definition of Energy Hartree of Fock matrix
-    E_H1 = vp.dot(n_11, J1)
-    E_H2 = vp.dot(n_22, J2)
-
-
-    # Definition of Energy Exchange of Fock matrix
-    E_xc1 = vp.dot(n_12, K2)
-    E_xc2 = vp.dot(n_21, K1)
+    K1a = Pua(n_21) * (4 * np.pi)
+    K1b = Pua(n_11) * (4 * np.pi)
+    K2a = Pua(n_12) * (4 * np.pi)
+    K2b = Pua(n_22) * (4 * np.pi)
+    #print('K1a', K1a)
+    #print('K2b', K2b)
 
 
     # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
@@ -310,28 +322,56 @@ if args.coulgau == 'coulomb':
     add_psi_2 = hd_psi_2 + v_psi_2
 
 
-    # Calculate Fij Fock matrix
+    # Calculation of necessary potential contributions to Hellmotz
+    J_spinorb1  = orb.apply_potential(1.0, J, spinorb1, prec)
+    J_spinorb2  = orb.apply_potential(1.0, J, spinorb2, prec)        
+
+
+    Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb2, prec)
+    Kb_spinorb1  = orb.apply_potential(1.0, K1b, spinorb1, prec)
+    Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb1, prec)
+    Kb_spinorb2  = orb.apply_potential(1.0, K2b, spinorb2, prec)
+
+
+    K_spinorb1 = Ka_spinorb1 + Kb_spinorb1
+    K_spinorb2 = Ka_spinorb2 + Kb_spinorb2
+    #print('K_spinorb1', K_spinorb1)
+
+
+    E_H11, imag_H11 = spinorb1.dot(J_spinorb1)
+    E_H12, imag_H12 = spinorb1.dot(J_spinorb2)
+    E_H21, imag_H21 = spinorb2.dot(J_spinorb1)
+    E_H22, imag_H22 = spinorb2.dot(J_spinorb2)
+         
+         
+    E_K11, imag_K11 = spinorb1.dot(K_spinorb1)
+    E_K12, imag_K12 = spinorb1.dot(K_spinorb2)
+    E_K21, imag_K21 = spinorb2.dot(K_spinorb1)
+    E_K22, imag_K22 = spinorb2.dot(K_spinorb2)
+
+
+    # Orbital Energy calculation
     energy_11, imag_11 = spinorb1.dot(add_psi_1)
     energy_12, imag_12 = spinorb1.dot(add_psi_2)
     energy_21, imag_21 = spinorb2.dot(add_psi_1)
     energy_22, imag_22 = spinorb2.dot(add_psi_2)
 
 
-    # Orbital Energy calculation
-    energy_11 = energy_11 + E_H1 - E_xc1
-    energy_22 = energy_22 + E_H2 - E_xc2
-    print('Energy_Spin_Orbit_1', energy_11 - light_speed**2)
-    print('Energy_Spin_Orbit_2', energy_22 - light_speed**2)
+    # Calculate Fij Fock matrix
+    F_11 = energy_11 + E_H11 - E_K11
+    F_12 = energy_12 + E_H12 - E_K12
+    F_21 = energy_21 + E_H21 - E_K21
+    F_22 = energy_22 + E_H22 - E_K22
+        
+
+    # Orbital Energy
+    print('Energy_Spin_Orbit_1', F_11 - light_speed**2)
+    print('Energy_Spin_Orbit_2', F_22 - light_speed**2)
 
 
-    # Total Energy with J = K approximation
-    E_tot_JK = energy_11 + energy_22 - 0.5 * (E_H1 + E_H2 - E_xc1 - E_xc2)
-    print('E_total(Coulomb) approximiation', E_tot_JK - 2.0 *(light_speed**2))
-
-    #x = np.arange(-59.999, 59.999, 0.001)
-    #y = [f_tree([x,  59.999,  59.999]) for x in x]
-
-    #plt.plt(x, y)
+    # Total Energy 
+    E_tot_JK = F_11 + F_22 - 0.5 * (E_H11 + E_H22 - E_K11 - E_K22)
+    print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
 
 #####################################################END COULOMB & START GAUNT#######################################################################
 elif args.coulgau == 'gaunt':
@@ -345,35 +385,63 @@ elif args.coulgau == 'gaunt':
         n_21 = spinorb2.exchange(spinorb1, prec)
         n_22 = spinorb2.density(prec)
 
-
         # Definition of Poisson operator
         Pua = vp.PoissonOperator(mra, prec)
 
-
-        # Defintion of Jx
-        J11 = Pua(n_11) * (4 * np.pi)
-        J12 = Pua(n_12) * (4 * np.pi)
-        J21 = Pua(n_21) * (4 * np.pi)
-        J22 = Pua(n_22) * (4 * np.pi)
-
+        # Defintion of J
+        J = Pua(n_11 + n_22) * (4 * np.pi)
+        #print('J', J)
 
         # Definition of Kx
-        K1 = Pua(n_12) * (4 * np.pi)
-        K2 = Pua(n_21) * (4 * np.pi)
+        K1a = Pua(n_21) * (4 * np.pi)
+        K1b = Pua(n_11) * (4 * np.pi)
+        K2a = Pua(n_12) * (4 * np.pi)
+        K2b = Pua(n_22) * (4 * np.pi)
+        #print('K1a', K1a)
+        #print('K2b', K2b)
 
 
-        # Definition of Energy Hartree of Fock matrix
-        E_H11 = vp.dot(n_11, J11)
-        E_H12 = vp.dot(n_12, J12)
-        E_H21 = vp.dot(n_21, J21)
-        E_H22 = vp.dot(n_22, J22)
+        # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
+        hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
+        hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
 
 
-        # Definition of Energy Exchange of Fock matrix
-        E_xc11 = vp.dot(n_12, K2)
-        E_xc12 = vp.dot(n_12, K1)
-        E_xc21 = vp.dot(n_21, K2)
-        E_xc22 = vp.dot(n_21, K1)
+        # Applying nuclear potential to spin orbit 1 and 2
+        v_psi_1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
+        v_psi_2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec)
+
+
+        # Definition of full 4c hamitoninan
+        add_psi_1 = hd_psi_1 + v_psi_1
+        add_psi_2 = hd_psi_2 + v_psi_2
+
+
+        # Calculation of necessary potential contributions to Hellmotz
+        J_spinorb1  = orb.apply_potential(1.0, J, spinorb1, prec)
+        J_spinorb2  = orb.apply_potential(1.0, J, spinorb2, prec)        
+
+
+        Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb2, prec)
+        Kb_spinorb1  = orb.apply_potential(1.0, K1b, spinorb1, prec)
+        Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb1, prec)
+        Kb_spinorb2  = orb.apply_potential(1.0, K2b, spinorb2, prec)
+
+
+        K_spinorb1 = Ka_spinorb1 + Kb_spinorb1
+        K_spinorb2 = Ka_spinorb2 + Kb_spinorb2
+        #print('K_spinorb1', K_spinorb1)
+
+
+        E_H11, imag_H11 = spinorb1.dot(J_spinorb1)
+        E_H12, imag_H12 = spinorb1.dot(J_spinorb2)
+        E_H21, imag_H21 = spinorb2.dot(J_spinorb1)
+        E_H22, imag_H22 = spinorb2.dot(J_spinorb2)
+             
+             
+        E_K11, imag_K11 = spinorb1.dot(K_spinorb1)
+        E_K12, imag_K12 = spinorb1.dot(K_spinorb2)
+        E_K21, imag_K21 = spinorb2.dot(K_spinorb1)
+        E_K22, imag_K22 = spinorb2.dot(K_spinorb2)
 
 
         #GAUNT: Direct (GJ) and Exchange (GK)
@@ -382,195 +450,232 @@ elif args.coulgau == 'gaunt':
         alpha_11 =  spinorb1.alpha(1)
         alpha_12 =  spinorb1.alpha(2)
        
+
         alpha_20 =  spinorb2.alpha(0)
         alpha_21 =  spinorb2.alpha(1)
         alpha_22 =  spinorb2.alpha(2)    
-         
+       
+
         #Defintion of orbital * alpha(orbital)
         cspinorb1_alpha10 = cspinorb1.overlap_density(alpha_10, prec)
         cspinorb1_alpha11 = cspinorb1.overlap_density(alpha_11, prec)
         cspinorb1_alpha12 = cspinorb1.overlap_density(alpha_12, prec)
        
+
         cspinorb1_alpha20 = cspinorb1.overlap_density(alpha_20, prec)
         cspinorb1_alpha21 = cspinorb1.overlap_density(alpha_21, prec)
         cspinorb1_alpha22 = cspinorb1.overlap_density(alpha_22, prec)
        
+
         cspinorb2_alpha10 = cspinorb2.overlap_density(alpha_10, prec)
         cspinorb2_alpha11 = cspinorb2.overlap_density(alpha_11, prec)
         cspinorb2_alpha12 = cspinorb2.overlap_density(alpha_12, prec)
        
+
         cspinorb2_alpha20 = cspinorb2.overlap_density(alpha_20, prec)
         cspinorb2_alpha21 = cspinorb2.overlap_density(alpha_21, prec)
         cspinorb2_alpha22 = cspinorb2.overlap_density(alpha_22, prec)
         
               
         #Definition of GJx
-        GJ11_Re0 = Pua(cspinorb1_alpha10.real) * (2.0 * np.pi)
-        GJ11_Re1 = Pua(cspinorb1_alpha11.real) * (2.0 * np.pi)
-        GJ11_Re2 = Pua(cspinorb1_alpha12.real) * (2.0 * np.pi)
-        GJ22_Re0 = Pua(cspinorb2_alpha20.real) * (2.0 * np.pi)
-        GJ22_Re1 = Pua(cspinorb2_alpha21.real) * (2.0 * np.pi)
-        GJ22_Re2 = Pua(cspinorb2_alpha22.real) * (2.0 * np.pi)
-        GJ11_Im0 = Pua(cspinorb1_alpha10.imag) * (2.0 * np.pi)
-        GJ11_Im1 = Pua(cspinorb1_alpha11.imag) * (2.0 * np.pi)
-        GJ11_Im2 = Pua(cspinorb1_alpha12.imag) * (2.0 * np.pi)
-        GJ22_Im0 = Pua(cspinorb2_alpha20.imag) * (2.0 * np.pi)
-        GJ22_Im1 = Pua(cspinorb2_alpha21.imag) * (2.0 * np.pi)
-        GJ22_Im2 = Pua(cspinorb2_alpha22.imag) * (2.0 * np.pi)
+        GJ_Re0 = Pua(cspinorb1_alpha10.real + cspinorb2_alpha20.real) * (2.0 * np.pi)
+        
+        GJ_Re1 = Pua(cspinorb1_alpha11.real + cspinorb2_alpha21.real) * (2.0 * np.pi)
+        
+        GJ_Re2 = Pua(cspinorb1_alpha12.real + cspinorb2_alpha22.real) * (2.0 * np.pi)
         
         
-        GJ11_0 = cf.complex_fcn()
-        GJ11_0.real = GJ11_Re0
-        GJ11_0.imag = GJ11_Im0
-        GJ11_1 = cf.complex_fcn()
-        GJ11_1.real = GJ11_Re1
-        GJ11_1.imag = GJ11_Im1
-        GJ11_2 = cf.complex_fcn()
-        GJ11_2.real = GJ11_Re2
-        GJ11_2.imag = GJ11_Im2
+        GJ_Im0 = Pua(cspinorb1_alpha10.imag + cspinorb2_alpha20.imag) * (2.0 * np.pi)
+        
+        GJ_Im1 = Pua(cspinorb1_alpha11.imag + cspinorb2_alpha21.imag) * (2.0 * np.pi)
+        
+        GJ_Im2 = Pua(cspinorb1_alpha12.imag + cspinorb2_alpha22.imag) * (2.0 * np.pi)
+        
+        
+        
+        GJ_0 = cf.complex_fcn()
+        GJ_0.real = GJ_Re0
+        GJ_0.imag = GJ_Im0
+        
+        GJ_1 = cf.complex_fcn()
+        GJ_1.real = GJ_Re1
+        GJ_1.imag = GJ_Im1
+
+        GJ_2 = cf.complex_fcn()
+        GJ_2.real = GJ_Re2
+        GJ_2.imag = GJ_Im2
     
-        GJ22_0 = cf.complex_fcn()
-        GJ22_0.real = GJ22_Re0
-        GJ22_0.imag = GJ22_Im0
-        GJ22_1 = cf.complex_fcn()
-        GJ22_1.real = GJ22_Re1
-        GJ22_1.imag = GJ22_Im1
-        GJ22_2 = cf.complex_fcn()
-        GJ22_2.real = GJ22_Re2
-        GJ22_2.imag = GJ22_Im2
-           
-    
+
         #Definition of GKx
-        GK12_Re0 = Pua(cspinorb1_alpha20.real) * (2.0 * np.pi)
-        GK12_Re1 = Pua(cspinorb1_alpha21.real) * (2.0 * np.pi)
-        GK12_Re2 = Pua(cspinorb1_alpha22.real) * (2.0 * np.pi)
-        GK21_Re0 = Pua(cspinorb2_alpha10.real) * (2.0 * np.pi)
-        GK21_Re1 = Pua(cspinorb2_alpha11.real) * (2.0 * np.pi)
-        GK21_Re2 = Pua(cspinorb2_alpha12.real) * (2.0 * np.pi)
-        GK12_Im0 = Pua(cspinorb1_alpha20.imag) * (2.0 * np.pi)
-        GK12_Im1 = Pua(cspinorb1_alpha21.imag) * (2.0 * np.pi)
-        GK12_Im2 = Pua(cspinorb1_alpha22.imag) * (2.0 * np.pi)
-        GK21_Im0 = Pua(cspinorb2_alpha10.imag) * (2.0 * np.pi)
-        GK21_Im1 = Pua(cspinorb2_alpha11.imag) * (2.0 * np.pi)
-        GK21_Im2 = Pua(cspinorb2_alpha12.imag) * (2.0 * np.pi)
+        GK1a_Re0 = Pua(cspinorb2_alpha10.real) * (2.0 * np.pi)
+        GK1a_Re1 = Pua(cspinorb2_alpha11.real) * (2.0 * np.pi)
+        GK1a_Re2 = Pua(cspinorb2_alpha12.real) * (2.0 * np.pi)
+
+        GK1b_Re0 = Pua(cspinorb1_alpha10.real) * (2.0 * np.pi)
+        GK1b_Re1 = Pua(cspinorb1_alpha11.real) * (2.0 * np.pi)
+        GK1b_Re2 = Pua(cspinorb1_alpha12.real) * (2.0 * np.pi)
+
+        GK2a_Re0 = Pua(cspinorb1_alpha20.real) * (2.0 * np.pi)
+        GK2a_Re1 = Pua(cspinorb1_alpha21.real) * (2.0 * np.pi)
+        GK2a_Re2 = Pua(cspinorb1_alpha22.real) * (2.0 * np.pi)
+
+        GK2b_Re0 = Pua(cspinorb2_alpha20.real) * (2.0 * np.pi)
+        GK2b_Re1 = Pua(cspinorb2_alpha21.real) * (2.0 * np.pi)
+        GK2b_Re2 = Pua(cspinorb2_alpha22.real) * (2.0 * np.pi)
+
         
-           
-        GK12_0 = cf.complex_fcn()
-        GK12_0.real = GK12_Re0
-        GK12_0.imag = GK12_Im0
-        GK12_1 = cf.complex_fcn()
-        GK12_1.real = GK12_Re1
-        GK12_1.imag = GK12_Im1
-        GK12_2 = cf.complex_fcn()
-        GK12_2.real = GK12_Re2
-        GK12_2.imag = GK12_Im2
-    
-        GK21_0 = cf.complex_fcn()
-        GK21_0.real = GK21_Re0
-        GK21_0.imag = GK21_Im0
-        GK21_1 = cf.complex_fcn()
-        GK21_1.real = GK21_Re1
-        GK21_1.imag = GK21_Im1
-        GK21_2 = cf.complex_fcn()
-        GK21_2.real = GK21_Re2
-        GK21_2.imag = GK21_Im2
- 
- 
-        # Calculation of necessary potential contributions to Helmotz and Energy 
-        CJ_spinorb1   = orb.apply_potential(1.0, J11, spinorb1, prec)
-        CK_spinorb1   = orb.apply_potential(1.0, K2, spinorb2, prec)
- 
-        CJ_spinorb2   = orb.apply_potential(1.0, J22, spinorb2, prec)
-        CK_spinorb2   = orb.apply_potential(1.0, K1, spinorb1, prec)
- 
-        GJ11_0_alpha10 = orb.apply_complex_potential(1.0, GJ11_0, alpha_10, prec)
-        GJ11_1_alpha11 = orb.apply_complex_potential(1.0, GJ11_1, alpha_11, prec)
-        GJ11_2_alpha12 = orb.apply_complex_potential(1.0, GJ11_2, alpha_12, prec)
-        GJ22_0_alpha20 = orb.apply_complex_potential(1.0, GJ22_0, alpha_20, prec)
-        GJ22_1_alpha21 = orb.apply_complex_potential(1.0, GJ22_1, alpha_21, prec)
-        GJ22_2_alpha22 = orb.apply_complex_potential(1.0, GJ22_2, alpha_22, prec)
+        GK1a_Im0 = Pua(cspinorb2_alpha10.imag) * (2.0 * np.pi)
+        GK1a_Im1 = Pua(cspinorb2_alpha11.imag) * (2.0 * np.pi)
+        GK1a_Im2 = Pua(cspinorb2_alpha12.imag) * (2.0 * np.pi)
+
+        GK1b_Im0 = Pua(cspinorb1_alpha10.imag) * (2.0 * np.pi)
+        GK1b_Im1 = Pua(cspinorb1_alpha11.imag) * (2.0 * np.pi)
+        GK1b_Im2 = Pua(cspinorb1_alpha12.imag) * (2.0 * np.pi)
         
-        GK12_0_alpha10 = orb.apply_complex_potential(1.0, GK12_0, alpha_10, prec)
-        GK12_1_alpha11 = orb.apply_complex_potential(1.0, GK12_1, alpha_11, prec)
-        GK12_2_alpha12 = orb.apply_complex_potential(1.0, GK12_2, alpha_12, prec)
-        GK21_0_alpha20 = orb.apply_complex_potential(1.0, GK21_0, alpha_20, prec)
-        GK21_1_alpha21 = orb.apply_complex_potential(1.0, GK21_1, alpha_21, prec)
-        GK21_2_alpha22 = orb.apply_complex_potential(1.0, GK21_2, alpha_22, prec)
+        GK2a_Im0 = Pua(cspinorb1_alpha20.imag) * (2.0 * np.pi)
+        GK2a_Im1 = Pua(cspinorb1_alpha21.imag) * (2.0 * np.pi)
+        GK2a_Im2 = Pua(cspinorb1_alpha22.imag) * (2.0 * np.pi)
+        
+        GK2b_Im0 = Pua(cspinorb2_alpha20.imag) * (2.0 * np.pi)
+        GK2b_Im1 = Pua(cspinorb2_alpha21.imag) * (2.0 * np.pi)
+        GK2b_Im2 = Pua(cspinorb2_alpha22.imag) * (2.0 * np.pi)
+        
+        
+
+        GK1a_0 = cf.complex_fcn()
+        GK1a_0.real = GK1a_Re0
+        GK1a_0.imag = GK1a_Im0
+        GK1b_0 = cf.complex_fcn()
+        GK1b_0.real = GK1b_Re0
+        GK1b_0.imag = GK1b_Im0
  
+        GK2a_0 = cf.complex_fcn()
+        GK2a_0.real = GK2a_Re0
+        GK2a_0.imag = GK2a_Im0
+        GK2b_0 = cf.complex_fcn()
+        GK2b_0.real = GK2b_Re0
+        GK2b_0.imag = GK2b_Im0
+
+
+        GK1a_1 = cf.complex_fcn()
+        GK1a_1.real = GK1a_Re1
+        GK1a_1.imag = GK1a_Im1
+        GK1b_1 = cf.complex_fcn()
+        GK1b_1.real = GK1b_Re1
+        GK1b_1.imag = GK1b_Im1
  
-        # Definition of Energy Hartree of Fock matrix
-        E_GJ110, imag_E_GJ110 = spinorb1.dot(GJ11_0_alpha10)
-        E_GJ111, imag_E_GJ111 = spinorb1.dot(GJ11_1_alpha11)
-        E_GJ112, imag_E_GJ112 = spinorb1.dot(GJ11_2_alpha12)
-        E_GJ220, imag_E_GJ220 = spinorb2.dot(GJ22_0_alpha20)
-        E_GJ221, imag_E_GJ221 = spinorb2.dot(GJ22_1_alpha21)
-        E_GJ222, imag_E_GJ222 = spinorb2.dot(GJ22_2_alpha22)
-     
+        GK2a_1 = cf.complex_fcn()
+        GK2a_1.real = GK2a_Re1
+        GK2a_1.imag = GK2a_Im1
+        GK2b_1 = cf.complex_fcn()
+        GK2b_1.real = GK2b_Re1
+        GK2b_1.imag = GK2b_Im1
+
+
+        GK1a_2 = cf.complex_fcn()
+        GK1a_2.real = GK1a_Re2
+        GK1a_2.imag = GK1a_Im2
+        GK1b_2 = cf.complex_fcn()
+        GK1b_2.real = GK1b_Re2
+        GK1b_2.imag = GK1b_Im2
  
-        E_Gxc120, imag_E_Gxc120 = spinorb2.dot(GK12_0_alpha10)
-        E_Gxc121, imag_E_Gxc121 = spinorb2.dot(GK12_1_alpha11)
-        E_Gxc122, imag_E_Gxc122 = spinorb2.dot(GK12_2_alpha12)
-        E_Gxc210, imag_E_Gxc210 = spinorb1.dot(GK21_0_alpha20)
-        E_Gxc211, imag_E_Gxc211 = spinorb1.dot(GK21_1_alpha21)
-        E_Gxc212, imag_E_Gxc212 = spinorb1.dot(GK21_2_alpha22)
- 
- 
-        E_GJ = E_GJ110 + E_GJ111 + E_GJ112 + E_GJ220 + E_GJ221 + E_GJ222
-     
-        E_GK = E_Gxc120 + E_Gxc121 + E_Gxc122 + E_Gxc210 + E_Gxc211 + E_Gxc212
- 
-        E_Gaunt = E_GJ - E_GK
- 
-        # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
-        hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0)
-        hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0)
- 
- 
-        # Applying nuclear potential to spin orbit 1 and 2
-        v_psi_1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
-        v_psi_2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec)
- 
- 
-        # Definition of full 4c hamitoninan
-        add_psi_1 = hd_psi_1 + v_psi_1
-        add_psi_2 = hd_psi_2 + v_psi_2
- 
- 
-        # Calculate Fij Fock matrix
+        GK2a_2 = cf.complex_fcn()
+        GK2a_2.real = GK2a_Re2
+        GK2a_2.imag = GK2a_Im2
+        GK2b_2 = cf.complex_fcn()
+        GK2b_2.real = GK2b_Re2
+        GK2b_2.imag = GK2b_Im2
+
+
+        # Calculation of necessary potential contributions to Hellmotz
+        1VG0 = orb.apply_complex_potential(1.0, GJ0, alpha_10, prec)
+        1VG1 = orb.apply_complex_potential(1.0, GJ1, alpha_11, prec)
+        1VG2 = orb.apply_complex_potential(1.0, GJ2, alpha_12, prec)
+        GJ_spinorb1 = 1VG0 + 1VG2 + 1VG2
+
+
+        2VG0 = orb.apply_complex_potential(1.0, GJ0, alpha_20, prec)
+        2VG1 = orb.apply_complex_potential(1.0, GJ1, alpha_21, prec)
+        2VG2 = orb.apply_complex_potential(1.0, GJ2, alpha_22, prec)
+        GJ_spinorb2 = 2VG0 + 2VG2 + 2VG2
+
+
+        GKa_spinorb1_0  = orb.apply_potential(1.0, GK1a_0, alpha_20, prec)
+        GKb_spinorb1_0  = orb.apply_potential(1.0, GK1b_0, alpha_10, prec)
+
+       
+        GKa_spinorb1_1  = orb.apply_potential(1.0, GK1a_1, alpha_21, prec)
+        GKb_spinorb1_1  = orb.apply_potential(1.0, GK1b_1, alpha_11, prec)
+
+
+        GKa_spinorb1_2  = orb.apply_potential(1.0, GK1a_2, alpha_22, prec)
+        GKb_spinorb1_2  = orb.apply_potential(1.0, GK1b_2, alpha_12, prec)
+
+
+        GKa_spinorb2_0  = orb.apply_potential(1.0, GK2a_0, alpha_10, prec)
+        GKb_spinorb2_0  = orb.apply_potential(1.0, GK2b_0, alpha_20, prec)
+
+
+        GKa_spinorb2_1  = orb.apply_potential(1.0, GK2a_1, alpha_11, prec)
+        GKb_spinorb2_1  = orb.apply_potential(1.0, GK2b_1, alpha_21, prec)
+
+
+        GKa_spinorb2_2  = orb.apply_potential(1.0, GK2a_2, alpha_12, prec)
+        GKb_spinorb2_2  = orb.apply_potential(1.0, GK2b_2, alpha_22, prec)
+
+
+        GK_spinorb1 = GKa_spinorb1_0 + GKb_spinorb1_0 + GKa_spinorb1_1 + GKb_spinorb1_1 + GKa_spinorb1_2 + GKb_spinorb1_2
+        GK_spinorb2 = GKa_spinorb2_0 + GKb_spinorb2_0 + GKa_spinorb2_1 + GKb_spinorb2_1 + GKa_spinorb2_2 + GKb_spinorb2_2
+        #print('K_spinorb1', K_spinorb1)
+
+
+        E_GH11, imag_GH11 = spinorb1.dot(GJ_spinorb1)
+        E_GH12, imag_GH12 = spinorb1.dot(GJ_spinorb2)
+        E_GH21, imag_GH21 = spinorb2.dot(GJ_spinorb1)
+        E_GH22, imag_GH22 = spinorb2.dot(GJ_spinorb2)
+             
+             
+        E_GK11, imag_GK11 = spinorb1.dot(GK_spinorb1)
+        E_GK12, imag_GK12 = spinorb1.dot(GK_spinorb2)
+        E_GK21, imag_GK21 = spinorb2.dot(GK_spinorb1)
+        E_GK22, imag_GK22 = spinorb2.dot(GK_spinorb2)
+
+
+        # Orbital Energy calculation
         energy_11, imag_11 = spinorb1.dot(add_psi_1)
         energy_12, imag_12 = spinorb1.dot(add_psi_2)
         energy_21, imag_21 = spinorb2.dot(add_psi_1)
         energy_22, imag_22 = spinorb2.dot(add_psi_2)
+
+
+        # Calculate Fij Fock matrix
+        F_11 = energy_11 + E_H11 - E_K11 - E_GH11 + E_GK11
+        F_12 = energy_12 + E_H12 - E_K12 - E_GH12 + E_GK12
+        F_21 = energy_21 + E_H21 - E_K21 - E_GH21 + E_GK21
+        F_22 = energy_22 + E_H22 - E_K22 - E_GH22 + E_GK22
+        
+
+        # Orbital Energy
+        print('Energy_Spin_Orbit_1', F_11 - light_speed**2)
+        print('Energy_Spin_Orbit_2', F_22 - light_speed**2)
+
+
+        # Total Energy 
+        E_tot_JK = F_11 + F_22 - 0.5 * (E_H11 + E_H22 - E_K11 - E_K22 - E_GH11 + E_GK11 - E_GH22 + E_GK22)
+        print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
+
  
- 
-        # Orbital Energy calculation
-        energy_11 = energy_11 + E_H11 - E_xc11 - (E_GJ110 + E_GJ111 + E_GJ112 - E_Gxc120 - E_Gxc121 - E_Gxc122)
-        energy_12 = energy_12 + E_H12 - E_xc12 
-        energy_21 = energy_21 + E_H21 - E_xc21 
-        energy_22 = energy_22 + E_H22 - E_xc22 - (E_GJ220 + E_GJ221 + E_GJ222 - E_Gxc210 - E_Gxc211 - E_Gxc212)
-        print('Energy_Spin_Orbit_1', energy_11 - light_speed**2.0)
-        print('Energy_Spin_Orbit_2', energy_22 - light_speed**2.0)
- 
-        #Total Energy
-        E_tot = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22 - E_Gaunt)
-        print('E_total (Coulomb & Gaunt) approximiation', E_tot - 2.0 * (light_speed**2.0))
-        print('E_Gåunt_cørræctiøn =', E_Gaunt * 0.5 )
- 
-        # Calculation of necessary potential contributions to Hellmotz
-        F12_spinorb2 = energy_12 * spinorb2
-        F21_spinorb1 = energy_21 * spinorb1
- 
-        V_J_K_spinorb1 = v_psi_1 + CJ_spinorb1 - CK_spinorb1 - GJ11_0_alpha10 - GJ11_1_alpha11 - GJ11_2_alpha12 + GK12_0_alpha10 - GK12_1_alpha11 - GK12_2_alpha12 - F12_spinorb2
-        V_J_K_spinorb2 = v_psi_2 + CJ_spinorb2 - CK_spinorb2 - GJ22_0_alpha20 - GJ22_1_alpha21 - GJ22_2_alpha22 + GK21_0_alpha20 - GK21_1_alpha21 - GK21_2_alpha22 - F21_spinorb1
+        V_J_K_spinorb1 = v_psi_1 + CJ_spinorb1 - CK_spinorb1 - GJ_spinorb1 + GK_spinorb1 - (F_12 * spinorb2)
+        V_J_K_spinorb2 = v_psi_2 + CJ_spinorb2 - CK_spinorb2 - GJ_spinorb1 + GK_spinorb1 - (F_21 * spinorb1)
  
  
         # Calculation of Helmotz
-        tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, energy_11, prec)
-        tmp_2 = orb.apply_helmholtz(V_J_K_spinorb2, energy_22, prec)
-        new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, energy_11)
+        tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, F_11, prec)
+        tmp_2 = orb.apply_helmholtz(V_J_K_spinorb2, F_22, prec)
+        new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, F_11)
         new_orbital_1 *= 0.5 / light_speed ** 2
         new_orbital_1.normalize()
-        new_orbital_2 = orb.apply_dirac_hamiltonian(tmp_2, prec, energy_22)
+        new_orbital_2 = orb.apply_dirac_hamiltonian(tmp_2, prec, F_22)
         new_orbital_2 *= 0.5 / light_speed ** 2
         new_orbital_2.normalize()
  
@@ -618,175 +723,253 @@ elif args.coulgau == 'gaunt':
     n_12 = spinorb1.exchange(spinorb2, prec)
     n_21 = spinorb2.exchange(spinorb1, prec)
     n_22 = spinorb2.density(prec)
- 
- 
+
     # Definition of Poisson operator
     Pua = vp.PoissonOperator(mra, prec)
- 
-    # Defintion of Jx
-    J11 = Pua(n_11) * (4 * np.pi)
-    J12 = Pua(n_12) * (4 * np.pi)
-    J21 = Pua(n_21) * (4 * np.pi)
-    J22 = Pua(n_22) * (4 * np.pi)
- 
- 
+
+    # Defintion of J
+    J = Pua(n_11 + n_22) * (4 * np.pi)
+    
+    #print('J', J)
     # Definition of Kx
-    K1 = Pua(n_12) * (4 * np.pi)
-    K2 = Pua(n_21) * (4 * np.pi)
- 
- 
-    # Definition of Energy Hartree of Fock matrix
-    E_H11 = vp.dot(n_11, J11)
-    E_H12 = vp.dot(n_12, J12)
-    E_H21 = vp.dot(n_21, J21)
-    E_H22 = vp.dot(n_22, J22)
- 
- 
-    # Definition of Energy Exchange of Fock matrix
-    E_xc11 = vp.dot(n_12, K2)
-    E_xc12 = vp.dot(n_12, K1)
-    E_xc21 = vp.dot(n_21, K2)
-    E_xc22 = vp.dot(n_21, K1)
- 
- 
-    #Definition of GJx
-    GJ11_Re0 = Pua(cspinorb1_alpha10.real) * (2.0 * np.pi)
-    GJ11_Re1 = Pua(cspinorb1_alpha11.real) * (2.0 * np.pi)
-    GJ11_Re2 = Pua(cspinorb1_alpha12.real) * (2.0 * np.pi)
-    GJ22_Re0 = Pua(cspinorb2_alpha20.real) * (2.0 * np.pi)
-    GJ22_Re1 = Pua(cspinorb2_alpha21.real) * (2.0 * np.pi)
-    GJ22_Re2 = Pua(cspinorb2_alpha22.real) * (2.0 * np.pi)
-    GJ11_Im0 = Pua(cspinorb1_alpha10.imag) * (2.0 * np.pi)
-    GJ11_Im1 = Pua(cspinorb1_alpha11.imag) * (2.0 * np.pi)
-    GJ11_Im2 = Pua(cspinorb1_alpha12.imag) * (2.0 * np.pi)
-    GJ22_Im0 = Pua(cspinorb2_alpha20.imag) * (2.0 * np.pi)
-    GJ22_Im1 = Pua(cspinorb2_alpha21.imag) * (2.0 * np.pi)
-    GJ22_Im2 = Pua(cspinorb2_alpha22.imag) * (2.0 * np.pi)
-    
-    
-    GJ11_0 = cf.complex_fcn()
-    GJ11_0.real = GJ11_Re0
-    GJ11_0.imag = GJ11_Im0
-    GJ11_1 = cf.complex_fcn()
-    GJ11_1.real = GJ11_Re1
-    GJ11_1.imag = GJ11_Im1
-    GJ11_2 = cf.complex_fcn()
-    GJ11_2.real = GJ11_Re2
-    GJ11_2.imag = GJ11_Im2
-    GJ22_0 = cf.complex_fcn()
-    GJ22_0.real = GJ22_Re0
-    GJ22_0.imag = GJ22_Im0
-    GJ22_1 = cf.complex_fcn()
-    GJ22_1.real = GJ22_Re1
-    GJ22_1.imag = GJ22_Im1
-    GJ22_2 = cf.complex_fcn()
-    GJ22_2.real = GJ22_Re2
-    GJ22_2.imag = GJ22_Im2
-       
-    #Definition of GKx
-    GK12_Re0 = Pua(cspinorb1_alpha20.real) * (2.0 * np.pi)
-    GK12_Re1 = Pua(cspinorb1_alpha21.real) * (2.0 * np.pi)
-    GK12_Re2 = Pua(cspinorb1_alpha22.real) * (2.0 * np.pi)
-    GK21_Re0 = Pua(cspinorb2_alpha10.real) * (2.0 * np.pi)
-    GK21_Re1 = Pua(cspinorb2_alpha11.real) * (2.0 * np.pi)
-    GK21_Re2 = Pua(cspinorb2_alpha12.real) * (2.0 * np.pi)
-    GK12_Im0 = Pua(cspinorb1_alpha20.imag) * (2.0 * np.pi)
-    GK12_Im1 = Pua(cspinorb1_alpha21.imag) * (2.0 * np.pi)
-    GK12_Im2 = Pua(cspinorb1_alpha22.imag) * (2.0 * np.pi)
-    GK21_Im0 = Pua(cspinorb2_alpha10.imag) * (2.0 * np.pi)
-    GK21_Im1 = Pua(cspinorb2_alpha11.imag) * (2.0 * np.pi)
-    GK21_Im2 = Pua(cspinorb2_alpha12.imag) * (2.0 * np.pi)
-    
-       
-    GK12_0 = cf.complex_fcn()
-    GK12_0.real = GK12_Re0
-    GK12_0.imag = GK12_Im0
-    GK12_1 = cf.complex_fcn()
-    GK12_1.real = GK12_Re1
-    GK12_1.imag = GK12_Im1
-    GK12_2 = cf.complex_fcn()
-    GK12_2.real = GK12_Re2
-    GK12_2.imag = GK12_Im2
-    GK21_0 = cf.complex_fcn()
-    GK21_0.real = GK21_Re0
-    GK21_0.imag = GK21_Im0
-    GK21_1 = cf.complex_fcn()
-    GK21_1.real = GK21_Re1
-    GK21_1.imag = GK21_Im1
-    GK21_2 = cf.complex_fcn()
-    GK21_2.real = GK21_Re2
-    GK21_2.imag = GK21_Im2
- 
-    # Calculation of necessary potential contributions to Energy 
-    GJ11_0_alpha10 = orb.apply_complex_potential(1.0, GJ11_0, alpha_10, prec)
-    GJ11_1_alpha11 = orb.apply_complex_potential(1.0, GJ11_1, alpha_11, prec)
-    GJ11_2_alpha12 = orb.apply_complex_potential(1.0, GJ11_2, alpha_12, prec)
-    GJ22_0_alpha20 = orb.apply_complex_potential(1.0, GJ22_0, alpha_20, prec)
-    GJ22_1_alpha21 = orb.apply_complex_potential(1.0, GJ22_1, alpha_21, prec)
-    GJ22_2_alpha22 = orb.apply_complex_potential(1.0, GJ22_2, alpha_22, prec)
-    
-    GK12_0_alpha10 = orb.apply_complex_potential(1.0, GK12_0, alpha_10, prec)
-    GK12_1_alpha11 = orb.apply_complex_potential(1.0, GK12_1, alpha_11, prec)
-    GK12_2_alpha12 = orb.apply_complex_potential(1.0, GK12_2, alpha_12, prec)
-    GK21_0_alpha20 = orb.apply_complex_potential(1.0, GK21_0, alpha_20, prec)
-    GK21_1_alpha21 = orb.apply_complex_potential(1.0, GK21_1, alpha_21, prec)
-    GK21_2_alpha22 = orb.apply_complex_potential(1.0, GK21_2, alpha_22, prec)
- 
-    # Definition of Energy Hartree of Fock matrix
-    E_GJ110, imag_E_GJ110 = spinorb1.dot(GJ11_0_alpha10)
-    E_GJ111, imag_E_GJ111 = spinorb1.dot(GJ11_1_alpha11)
-    E_GJ112, imag_E_GJ112 = spinorb1.dot(GJ11_2_alpha12)
-    E_GJ220, imag_E_GJ220 = spinorb2.dot(GJ22_0_alpha20)
-    E_GJ221, imag_E_GJ221 = spinorb2.dot(GJ22_1_alpha21)
-    E_GJ222, imag_E_GJ222 = spinorb2.dot(GJ22_2_alpha22)
- 
-    E_Gxc120, imag_E_Gxc120 = spinorb2.dot(GK12_0_alpha10)
-    E_Gxc121, imag_E_Gxc121 = spinorb2.dot(GK12_1_alpha11)
-    E_Gxc122, imag_E_Gxc122 = spinorb2.dot(GK12_2_alpha12)
-    E_Gxc210, imag_E_Gxc210 = spinorb1.dot(GK21_0_alpha20)
-    E_Gxc211, imag_E_Gxc211 = spinorb1.dot(GK21_1_alpha21)
-    E_Gxc212, imag_E_Gxc212 = spinorb1.dot(GK21_2_alpha22)
- 
-    E_GJ = E_GJ110 + E_GJ111 + E_GJ112 + E_GJ220 + E_GJ221 + E_GJ222
-    
-    E_GK = E_Gxc120 + E_Gxc121 + E_Gxc122 + E_Gxc210 + E_Gxc211 + E_Gxc212
-    
-    E_Gaunt = E_GJ - E_GK
- 
- 
+    K1a = Pua(n_21) * (4 * np.pi)
+    K1b = Pua(n_11) * (4 * np.pi)
+    K2a = Pua(n_12) * (4 * np.pi)
+    K2b = Pua(n_22) * (4 * np.pi)
+    #print('K1a', K1a)
+    #print('K2b', K2b)
+
     # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
-    hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0)
-    hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0)
- 
- 
+    hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
+    hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
+
     # Applying nuclear potential to spin orbit 1 and 2
     v_psi_1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
     v_psi_2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec)
- 
- 
+
     # Definition of full 4c hamitoninan
     add_psi_1 = hd_psi_1 + v_psi_1
     add_psi_2 = hd_psi_2 + v_psi_2
- 
- 
-    # Calculate Fij Fock matrix
+
+    # Calculation of necessary potential contributions to Hellmotz
+    J_spinorb1  = orb.apply_potential(1.0, J, spinorb1, prec)
+    J_spinorb2  = orb.apply_potential(1.0, J, spinorb2, prec) 
+
+    Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb2, prec)
+    Kb_spinorb1  = orb.apply_potential(1.0, K1b, spinorb1, prec)
+    Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb1, prec)
+    Kb_spinorb2  = orb.apply_potential(1.0, K2b, spinorb2, prec)
+    K_spinorb1 = Ka_spinorb1 + Kb_spinorb1
+    K_spinorb2 = Ka_spinorb2 + Kb_spinorb2
+    #print('K_spinorb1', K_spinorb1)
+    
+
+    E_H11, imag_H11 = spinorb1.dot(J_spinorb1)
+    E_H12, imag_H12 = spinorb1.dot(J_spinorb2)
+    E_H21, imag_H21 = spinorb2.dot(J_spinorb1)
+    E_H22, imag_H22 = spinorb2.dot(J_spinorb2)
+         
+         
+    E_K11, imag_K11 = spinorb1.dot(K_spinorb1)
+    E_K12, imag_K12 = spinorb1.dot(K_spinorb2)
+    E_K21, imag_K21 = spinorb2.dot(K_spinorb1)
+    E_K22, imag_K22 = spinorb2.dot(K_spinorb2)
+    
+
+    #GAUNT: Direct (GJ) and Exchange (GK)
+    #Definition of alpha(orbital)
+    alpha_10 =  spinorb1.alpha(0)
+    alpha_11 =  spinorb1.alpha(1)
+    alpha_12 =  spinorb1.alpha(2)
+    
+    alpha_20 =  spinorb2.alpha(0)
+    alpha_21 =  spinorb2.alpha(1)
+    alpha_22 =  spinorb2.alpha(2)    
+    
+    #Defintion of orbital * alpha(orbital)
+    cspinorb1_alpha10 = cspinorb1.overlap_density(alpha_10, prec)
+    cspinorb1_alpha11 = cspinorb1.overlap_density(alpha_11, prec)
+    cspinorb1_alpha12 = cspinorb1.overlap_density(alpha_12, prec)
+    
+    cspinorb1_alpha20 = cspinorb1.overlap_density(alpha_20, prec)
+    cspinorb1_alpha21 = cspinorb1.overlap_density(alpha_21, prec)
+    cspinorb1_alpha22 = cspinorb1.overlap_density(alpha_22, prec)
+    
+    cspinorb2_alpha10 = cspinorb2.overlap_density(alpha_10, prec)
+    cspinorb2_alpha11 = cspinorb2.overlap_density(alpha_11, prec)
+    cspinorb2_alpha12 = cspinorb2.overlap_density(alpha_12, prec)
+    
+    cspinorb2_alpha20 = cspinorb2.overlap_density(alpha_20, prec)
+    cspinorb2_alpha21 = cspinorb2.overlap_density(alpha_21, prec)
+    cspinorb2_alpha22 = cspinorb2.overlap_density(alpha_22, prec)
+    
+          
+    #Definition of GJx
+    GJ_Re0 = Pua(cspinorb1_alpha10.real + cspinorb2_alpha20.real) * (2.0 * np.pi)
+    
+    GJ_Re1 = Pua(cspinorb1_alpha11.real + cspinorb2_alpha21.real) * (2.0 * np.pi)
+    
+    GJ_Re2 = Pua(cspinorb1_alpha12.real + cspinorb2_alpha22.real) * (2.0 * np.pi)
+    
+    
+    GJ_Im0 = Pua(cspinorb1_alpha10.imag + cspinorb2_alpha20.imag) * (2.0 * np.pi)
+    
+    GJ_Im1 = Pua(cspinorb1_alpha11.imag + cspinorb2_alpha21.imag) * (2.0 * np.pi)
+    
+    GJ_Im2 = Pua(cspinorb1_alpha12.imag + cspinorb2_alpha22.imag) * (2.0 * np.pi)
+    
+    
+    
+    GJ_0 = cf.complex_fcn()
+    GJ_0.real = GJ_Re0
+    GJ_0.imag = GJ_Im0
+    
+    GJ_1 = cf.complex_fcn()
+    GJ_1.real = GJ_Re1
+    GJ_1.imag = GJ_Im1
+    GJ_2 = cf.complex_fcn()
+    GJ_2.real = GJ_Re2
+    GJ_2.imag = GJ_Im2
+
+    #Definition of GKx
+    GK1a_Re0 = Pua(cspinorb2_alpha10.real) * (2.0 * np.pi)
+    GK1a_Re1 = Pua(cspinorb2_alpha11.real) * (2.0 * np.pi)
+    GK1a_Re2 = Pua(cspinorb2_alpha12.real) * (2.0 * np.pi)
+    GK1b_Re0 = Pua(cspinorb1_alpha10.real) * (2.0 * np.pi)
+    GK1b_Re1 = Pua(cspinorb1_alpha11.real) * (2.0 * np.pi)
+    GK1b_Re2 = Pua(cspinorb1_alpha12.real) * (2.0 * np.pi)
+    
+    GK2a_Re0 = Pua(cspinorb1_alpha20.real) * (2.0 * np.pi)
+    GK2a_Re1 = Pua(cspinorb1_alpha21.real) * (2.0 * np.pi)
+    GK2a_Re2 = Pua(cspinorb1_alpha22.real) * (2.0 * np.pi)
+    GK2b_Re0 = Pua(cspinorb2_alpha20.real) * (2.0 * np.pi)
+    GK2b_Re1 = Pua(cspinorb2_alpha21.real) * (2.0 * np.pi)
+    GK2b_Re2 = Pua(cspinorb2_alpha22.real) * (2.0 * np.pi)
+    
+    GK1a_Im0 = Pua(cspinorb2_alpha10.imag) * (2.0 * np.pi)
+    GK1a_Im1 = Pua(cspinorb2_alpha11.imag) * (2.0 * np.pi)
+    GK1a_Im2 = Pua(cspinorb2_alpha12.imag) * (2.0 * np.pi)
+    GK1b_Im0 = Pua(cspinorb1_alpha10.imag) * (2.0 * np.pi)
+    GK1b_Im1 = Pua(cspinorb1_alpha11.imag) * (2.0 * np.pi)
+    GK1b_Im2 = Pua(cspinorb1_alpha12.imag) * (2.0 * np.pi)
+    
+    GK2a_Im0 = Pua(cspinorb1_alpha20.imag) * (2.0 * np.pi)
+    GK2a_Im1 = Pua(cspinorb1_alpha21.imag) * (2.0 * np.pi)
+    GK2a_Im2 = Pua(cspinorb1_alpha22.imag) * (2.0 * np.pi)
+    
+    GK2b_Im0 = Pua(cspinorb2_alpha20.imag) * (2.0 * np.pi)
+    GK2b_Im1 = Pua(cspinorb2_alpha21.imag) * (2.0 * np.pi)
+    GK2b_Im2 = Pua(cspinorb2_alpha22.imag) * (2.0 * np.pi)
+    
+    
+    GK1a_0 = cf.complex_fcn()
+    GK1a_0.real = GK1a_Re0
+    GK1a_0.imag = GK1a_Im0
+    GK1b_0 = cf.complex_fcn()
+    GK1b_0.real = GK1b_Re0
+    GK1b_0.imag = GK1b_Im0
+
+    GK2a_0 = cf.complex_fcn()
+    GK2a_0.real = GK2a_Re0
+    GK2a_0.imag = GK2a_Im0
+    GK2b_0 = cf.complex_fcn()
+    GK2b_0.real = GK2b_Re0
+    GK2b_0.imag = GK2b_Im0
+    
+    GK1a_1 = cf.complex_fcn()
+    GK1a_1.real = GK1a_Re1
+    GK1a_1.imag = GK1a_Im1
+    GK1b_1 = cf.complex_fcn()
+    GK1b_1.real = GK1b_Re1
+    GK1b_1.imag = GK1b_Im1
+
+    GK2a_1 = cf.complex_fcn()
+    GK2a_1.real = GK2a_Re1
+    GK2a_1.imag = GK2a_Im1
+    GK2b_1 = cf.complex_fcn()
+    GK2b_1.real = GK2b_Re1
+    GK2b_1.imag = GK2b_Im1
+    
+    GK1a_2 = cf.complex_fcn()
+    GK1a_2.real = GK1a_Re2
+    GK1a_2.imag = GK1a_Im2
+    GK1b_2 = cf.complex_fcn()
+    GK1b_2.real = GK1b_Re2
+    GK1b_2.imag = GK1b_Im2
+
+    GK2a_2 = cf.complex_fcn()
+    GK2a_2.real = GK2a_Re2
+    GK2a_2.imag = GK2a_Im2
+    GK2b_2 = cf.complex_fcn()
+    GK2b_2.real = GK2b_Re2
+    GK2b_2.imag = GK2b_Im2
+    
+    
+    # Calculation of necessary potential contributions to Hellmotz
+    1VG0 = orb.apply_complex_potential(1.0, GJ0, alpha_10, prec)
+    1VG1 = orb.apply_complex_potential(1.0, GJ1, alpha_11, prec)
+    1VG2 = orb.apply_complex_potential(1.0, GJ2, alpha_12, prec)
+    GJ_spinorb1 = 1VG0 + 1VG2 + 1VG2
+    
+
+    2VG0 = orb.apply_complex_potential(1.0, GJ0, alpha_20, prec)
+    2VG1 = orb.apply_complex_potential(1.0, GJ1, alpha_21, prec)
+    2VG2 = orb.apply_complex_potential(1.0, GJ2, alpha_22, prec)
+    GJ_spinorb2 = 2VG0 + 2VG2 + 2VG2
+    
+
+    GKa_spinorb1_0  = orb.apply_potential(1.0, GK1a_0, alpha_20, prec)
+    GKb_spinorb1_0  = orb.apply_potential(1.0, GK1b_0, alpha_10, prec)
+    
+
+    GKa_spinorb1_1  = orb.apply_potential(1.0, GK1a_1, alpha_21, prec)
+    GKb_spinorb1_1  = orb.apply_potential(1.0, GK1b_1, alpha_11, prec)
+    GKa_spinorb1_2  = orb.apply_potential(1.0, GK1a_2, alpha_22, prec)
+    GKb_spinorb1_2  = orb.apply_potential(1.0, GK1b_2, alpha_12, prec)
+    
+
+    GKa_spinorb2_0  = orb.apply_potential(1.0, GK2a_0, alpha_10, prec)
+    GKb_spinorb2_0  = orb.apply_potential(1.0, GK2b_0, alpha_20, prec)
+    GKa_spinorb2_1  = orb.apply_potential(1.0, GK2a_1, alpha_11, prec)
+    GKb_spinorb2_1  = orb.apply_potential(1.0, GK2b_1, alpha_21, prec)
+    GKa_spinorb2_2  = orb.apply_potential(1.0, GK2a_2, alpha_12, prec)
+    GKb_spinorb2_2  = orb.apply_potential(1.0, GK2b_2, alpha_22, prec)
+    GK_spinorb1 = GKa_spinorb1_0 + GKb_spinorb1_0 + GKa_spinorb1_1 + GKb_spinorb1_1 + GKa_spinorb1_2 + GKb_spinorb1_2
+    GK_spinorb2 = GKa_spinorb2_0 + GKb_spinorb2_0 + GKa_spinorb2_1 + GKb_spinorb2_1 + GKa_spinorb2_2 + GKb_spinorb2_2
+    
+
+    E_GH11, imag_GH11 = spinorb1.dot(GJ_spinorb1)
+    E_GH12, imag_GH12 = spinorb1.dot(GJ_spinorb2)
+    E_GH21, imag_GH21 = spinorb2.dot(GJ_spinorb1)
+    E_GH22, imag_GH22 = spinorb2.dot(GJ_spinorb2)
+         
+         
+    E_GK11, imag_GK11 = spinorb1.dot(GK_spinorb1)
+    E_GK12, imag_GK12 = spinorb1.dot(GK_spinorb2)
+    E_GK21, imag_GK21 = spinorb2.dot(GK_spinorb1)
+    E_GK22, imag_GK22 = spinorb2.dot(GK_spinorb2)
+    
+
+    # Orbital Energy calculation
     energy_11, imag_11 = spinorb1.dot(add_psi_1)
     energy_12, imag_12 = spinorb1.dot(add_psi_2)
     energy_21, imag_21 = spinorb2.dot(add_psi_1)
     energy_22, imag_22 = spinorb2.dot(add_psi_2)
- 
- 
-    # Orbital Energy calculation
-    energy_11 = energy_11 + E_H11 - E_xc11 - (E_GJ110 + E_GJ111 + E_GJ112 - E_Gxc120 - E_Gxc121 - E_Gxc122)
-    energy_12 = energy_12 + E_H12 - E_xc12 
-    energy_21 = energy_21 + E_H21 - E_xc21 
-    energy_22 = energy_22 + E_H22 - E_xc22 - (E_GJ220 + E_GJ221 + E_GJ222 - E_Gxc210 - E_Gxc211 - E_Gxc212)
-    print('Energy_Spin_Orbit_1', energy_11 - light_speed**2.0)
-    print('Energy_Spin_Orbit_2', energy_22 - light_speed**2.0)
- 
- 
+    
+
+    # Calculate Fij Fock matrix
+    F_11 = energy_11 + E_H11 - E_K11 - E_GH11 + E_GK11
+    F_12 = energy_12 + E_H12 - E_K12 - E_GH12 + E_GK12
+    F_21 = energy_21 + E_H21 - E_K21 - E_GH21 + E_GK21
+    F_22 = energy_22 + E_H22 - E_K22 - E_GH22 + E_GK22
+    
+
+    # Orbital Energy
+    print('Energy_Spin_Orbit_1', F_11 - light_speed**2)
+    print('Energy_Spin_Orbit_2', F_22 - light_speed**2)
+    
+
     # Total Energy 
-    E_tot = energy_11 + energy_22 - 0.5 * (E_H11 + E_H22 - E_xc11 - E_xc22 - E_Gaunt)
-    print('E_total (Coulomb & Gaunt) approximiation', E_tot - 2.0 * (light_speed**2.0))
-    print('E_Gåunt_cørræctiøn =', E_Gaunt * 0.5 )
+    E_tot_JK = F_11 + F_22 - 0.5 * (E_H11 + E_H22 - E_K11 - E_K22 - E_GH11 + E_GK11 - E_GH22 + E_GK22)
+    print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
 #########################################################END###########################################################################
