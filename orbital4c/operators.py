@@ -200,92 +200,163 @@ class Orthogonalize():
 
 
 class GauntDirectOperator():
-    def __init__(self, mra, prec, Psi, cPsi, alpha):
+    def __init__(self, mra, prec, cPsi, alpha):
         self.mra = mra
         self.prec = prec
-        self.Psi = Psi
         self.cPsi = cPsi
         self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
         self.alpha = alpha
-        self.GJ = None
+        self.GJ0 = None
+        self.GJ1 = None
+        self.GJ2 = None
         self.potential = None
         self.setup()
 
     def setup(self):       
-        cPsi_alpha  = self.cPsi[0].overlap_density(self.alpha[0], self.prec)
+        cPsi_alpha0  = self.cPsi[0].overlap_density(self.alpha[0,0], self.prec)
         for i in range(1, len(self.cPsi)):
-            cPsi_alpha +=  self.cPsi[i].overlap_density(self.alpha[i], self.prec)
+            cPsi_alpha0 +=  self.cPsi[i].overlap_density(self.alpha[i,0], self.prec)
  
+        cPsi_alpha1  = self.cPsi[0].overlap_density(self.alpha[0,1], self.prec)
+        for i in range(1, len(self.cPsi)):
+            cPsi_alpha1 +=  self.cPsi[i].overlap_density(self.alpha[i,1], self.prec)
 
-        self.GJ = cf.complex_fcn()
-        GJ_Re = self.poisson(cPsi_alpha.real) * (2.0 * np.pi)
-        GJ_Re.crop(self.prec)
+        cPsi_alpha2  = self.cPsi[0].overlap_density(self.alpha[0,2], self.prec)
+        for i in range(1, len(self.cPsi)):
+            cPsi_alpha2 +=  self.cPsi[i].overlap_density(self.alpha[i,2], self.prec)
 
 
-        GJ_Im = self.poisson(cPsi_alpha.imag) * (2.0 * np.pi)
-        GJ_Im.crop(self.prec)                      
+        GJ0_Re = self.poisson(cPsi_alpha0.real) * (2.0 * np.pi)
+        GJ0_Re.crop(self.prec)
 
 
-        self.GJ = cf.complex_fcn()
-        self.GJ.real = GJ_Re
-        self.GJ.imag = GJ_Im 
+        GJ0_Im = self.poisson(cPsi_alpha0.imag) * (2.0 * np.pi)
+        GJ0_Im.crop(self.prec)                      
 
+
+        self.GJ0 = cf.complex_fcn()
+        self.GJ0.real = GJ0_Re
+        self.GJ0.imag = GJ0_Im 
+
+
+        GJ1_Re = self.poisson(cPsi_alpha1.real) * (2.0 * np.pi)
+        GJ1_Re.crop(self.prec)
+
+
+        GJ1_Im = self.poisson(cPsi_alpha1.imag) * (2.0 * np.pi)
+        GJ1_Im.crop(self.prec)                      
+
+
+        self.GJ1 = cf.complex_fcn()
+        self.GJ1.real = GJ1_Re
+        self.GJ1.imag = GJ1_Im 
+    
+
+        GJ2_Re = self.poisson(cPsi_alpha2.real) * (2.0 * np.pi)
+        GJ2_Re.crop(self.prec)
+
+
+        GJ2_Im = self.poisson(cPsi_alpha2.imag) * (2.0 * np.pi)
+        GJ2_Im.crop(self.prec)                      
+
+
+        self.GJ2 = cf.complex_fcn()
+        self.GJ2.real = GJ2_Re
+        self.GJ2.imag = GJ2_Im 
+    
 
     def __call__(self, alpha):
-        self.potential = orb.apply_complex_potential(1.0, self.GJ, alpha, self.prec)
+        V0 = orb.apply_complex_potential(1.0, self.GJ0, alpha[0], self.prec)
+        V1 = orb.apply_complex_potential(1.0, self.GJ1, alpha[1], self.prec)
+        V2 = orb.apply_complex_potential(1.0, self.GJ2, alpha[2], self.prec)
+        self.potential = V0 + V2 + V2
         return self.potential
 
 
 class GauntExchangeOperator():
-    def __init__(self, mra, prec, Psi, cPsi, alpha):
+    def __init__(self, mra, prec, cPsi):
         self.mra = mra
         self.prec = prec
-        self.Psi = Psi
         self.cPsi = cPsi
         self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
-        self.alpha = alpha
-        self.GK = None
+        self.GK0 = None
+        self.GK1 = None
+        self.GK2 = None
         self.potential = None
         
 
     def __call__(self, alpha):      
-        cPsi_alpha  = self.cPsi[0].overlap_density(alpha, self.prec)
+        cPsi_alpha0  = self.cPsi[0].overlap_density(alpha[0], self.prec)
         for i in range(1, len(self.cPsi)):
-            cPsi_alpha +=  self.cPsi[i].overlap_density(alpha, self.prec)
+            cPsi_alpha0 +=  self.cPsi[i].overlap_density(alpha[0], self.prec)
 
 
-        GK_Re = self.poisson(cPsi_alpha.real) * (2.0 * np.pi)
-        GK_Re.crop(self.prec)
+        cPsi_alpha1  = self.cPsi[0].overlap_density(alpha[1], self.prec)
+        for i in range(1, len(self.cPsi)):
+            cPsi_alpha1 +=  self.cPsi[i].overlap_density(alpha[1], self.prec)
 
 
-        GK_Im = self.poisson(cPsi_alpha.imag) * (2.0 * np.pi)
-        GK_Im.crop(self.prec)
+        cPsi_alpha2  = self.cPsi[0].overlap_density(alpha[2], self.prec)
+        for i in range(1, len(self.cPsi)):
+            cPsi_alpha2 +=  self.cPsi[i].overlap_density(alpha[2], self.prec)
+
+
+        GK0_Re = self.poisson(cPsi_alpha0.real) * (2.0 * np.pi)
+        GK0_Re.crop(self.prec)
+
+
+        GK0_Im = self.poisson(cPsi_alpha0.imag) * (2.0 * np.pi)
+        GK0_Im.crop(self.prec)
 
                    
-        self.GK = cf.complex_fcn()
-        self.GK.real = GK_Re
-        self.GK.imag = GK_Im                
+        self.GK0 = cf.complex_fcn()
+        self.GK0.real = GK0_Re
+        self.GK0.imag = GK0_Im    
 
 
-        self.potential = orb.apply_complex_potential(1.0, self.GK, alpha, self.prec)
+        GK1_Re = self.poisson(cPsi_alpha1.real) * (2.0 * np.pi)
+        GK1_Re.crop(self.prec)
+
+
+        GK1_Im = self.poisson(cPsi_alpha1.imag) * (2.0 * np.pi)
+        GK1_Im.crop(self.prec)
+
+                   
+        self.GK1 = cf.complex_fcn()
+        self.GK1.real = GK1_Re
+        self.GK1.imag = GK1_Im  
+
+
+        GK2_Re = self.poisson(cPsi_alpha2.real) * (2.0 * np.pi)
+        GK2_Re.crop(self.prec)
+
+
+        GK2_Im = self.poisson(cPsi_alpha2.imag) * (2.0 * np.pi)
+        GK2_Im.crop(self.prec)
+
+                   
+        self.GK2 = cf.complex_fcn()
+        self.GK2.real = GK2_Re
+        self.GK2.imag = GK2_Im               
+
+
+        V0 = orb.apply_complex_potential(1.0, self.GK0, alpha[0], self.prec)
+        V1 = orb.apply_complex_potential(1.0, self.GK1, alpha[1], self.prec)
+        V2 = orb.apply_complex_potential(1.0, self.GK2, alpha[2], self.prec)
+        self.potential = V0 + V2 + V2
         return self.potential
 
 
 class FockMatrix2():
-    def __init__(self, prec, default_der, J, K, GJ0, GJ1, GJ2, GK0, GK1, GK2, v_spinorbv, Psi, alpha0, alpha1, alpha2):
+    def __init__(self, prec, default_der, J, K, GJ, GK, v_spinorbv, Psi, alpha1, alpha2):
         self.prec = prec
         self.default_der = default_der
         self.v_spinorbv = v_spinorbv
         self.J = J 
         self.K = K
-        self.GJ0 = GJ0
-        self.GJ1 = GJ1
-        self.GJ2 = GJ2
-        self.GK0 = GK0
-        self.GK1 = GK1
-        self.GK2 = GK2
+        self.GJ = GJ
+        self.GK = GK
         self.Psi = Psi
-        self.alpha0 = alpha0
         self.alpha1 = alpha1
         self.alpha2 = alpha2
         self.energy11 = None
@@ -328,56 +399,24 @@ class FockMatrix2():
 
         #############################################################################
 
-        E_GH0_11,  imag_GH0_11 = self.Psi[0].dot(self.GJ0(self.alpha0[0]))
-        E_GH1_11,  imag_GH1_11 = self.Psi[0].dot(self.GJ1(self.alpha1[0]))
-        E_GH2_11,  imag_GH2_11 = self.Psi[0].dot(self.GJ2(self.alpha2[0]))
-
-        E_GH11 = E_GH0_11 + E_GH1_11 + E_GH2_11
+        E_GH11,  imag_GH_11 = self.Psi[0].dot(self.GJ(self.alpha1))
+       
+        E_GH12,  imag_GH_12 = self.Psi[0].dot(self.GJ(self.alpha2))
         
-        E_GH0_12,  imag_GH0_12 = self.Psi[0].dot(self.GJ0(self.alpha0[1]))
-        E_GH1_12,  imag_GH1_12 = self.Psi[0].dot(self.GJ1(self.alpha1[1]))
-        E_GH2_12,  imag_GH2_12 = self.Psi[0].dot(self.GJ2(self.alpha2[1]))
-
-        E_GH12 = E_GH0_12 + E_GH1_12 + E_GH2_12
-
-        E_GH0_21,  imag_GH0_21 = self.Psi[1].dot(self.GJ0(self.alpha0[0]))
-        E_GH1_21,  imag_GH1_21 = self.Psi[1].dot(self.GJ1(self.alpha1[0]))
-        E_GH2_21,  imag_GH2_21 = self.Psi[1].dot(self.GJ2(self.alpha2[0]))
-
-        E_GH21 = E_GH0_21 + E_GH1_21 + E_GH2_21
-
-        E_GH0_22,  imag_GH0_22 = self.Psi[1].dot(self.GJ0(self.alpha0[1]))
-        E_GH1_22,  imag_GH1_22 = self.Psi[1].dot(self.GJ1(self.alpha1[1]))
-        E_GH2_22,  imag_GH2_22 = self.Psi[1].dot(self.GJ2(self.alpha2[1]))
+        E_GH21,  imag_GH_21 = self.Psi[1].dot(self.GJ(self.alpha1))
         
-        E_GH22 = E_GH0_22 + E_GH1_22 + E_GH2_22
+        E_GH22,  imag_GH_22 = self.Psi[1].dot(self.GJ(self.alpha2))
 
         #############################################################################
 
-        E_GK0_11,  imag_GK0_11 = self.Psi[0].dot(self.GK0(self.alpha0[0]))
-        E_GK1_11,  imag_GK1_11 = self.Psi[0].dot(self.GK1(self.alpha1[0]))
-        E_GK2_11,  imag_GK2_11 = self.Psi[0].dot(self.GK2(self.alpha2[0]))
+        E_GK11,  imag_GK_11 = self.Psi[0].dot(self.GK(self.alpha1))
 
-        E_GK11 = E_GK0_11 + E_GK1_11 + E_GK2_11
-        
-        E_GK0_12,  imag_GK0_12 = self.Psi[0].dot(self.GK0(self.alpha0[1]))
-        E_GK1_12,  imag_GK1_12 = self.Psi[0].dot(self.GK1(self.alpha1[1]))
-        E_GK2_12,  imag_GK2_12 = self.Psi[0].dot(self.GK2(self.alpha2[1]))
+        E_GK12,  imag_GK_12 = self.Psi[0].dot(self.GK(self.alpha2))
 
-        E_GK12 = E_GK0_12 + E_GK1_12 + E_GK2_12
+        E_GK21,  imag_GK_21 = self.Psi[1].dot(self.GK(self.alpha1))
 
-        E_GK0_21,  imag_GK0_21 = self.Psi[1].dot(self.GK0(self.alpha0[0]))
-        E_GK1_21,  imag_GK1_21 = self.Psi[1].dot(self.GK1(self.alpha1[0]))
-        E_GK2_21,  imag_GK2_21 = self.Psi[1].dot(self.GK2(self.alpha2[0]))
-
-        E_GK21 = E_GK0_21 + E_GK1_21 + E_GK2_21
-
-        E_GK0_22,  imag_GK0_22 = self.Psi[1].dot(self.GK0(self.alpha0[1]))
-        E_GK1_22,  imag_GK1_22 = self.Psi[1].dot(self.GK1(self.alpha1[1]))
-        E_GK2_22,  imag_GK2_22 = self.Psi[1].dot(self.GK2(self.alpha2[1]))
-
-        E_GK22 = E_GK0_22 + E_GK1_22 + E_GK2_22
-
+        E_GK22,  imag_GK_22 = self.Psi[1].dot(self.GK(self.alpha2))
+  
         #############################################################################     
 
         self.energy11 = energy_11 + E_H11 - E_xc11 - E_GH11 + E_GK11 
