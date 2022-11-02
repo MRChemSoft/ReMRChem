@@ -292,6 +292,16 @@ class orbital4c:
             out_orb.comp_array[idx] = beta[idx] * self.comp_array[idx]
         return out_orb
     
+    def beta2(self):
+        out_orb = orbital4c()
+        beta = np.array([1.0,
+                         1.0,
+                        -1.0,
+                        -1.0])
+        for idx in range(4):
+            out_orb.comp_array[idx] = beta[idx] * self.comp_array[idx]
+        return out_orb
+    
     def dot(self, other):
         out_real = 0
         out_imag = 0
