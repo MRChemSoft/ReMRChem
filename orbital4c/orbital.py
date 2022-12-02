@@ -231,6 +231,15 @@ class orbital4c:
             out_orb.comp_array[idx] = coeff * self.comp_array[comp]
         return out_orb
 
+    def ktrs(self):   #Kramers´ Time Reversal Symmetry
+        out_orb = orbital4c()
+        ktrs = np.array([[ 0,  -1,  0,    0,],
+                         [ 1,   0,  0,    0,],
+                         [ 0,   0,  0,   -1,],
+                         [ 0,   0,  1,    0,]])
+        out_orb.comp_array = ktrs@self.comp_array
+        return out_orb 
+
 #Beta c**2
     def beta(self, shift = 0):
         out_orb = orbital4c()
