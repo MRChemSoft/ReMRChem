@@ -45,7 +45,7 @@ if __name__ == '__main__':
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     args = parser.parse_args()
 
-    assert args.atype != 'H', 'Please consider only atoms with more than one electran'
+    assert args.atype != 'H', 'Please consider only atoms with more than one electron'
 
     assert args.charge > 1.0, 'Please consider only atoms with more than one electron'
 
@@ -121,12 +121,6 @@ elif args.potential == 'homogeneus_charge_sphere':
    Peps = vp.ScalingProjector(mra,prec/10)
    f = lambda x: nucpot.homogeneus_charge_sphere(x, origin, Z, atom)
    V_tree = Peps(f)
-elif args.potential == 'fermi_dirac':
-   Peps = vp.ScalingProjector(mra,prec/10)
-   Pua = vp.PoissonOperator(mra, prec/10)
-   f = lambda x: nucpot.fermi_dirac(x, origin, Z, atom)
-   rho_tree = Peps(f)
-   V_tree = Pua(rho_tree) * (4 * np.pi)
 elif args.potential == 'gaussian':
    Peps = vp.ScalingProjector(mra,prec/10)
    f = lambda x: nucpot.gaussian(x, origin, Z, atom)
