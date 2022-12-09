@@ -632,7 +632,7 @@ elif args.coulgau == 'gaunt':
 
         # Total Energy 
         E_tot_JK = F_11 + F_22 - 0.5 * (E_H11 + E_H22 - E_K11 - E_K22 - E_GH11 - E_GH22 + E_GK11 + E_GK22)
-        print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
+        print('E_total(Coulomb-Gaunt) approximiation', E_tot_JK - (2.0 *light_speed**2))
 
         #Right Hand Side
         V_J_K_spinorb1 = v_psi_1 + J_spinorb1 - K_spinorb1 - GJ_spinorb1 + GK_spinorb1 - (F_12 * spinorb2)
@@ -935,5 +935,5 @@ elif args.coulgau == 'gaunt':
 
     # Total Energy 
     E_tot_JK = F_11 + F_22 - 0.5 * (E_H11 + E_H22 - E_K11 - E_K22 - E_GH11 - E_GH22 + E_GK11 + E_GK22)
-    print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
+    print('E_total(Coulomb-Gaunt) approximiation', E_tot_JK - (2.0 *light_speed**2))
 #########################################################END###########################################################################
