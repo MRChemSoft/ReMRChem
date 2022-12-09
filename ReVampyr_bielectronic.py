@@ -175,9 +175,9 @@ if args.coulgau == 'coulomb':
         J_spinorb2  = orb.apply_potential(1.0, J, spinorb2, prec)        
 
 
-        Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb1, prec)
+        Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb2, prec)
         Kb_spinorb1  = orb.apply_potential(1.0, K1b, spinorb1, prec)
-        Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb2, prec)
+        Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb1, prec)
         Kb_spinorb2  = orb.apply_potential(1.0, K2b, spinorb2, prec)
 
 
@@ -321,9 +321,9 @@ if args.coulgau == 'coulomb':
     J_spinorb2  = orb.apply_potential(1.0, J, spinorb2, prec)        
 
 
-    Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb1, prec)
+    Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb2, prec)
     Kb_spinorb1  = orb.apply_potential(1.0, K1b, spinorb1, prec)
-    Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb2, prec)
+    Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb1, prec)
     Kb_spinorb2  = orb.apply_potential(1.0, K2b, spinorb2, prec)
 
 
@@ -418,9 +418,9 @@ elif args.coulgau == 'gaunt':
         J_spinorb2  = orb.apply_potential(1.0, J, spinorb2, prec)        
 
 
-        Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb1, prec)
+        Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb2, prec)
         Kb_spinorb1  = orb.apply_potential(1.0, K1b, spinorb1, prec)
-        Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb2, prec)
+        Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb1, prec)
         Kb_spinorb2  = orb.apply_potential(1.0, K2b, spinorb2, prec)
 
 
@@ -584,16 +584,16 @@ elif args.coulgau == 'gaunt':
         VG22 = orb.apply_complex_potential(1.0, GJ_2, alpha_22, prec)
         GJ_spinorb2 = VG20 + VG21 + VG22
 
-        GKa_spinorb1_0  = orb.apply_complex_potential(1.0, GK1a_0, alpha_10, prec)
-        GKa_spinorb1_1  = orb.apply_complex_potential(1.0, GK1a_1, alpha_11, prec)
-        GKa_spinorb1_2  = orb.apply_complex_potential(1.0, GK1a_2, alpha_12, prec)
+        GKa_spinorb1_0  = orb.apply_complex_potential(1.0, GK1a_0, alpha_20, prec)
+        GKa_spinorb1_1  = orb.apply_complex_potential(1.0, GK1a_1, alpha_21, prec)
+        GKa_spinorb1_2  = orb.apply_complex_potential(1.0, GK1a_2, alpha_22, prec)
         GKb_spinorb1_0  = orb.apply_complex_potential(1.0, GK1b_0, alpha_10, prec)
         GKb_spinorb1_1  = orb.apply_complex_potential(1.0, GK1b_1, alpha_11, prec)
         GKb_spinorb1_2  = orb.apply_complex_potential(1.0, GK1b_2, alpha_12, prec)
     
-        GKa_spinorb2_0  = orb.apply_complex_potential(1.0, GK2a_0, alpha_20, prec)
-        GKa_spinorb2_1  = orb.apply_complex_potential(1.0, GK2a_1, alpha_21, prec)
-        GKa_spinorb2_2  = orb.apply_complex_potential(1.0, GK2a_2, alpha_22, prec)
+        GKa_spinorb2_0  = orb.apply_complex_potential(1.0, GK2a_0, alpha_10, prec)
+        GKa_spinorb2_1  = orb.apply_complex_potential(1.0, GK2a_1, alpha_11, prec)
+        GKa_spinorb2_2  = orb.apply_complex_potential(1.0, GK2a_2, alpha_12, prec)
         GKb_spinorb2_0  = orb.apply_complex_potential(1.0, GK2b_0, alpha_20, prec)
         GKb_spinorb2_1  = orb.apply_complex_potential(1.0, GK2b_1, alpha_21, prec)
         GKb_spinorb2_2  = orb.apply_complex_potential(1.0, GK2b_2, alpha_22, prec)
@@ -727,9 +727,9 @@ elif args.coulgau == 'gaunt':
     J_spinorb1  = orb.apply_potential(1.0, J, spinorb1, prec)
     J_spinorb2  = orb.apply_potential(1.0, J, spinorb2, prec) 
 
-    Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb1, prec)
+    Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb2, prec)
     Kb_spinorb1  = orb.apply_potential(1.0, K1b, spinorb1, prec)
-    Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb2, prec)
+    Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb1, prec)
     Kb_spinorb2  = orb.apply_potential(1.0, K2b, spinorb2, prec)
     K_spinorb1 = Ka_spinorb1 + Kb_spinorb1
     K_spinorb2 = Ka_spinorb2 + Kb_spinorb2
@@ -886,16 +886,16 @@ elif args.coulgau == 'gaunt':
     VG22 = orb.apply_complex_potential(1.0, GJ_2, alpha_22, prec)
     GJ_spinorb2 = VG20 + VG21 + VG22
     
-    GKa_spinorb1_0  = orb.apply_complex_potential(1.0, GK1a_0, alpha_10, prec)
-    GKa_spinorb1_1  = orb.apply_complex_potential(1.0, GK1a_1, alpha_11, prec)
-    GKa_spinorb1_2  = orb.apply_complex_potential(1.0, GK1a_2, alpha_12, prec)
+    GKa_spinorb1_0  = orb.apply_complex_potential(1.0, GK1a_0, alpha_20, prec)
+    GKa_spinorb1_1  = orb.apply_complex_potential(1.0, GK1a_1, alpha_21, prec)
+    GKa_spinorb1_2  = orb.apply_complex_potential(1.0, GK1a_2, alpha_22, prec)
     GKb_spinorb1_0  = orb.apply_complex_potential(1.0, GK1b_0, alpha_10, prec)
     GKb_spinorb1_1  = orb.apply_complex_potential(1.0, GK1b_1, alpha_11, prec)
     GKb_spinorb1_2  = orb.apply_complex_potential(1.0, GK1b_2, alpha_12, prec)
 
-    GKa_spinorb2_0  = orb.apply_complex_potential(1.0, GK2a_0, alpha_20, prec)
-    GKa_spinorb2_1  = orb.apply_complex_potential(1.0, GK2a_1, alpha_21, prec)
-    GKa_spinorb2_2  = orb.apply_complex_potential(1.0, GK2a_2, alpha_22, prec)
+    GKa_spinorb2_0  = orb.apply_complex_potential(1.0, GK2a_0, alpha_10, prec)
+    GKa_spinorb2_1  = orb.apply_complex_potential(1.0, GK2a_1, alpha_11, prec)
+    GKa_spinorb2_2  = orb.apply_complex_potential(1.0, GK2a_2, alpha_12, prec)
     GKb_spinorb2_0  = orb.apply_complex_potential(1.0, GK2b_0, alpha_20, prec)
     GKb_spinorb2_1  = orb.apply_complex_potential(1.0, GK2b_1, alpha_21, prec)
     GKb_spinorb2_2  = orb.apply_complex_potential(1.0, GK2b_2, alpha_22, prec)
