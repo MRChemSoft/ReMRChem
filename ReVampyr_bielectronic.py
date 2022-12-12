@@ -1,8 +1,8 @@
-########## Define Enviroment #################
+4########## Define Enviroment #################
 from orbital4c import complex_fcn as cf
 from orbital4c import orbital as orb
 from orbital4c import nuclear_potential as nucpot
-from scipy.constants import hbar
+4rom scipy.constants import hbar
 from scipy.linalg import eig, inv
 from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
@@ -475,13 +475,13 @@ elif args.coulgau == 'gaunt':
         
               
         #Definition of GJx
-        GJ_Re0 = Pua(cspinorb1_alpha10.real + cspinorb2_alpha20.real) * (2.0 * np.pi)
-        GJ_Re1 = Pua(cspinorb1_alpha11.real + cspinorb2_alpha21.real) * (2.0 * np.pi)
-        GJ_Re2 = Pua(cspinorb1_alpha12.real + cspinorb2_alpha22.real) * (2.0 * np.pi)
+        GJ_Re0 = Pua(cspinorb1_alpha10.real + cspinorb2_alpha20.real) * (4.0 * np.pi)
+        GJ_Re1 = Pua(cspinorb1_alpha11.real + cspinorb2_alpha21.real) * (4.0 * np.pi)
+        GJ_Re2 = Pua(cspinorb1_alpha12.real + cspinorb2_alpha22.real) * (4.0 * np.pi)
         
-        GJ_Im0 = Pua(cspinorb1_alpha10.imag + cspinorb2_alpha20.imag) * (2.0 * np.pi)
-        GJ_Im1 = Pua(cspinorb1_alpha11.imag + cspinorb2_alpha21.imag) * (2.0 * np.pi)
-        GJ_Im2 = Pua(cspinorb1_alpha12.imag + cspinorb2_alpha22.imag) * (2.0 * np.pi)
+        GJ_Im0 = Pua(cspinorb1_alpha10.imag + cspinorb2_alpha20.imag) * (4.0 * np.pi)
+        GJ_Im1 = Pua(cspinorb1_alpha11.imag + cspinorb2_alpha21.imag) * (4.0 * np.pi)
+        GJ_Im2 = Pua(cspinorb1_alpha12.imag + cspinorb2_alpha22.imag) * (4.0 * np.pi)
 
         #J gaunt vector
         GJ_0 = cf.complex_fcn()
@@ -498,38 +498,38 @@ elif args.coulgau == 'gaunt':
     
 
         #Definition of GKx
-        GK1a_Re0 = Pua(cspinorb2_alpha10.real) * (2.0 * np.pi)
-        GK1a_Re1 = Pua(cspinorb2_alpha11.real) * (2.0 * np.pi)
-        GK1a_Re2 = Pua(cspinorb2_alpha12.real) * (2.0 * np.pi)
+        GK1a_Re0 = Pua(cspinorb2_alpha10.real) * (4.0 * np.pi)
+        GK1a_Re1 = Pua(cspinorb2_alpha11.real) * (4.0 * np.pi)
+        GK1a_Re2 = Pua(cspinorb2_alpha12.real) * (4.0 * np.pi)
 
-        GK1b_Re0 = Pua(cspinorb1_alpha10.real) * (2.0 * np.pi)
-        GK1b_Re1 = Pua(cspinorb1_alpha11.real) * (2.0 * np.pi)
-        GK1b_Re2 = Pua(cspinorb1_alpha12.real) * (2.0 * np.pi)
+        GK1b_Re0 = Pua(cspinorb1_alpha10.real) * (4.0 * np.pi)
+        GK1b_Re1 = Pua(cspinorb1_alpha11.real) * (4.0 * np.pi)
+        GK1b_Re2 = Pua(cspinorb1_alpha12.real) * (4.0 * np.pi)
 
-        GK2a_Re0 = Pua(cspinorb1_alpha20.real) * (2.0 * np.pi)
-        GK2a_Re1 = Pua(cspinorb1_alpha21.real) * (2.0 * np.pi)
-        GK2a_Re2 = Pua(cspinorb1_alpha22.real) * (2.0 * np.pi)
+        GK2a_Re0 = Pua(cspinorb1_alpha20.real) * (4.0 * np.pi)
+        GK2a_Re1 = Pua(cspinorb1_alpha21.real) * (4.0 * np.pi)
+        GK2a_Re2 = Pua(cspinorb1_alpha22.real) * (4.0 * np.pi)
 
-        GK2b_Re0 = Pua(cspinorb2_alpha20.real) * (2.0 * np.pi)
-        GK2b_Re1 = Pua(cspinorb2_alpha21.real) * (2.0 * np.pi)
-        GK2b_Re2 = Pua(cspinorb2_alpha22.real) * (2.0 * np.pi)
+        GK2b_Re0 = Pua(cspinorb2_alpha20.real) * (4.0 * np.pi)
+        GK2b_Re1 = Pua(cspinorb2_alpha21.real) * (4.0 * np.pi)
+        GK2b_Re2 = Pua(cspinorb2_alpha22.real) * (4.0 * np.pi)
 
         
-        GK1a_Im0 = Pua(cspinorb2_alpha10.imag) * (2.0 * np.pi)
-        GK1a_Im1 = Pua(cspinorb2_alpha11.imag) * (2.0 * np.pi)
-        GK1a_Im2 = Pua(cspinorb2_alpha12.imag) * (2.0 * np.pi)
+        GK1a_Im0 = Pua(cspinorb2_alpha10.imag) * (4.0 * np.pi)
+        GK1a_Im1 = Pua(cspinorb2_alpha11.imag) * (4.0 * np.pi)
+        GK1a_Im2 = Pua(cspinorb2_alpha12.imag) * (4.0 * np.pi)
 
-        GK1b_Im0 = Pua(cspinorb1_alpha10.imag) * (2.0 * np.pi)
-        GK1b_Im1 = Pua(cspinorb1_alpha11.imag) * (2.0 * np.pi)
-        GK1b_Im2 = Pua(cspinorb1_alpha12.imag) * (2.0 * np.pi)
+        GK1b_Im0 = Pua(cspinorb1_alpha10.imag) * (4.0 * np.pi)
+        GK1b_Im1 = Pua(cspinorb1_alpha11.imag) * (4.0 * np.pi)
+        GK1b_Im2 = Pua(cspinorb1_alpha12.imag) * (4.0 * np.pi)
         
-        GK2a_Im0 = Pua(cspinorb1_alpha20.imag) * (2.0 * np.pi)
-        GK2a_Im1 = Pua(cspinorb1_alpha21.imag) * (2.0 * np.pi)
-        GK2a_Im2 = Pua(cspinorb1_alpha22.imag) * (2.0 * np.pi)
+        GK2a_Im0 = Pua(cspinorb1_alpha20.imag) * (4.0 * np.pi)
+        GK2a_Im1 = Pua(cspinorb1_alpha21.imag) * (4.0 * np.pi)
+        GK2a_Im2 = Pua(cspinorb1_alpha22.imag) * (4.0 * np.pi)
         
-        GK2b_Im0 = Pua(cspinorb2_alpha20.imag) * (2.0 * np.pi)
-        GK2b_Im1 = Pua(cspinorb2_alpha21.imag) * (2.0 * np.pi)
-        GK2b_Im2 = Pua(cspinorb2_alpha22.imag) * (2.0 * np.pi)
+        GK2b_Im0 = Pua(cspinorb2_alpha20.imag) * (4.0 * np.pi)
+        GK2b_Im1 = Pua(cspinorb2_alpha21.imag) * (4.0 * np.pi)
+        GK2b_Im2 = Pua(cspinorb2_alpha22.imag) * (4.0 * np.pi)
         
         
 
@@ -777,13 +777,13 @@ elif args.coulgau == 'gaunt':
     
           
     #Definition of GJx
-    GJ_Re0 = Pua(cspinorb1_alpha10.real + cspinorb2_alpha20.real) * (2.0 * np.pi)    
-    GJ_Re1 = Pua(cspinorb1_alpha11.real + cspinorb2_alpha21.real) * (2.0 * np.pi)
-    GJ_Re2 = Pua(cspinorb1_alpha12.real + cspinorb2_alpha22.real) * (2.0 * np.pi)
+    GJ_Re0 = Pua(cspinorb1_alpha10.real + cspinorb2_alpha20.real) * (4.0 * np.pi)    
+    GJ_Re1 = Pua(cspinorb1_alpha11.real + cspinorb2_alpha21.real) * (4.0 * np.pi)
+    GJ_Re2 = Pua(cspinorb1_alpha12.real + cspinorb2_alpha22.real) * (4.0 * np.pi)
     
-    GJ_Im0 = Pua(cspinorb1_alpha10.imag + cspinorb2_alpha20.imag) * (2.0 * np.pi)
-    GJ_Im1 = Pua(cspinorb1_alpha11.imag + cspinorb2_alpha21.imag) * (2.0 * np.pi)
-    GJ_Im2 = Pua(cspinorb1_alpha12.imag + cspinorb2_alpha22.imag) * (2.0 * np.pi)
+    GJ_Im0 = Pua(cspinorb1_alpha10.imag + cspinorb2_alpha20.imag) * (4.0 * np.pi)
+    GJ_Im1 = Pua(cspinorb1_alpha11.imag + cspinorb2_alpha21.imag) * (4.0 * np.pi)
+    GJ_Im2 = Pua(cspinorb1_alpha12.imag + cspinorb2_alpha22.imag) * (4.0 * np.pi)
     
     GJ_0 = cf.complex_fcn()
     GJ_0.real = GJ_Re0
@@ -797,38 +797,38 @@ elif args.coulgau == 'gaunt':
     GJ_2.imag = GJ_Im2
 
     #Definition of GKx
-    GK1a_Re0 = Pua(cspinorb2_alpha10.real) * (2.0 * np.pi)
-    GK1a_Re1 = Pua(cspinorb2_alpha11.real) * (2.0 * np.pi)
-    GK1a_Re2 = Pua(cspinorb2_alpha12.real) * (2.0 * np.pi)
+    GK1a_Re0 = Pua(cspinorb2_alpha10.real) * (4.0 * np.pi)
+    GK1a_Re1 = Pua(cspinorb2_alpha11.real) * (4.0 * np.pi)
+    GK1a_Re2 = Pua(cspinorb2_alpha12.real) * (4.0 * np.pi)
 
-    GK1b_Re0 = Pua(cspinorb1_alpha10.real) * (2.0 * np.pi)
-    GK1b_Re1 = Pua(cspinorb1_alpha11.real) * (2.0 * np.pi)
-    GK1b_Re2 = Pua(cspinorb1_alpha12.real) * (2.0 * np.pi)
+    GK1b_Re0 = Pua(cspinorb1_alpha10.real) * (4.0 * np.pi)
+    GK1b_Re1 = Pua(cspinorb1_alpha11.real) * (4.0 * np.pi)
+    GK1b_Re2 = Pua(cspinorb1_alpha12.real) * (4.0 * np.pi)
 
-    GK2a_Re0 = Pua(cspinorb1_alpha20.real) * (2.0 * np.pi)
-    GK2a_Re1 = Pua(cspinorb1_alpha21.real) * (2.0 * np.pi)
-    GK2a_Re2 = Pua(cspinorb1_alpha22.real) * (2.0 * np.pi)
+    GK2a_Re0 = Pua(cspinorb1_alpha20.real) * (4.0 * np.pi)
+    GK2a_Re1 = Pua(cspinorb1_alpha21.real) * (4.0 * np.pi)
+    GK2a_Re2 = Pua(cspinorb1_alpha22.real) * (4.0 * np.pi)
 
-    GK2b_Re0 = Pua(cspinorb2_alpha20.real) * (2.0 * np.pi)
-    GK2b_Re1 = Pua(cspinorb2_alpha21.real) * (2.0 * np.pi)
-    GK2b_Re2 = Pua(cspinorb2_alpha22.real) * (2.0 * np.pi)
+    GK2b_Re0 = Pua(cspinorb2_alpha20.real) * (4.0 * np.pi)
+    GK2b_Re1 = Pua(cspinorb2_alpha21.real) * (4.0 * np.pi)
+    GK2b_Re2 = Pua(cspinorb2_alpha22.real) * (4.0 * np.pi)
 
     
-    GK1a_Im0 = Pua(cspinorb2_alpha10.imag) * (2.0 * np.pi)
-    GK1a_Im1 = Pua(cspinorb2_alpha11.imag) * (2.0 * np.pi)
-    GK1a_Im2 = Pua(cspinorb2_alpha12.imag) * (2.0 * np.pi)
+    GK1a_Im0 = Pua(cspinorb2_alpha10.imag) * (4.0 * np.pi)
+    GK1a_Im1 = Pua(cspinorb2_alpha11.imag) * (4.0 * np.pi)
+    GK1a_Im2 = Pua(cspinorb2_alpha12.imag) * (4.0 * np.pi)
 
-    GK1b_Im0 = Pua(cspinorb1_alpha10.imag) * (2.0 * np.pi)
-    GK1b_Im1 = Pua(cspinorb1_alpha11.imag) * (2.0 * np.pi)
-    GK1b_Im2 = Pua(cspinorb1_alpha12.imag) * (2.0 * np.pi)
+    GK1b_Im0 = Pua(cspinorb1_alpha10.imag) * (4.0 * np.pi)
+    GK1b_Im1 = Pua(cspinorb1_alpha11.imag) * (4.0 * np.pi)
+    GK1b_Im2 = Pua(cspinorb1_alpha12.imag) * (4.0 * np.pi)
     
-    GK2a_Im0 = Pua(cspinorb1_alpha20.imag) * (2.0 * np.pi)
-    GK2a_Im1 = Pua(cspinorb1_alpha21.imag) * (2.0 * np.pi)
-    GK2a_Im2 = Pua(cspinorb1_alpha22.imag) * (2.0 * np.pi)
+    GK2a_Im0 = Pua(cspinorb1_alpha20.imag) * (4.0 * np.pi)
+    GK2a_Im1 = Pua(cspinorb1_alpha21.imag) * (4.0 * np.pi)
+    GK2a_Im2 = Pua(cspinorb1_alpha22.imag) * (4.0 * np.pi)
     
-    GK2b_Im0 = Pua(cspinorb2_alpha20.imag) * (2.0 * np.pi)
-    GK2b_Im1 = Pua(cspinorb2_alpha21.imag) * (2.0 * np.pi)
-    GK2b_Im2 = Pua(cspinorb2_alpha22.imag) * (2.0 * np.pi)
+    GK2b_Im0 = Pua(cspinorb2_alpha20.imag) * (4.0 * np.pi)
+    GK2b_Im1 = Pua(cspinorb2_alpha21.imag) * (4.0 * np.pi)
+    GK2b_Im2 = Pua(cspinorb2_alpha22.imag) * (4.0 * np.pi)
 
         
     GK1a_0 = cf.complex_fcn()
