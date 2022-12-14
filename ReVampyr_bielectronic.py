@@ -133,26 +133,55 @@ if args.coulgau == 'coulomb':
     error_norm = 1
 
     while error_norm > prec:
+
+        cspinorb1 = spinorb1.complex_conj()
+        cspinorb2 = spinorb2.complex_conj()
+        
         # Definition of different densities
-        n_11 = spinorb1.density(prec)
-        n_12 = spinorb1.exchange(spinorb2, prec)
-        n_21 = spinorb2.exchange(spinorb1, prec)
-        n_22 = spinorb2.density(prec)
+        n_11 = cspinorb1.overlap_density(spinorb1, prec)
+        n_12 = cspinorb1.overlap_density(spinorb2, prec)
+        n_21 = cspinorb2.overlap_density(spinorb1, prec)
+        n_22 = cspinorb2.overlap_density(spinorb2, prec)
 
         # Definition of Poisson operator
         Pua = vp.PoissonOperator(mra, prec)
 
         # Defintion of J
-        J = Pua(n_11 + n_22) * (4 * np.pi)
+        J_Re = Pua(n_11.real + n_22.real) * (4 * np.pi)
+        J_Im = Pua(n_11.imag + n_22.imag) * (4 * np.pi)
+
+        J = cf.complex_fcn()
+        J.real = J_Re
+        J.imag = J_Im
         #print('J', J)
 
         # Definition of Kx
-        K1a = Pua(n_21) * (4 * np.pi)
-        K1b = Pua(n_11) * (4 * np.pi)
-        K2a = Pua(n_12) * (4 * np.pi)
-        K2b = Pua(n_22) * (4 * np.pi)
+        K1a_Re = Pua(n_21.real) * (4 * np.pi)
+        K1a_Im = Pua(n_21.imag) * (4 * np.pi)
+        K1b_Re = Pua(n_11.real) * (4 * np.pi)
+        K1b_Im = Pua(n_11.imag) * (4 * np.pi)
+        K2a_Re = Pua(n_12.real) * (4 * np.pi)
+        K2a_Im = Pua(n_12.imag) * (4 * np.pi)
+        K2b_Re = Pua(n_22.real) * (4 * np.pi)
+        K2b_Im = Pua(n_22.imag) * (4 * np.pi)
         #print('K1a', K1a)
         #print('K2b', K2b)
+
+        K1a = cf.complex_fcn()
+        K1a.real = K1a_Re
+        K1a.imag = K1a_Im
+        
+        K1b = cf.complex_fcn()
+        K1b.real = K1b_Re
+        K1b.imag = K1b_Im 
+        
+        K2a = cf.complex_fcn()
+        K2a.real = K2a_Re
+        K2a.imag = K2a_Im
+        
+        K2b = cf.complex_fcn()
+        K2b.real = K2b_Re
+        K2b.imag = K2b_Im
 
 
         # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
@@ -171,14 +200,14 @@ if args.coulgau == 'coulomb':
 
 
         # Calculation of necessary potential contributions to Hellmotz
-        J_spinorb1  = orb.apply_potential(1.0, J, spinorb1, prec)
-        J_spinorb2  = orb.apply_potential(1.0, J, spinorb2, prec)        
+        J_spinorb1  = orb.apply_complex_potential(1.0, J, spinorb1, prec)
+        J_spinorb2  = orb.apply_complex_potential(1.0, J, spinorb2, prec)        
 
 
-        Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb2, prec)
-        Kb_spinorb1  = orb.apply_potential(1.0, K1b, spinorb1, prec)
-        Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb1, prec)
-        Kb_spinorb2  = orb.apply_potential(1.0, K2b, spinorb2, prec)
+        Ka_spinorb1  = orb.apply_complex_potential(1.0, K1a, spinorb2, prec)
+        Kb_spinorb1  = orb.apply_complex_potential(1.0, K1b, spinorb1, prec)
+        Ka_spinorb2  = orb.apply_complex_potential(1.0, K2a, spinorb1, prec)
+        Kb_spinorb2  = orb.apply_complex_potential(1.0, K2b, spinorb2, prec)
 
 
         K_spinorb1 = Ka_spinorb1 + Kb_spinorb1
@@ -278,27 +307,55 @@ if args.coulgau == 'coulomb':
         spinorb2.crop(prec)
 
    ##########
+    cspinorb1 = spinorb1.complex_conj()
+    cspinorb2 = spinorb2.complex_conj()
 
+        
     # Definition of different densities
-    n_11 = spinorb1.density(prec)
-    n_12 = spinorb1.exchange(spinorb2, prec)
-    n_21 = spinorb2.exchange(spinorb1, prec)
-    n_22 = spinorb2.density(prec)
+    n_11 = cspinorb1.overlap_density(spinorb1, prec)
+    n_12 = cspinorb1.overlap_density(spinorb2, prec)
+    n_21 = cspinorb2.overlap_density(spinorb1, prec)
+    n_22 = cspinorb2.overlap_density(spinorb2, prec)
 
     # Definition of Poisson operator
     Pua = vp.PoissonOperator(mra, prec)
 
     # Defintion of J
-    J = Pua(n_11 + n_22) * (4 * np.pi)
+    J_Re = Pua(n_11.real + n_22.real) * (4 * np.pi)
+    J_Im = Pua(n_11.imag + n_22.imag) * (4 * np.pi)
+
+    J = cf.complex_fcn()
+    J.real = J_Re
+    J.imag = J_Im
     #print('J', J)
 
     # Definition of Kx
-    K1a = Pua(n_21) * (4 * np.pi)
-    K1b = Pua(n_11) * (4 * np.pi)
-    K2a = Pua(n_12) * (4 * np.pi)
-    K2b = Pua(n_22) * (4 * np.pi)
+    K1a_Re = Pua(n_21.real) * (4 * np.pi)
+    K1a_Im = Pua(n_21.imag) * (4 * np.pi)
+    K1b_Re = Pua(n_11.real) * (4 * np.pi)
+    K1b_Im = Pua(n_11.imag) * (4 * np.pi)
+    K2a_Re = Pua(n_12.real) * (4 * np.pi)
+    K2a_Im = Pua(n_12.imag) * (4 * np.pi)
+    K2b_Re = Pua(n_22.real) * (4 * np.pi)
+    K2b_Im = Pua(n_22.imag) * (4 * np.pi)
     #print('K1a', K1a)
     #print('K2b', K2b)
+
+    K1a = cf.complex_fcn()
+    K1a.real = K1a_Re
+    K1a.imag = K1a_Im
+        
+    K1b = cf.complex_fcn()
+    K1b.real = K1b_Re
+    K1b.imag = K1b_Im 
+        
+    K2a = cf.complex_fcn()
+    K2a.real = K2a_Re
+    K2a.imag = K2a_Im
+        
+    K2b = cf.complex_fcn()
+    K2b.real = K2b_Re
+    K2b.imag = K2b_Im
 
 
     # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
@@ -317,14 +374,14 @@ if args.coulgau == 'coulomb':
 
 
     # Calculation of necessary potential contributions to Hellmotz
-    J_spinorb1  = orb.apply_potential(1.0, J, spinorb1, prec)
-    J_spinorb2  = orb.apply_potential(1.0, J, spinorb2, prec)        
+    J_spinorb1  = orb.apply_complex_potential(1.0, J, spinorb1, prec)
+    J_spinorb2  = orb.apply_complex_potential(1.0, J, spinorb2, prec)        
 
 
-    Ka_spinorb1  = orb.apply_potential(1.0, K1a, spinorb2, prec)
-    Kb_spinorb1  = orb.apply_potential(1.0, K1b, spinorb1, prec)
-    Ka_spinorb2  = orb.apply_potential(1.0, K2a, spinorb1, prec)
-    Kb_spinorb2  = orb.apply_potential(1.0, K2b, spinorb2, prec)
+    Ka_spinorb1  = orb.apply_complex_potential(1.0, K1a, spinorb2, prec)
+    Kb_spinorb1  = orb.apply_complex_potential(1.0, K1b, spinorb1, prec)
+    Ka_spinorb2  = orb.apply_complex_potential(1.0, K2a, spinorb1, prec)
+    Kb_spinorb2  = orb.apply_complex_potential(1.0, K2b, spinorb2, prec)
 
 
     K_spinorb1 = Ka_spinorb1 + Kb_spinorb1
