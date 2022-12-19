@@ -1278,29 +1278,29 @@ elif args.coulgau == 'gaunt-test':
 
 
         # Calculation of necessary potential contributions to Helmholtz
-        VG10 = orb.apply_complex_potential(1.0, GJ_0, alpha_10, prec)
-        VG11 = orb.apply_complex_potential(1.0, GJ_1, alpha_11, prec)
-        VG12 = orb.apply_complex_potential(1.0, GJ_2, alpha_12, prec)
+        VG10 = orb.apply_complex_potential(1.0, GJ_0, spinorb1, prec)
+        VG11 = orb.apply_complex_potential(1.0, GJ_1, spinorb1, prec)
+        VG12 = orb.apply_complex_potential(1.0, GJ_2, spinorb1, prec)
         GJ_spinorb1 = VG10 + VG11 + VG12
 
-        VG20 = orb.apply_complex_potential(1.0, GJ_0, alpha_20, prec)
-        VG21 = orb.apply_complex_potential(1.0, GJ_1, alpha_21, prec)
-        VG22 = orb.apply_complex_potential(1.0, GJ_2, alpha_22, prec)
+        VG20 = orb.apply_complex_potential(1.0, GJ_0, spinorb2, prec)
+        VG21 = orb.apply_complex_potential(1.0, GJ_1, spinorb2, prec)
+        VG22 = orb.apply_complex_potential(1.0, GJ_2, spinorb2, prec)
         GJ_spinorb2 = VG20 + VG21 + VG22
 
-        GKa_spinorb1_0  = orb.apply_complex_potential(1.0, GK1a_0, alpha_20, prec)
-        GKa_spinorb1_1  = orb.apply_complex_potential(1.0, GK1a_1, alpha_21, prec)
-        GKa_spinorb1_2  = orb.apply_complex_potential(1.0, GK1a_2, alpha_22, prec)
-        GKb_spinorb1_0  = orb.apply_complex_potential(1.0, GK1b_0, alpha_10, prec)
-        GKb_spinorb1_1  = orb.apply_complex_potential(1.0, GK1b_1, alpha_11, prec)
-        GKb_spinorb1_2  = orb.apply_complex_potential(1.0, GK1b_2, alpha_12, prec)
+        GKa_spinorb1_0  = orb.apply_complex_potential(1.0, GK1a_0, spinorb2, prec)
+        GKa_spinorb1_1  = orb.apply_complex_potential(1.0, GK1a_1, spinorb2, prec)
+        GKa_spinorb1_2  = orb.apply_complex_potential(1.0, GK1a_2, spinorb2, prec)
+        GKb_spinorb1_0  = orb.apply_complex_potential(1.0, GK1b_0, spinorb1, prec)
+        GKb_spinorb1_1  = orb.apply_complex_potential(1.0, GK1b_1, spinorb1, prec)
+        GKb_spinorb1_2  = orb.apply_complex_potential(1.0, GK1b_2, spinorb1, prec)
     
-        GKa_spinorb2_0  = orb.apply_complex_potential(1.0, GK2a_0, alpha_10, prec)
-        GKa_spinorb2_1  = orb.apply_complex_potential(1.0, GK2a_1, alpha_11, prec)
-        GKa_spinorb2_2  = orb.apply_complex_potential(1.0, GK2a_2, alpha_12, prec)
-        GKb_spinorb2_0  = orb.apply_complex_potential(1.0, GK2b_0, alpha_20, prec)
-        GKb_spinorb2_1  = orb.apply_complex_potential(1.0, GK2b_1, alpha_21, prec)
-        GKb_spinorb2_2  = orb.apply_complex_potential(1.0, GK2b_2, alpha_22, prec)
+        GKa_spinorb2_0  = orb.apply_complex_potential(1.0, GK2a_0, spinorb1, prec)
+        GKa_spinorb2_1  = orb.apply_complex_potential(1.0, GK2a_1, spinorb1, prec)
+        GKa_spinorb2_2  = orb.apply_complex_potential(1.0, GK2a_2, spinorb1, prec)
+        GKb_spinorb2_0  = orb.apply_complex_potential(1.0, GK2b_0, spinorb2, prec)
+        GKb_spinorb2_1  = orb.apply_complex_potential(1.0, GK2b_1, spinorb2, prec)
+        GKb_spinorb2_2  = orb.apply_complex_potential(1.0, GK2b_2, spinorb2, prec)
 
         GK_spinorb1 = GKa_spinorb1_0 + GKb_spinorb1_0 + GKa_spinorb1_1 + GKb_spinorb1_1 + GKa_spinorb1_2 + GKb_spinorb1_2
         GK_spinorb2 = GKa_spinorb2_0 + GKb_spinorb2_0 + GKa_spinorb2_1 + GKb_spinorb2_1 + GKa_spinorb2_2 + GKb_spinorb2_2
@@ -1605,30 +1605,30 @@ elif args.coulgau == 'gaunt-test':
     
 
     # Calculation of necessary potential contributions to Hellmotz
-    VG10 = orb.apply_complex_potential(1.0, GJ_0, alpha_10, prec)
-    VG11 = orb.apply_complex_potential(1.0, GJ_1, alpha_11, prec)
-    VG12 = orb.apply_complex_potential(1.0, GJ_2, alpha_12, prec)
+    VG10 = orb.apply_complex_potential(1.0, GJ_0, spinorb1, prec)
+    VG11 = orb.apply_complex_potential(1.0, GJ_1, spinorb1, prec)
+    VG12 = orb.apply_complex_potential(1.0, GJ_2, spinorb1, prec)
     GJ_spinorb1 = VG10 + VG11 + VG12
     
 
-    VG20 = orb.apply_complex_potential(1.0, GJ_0, alpha_20, prec)
-    VG21 = orb.apply_complex_potential(1.0, GJ_1, alpha_21, prec)
-    VG22 = orb.apply_complex_potential(1.0, GJ_2, alpha_22, prec)
+    VG20 = orb.apply_complex_potential(1.0, GJ_0, spinorb2, prec)
+    VG21 = orb.apply_complex_potential(1.0, GJ_1, spinorb2, prec)
+    VG22 = orb.apply_complex_potential(1.0, GJ_2, spinorb2, prec)
     GJ_spinorb2 = VG20 + VG21 + VG22
     
-    GKa_spinorb1_0  = orb.apply_complex_potential(1.0, GK1a_0, alpha_20, prec)
-    GKa_spinorb1_1  = orb.apply_complex_potential(1.0, GK1a_1, alpha_21, prec)
-    GKa_spinorb1_2  = orb.apply_complex_potential(1.0, GK1a_2, alpha_22, prec)
-    GKb_spinorb1_0  = orb.apply_complex_potential(1.0, GK1b_0, alpha_10, prec)
-    GKb_spinorb1_1  = orb.apply_complex_potential(1.0, GK1b_1, alpha_11, prec)
-    GKb_spinorb1_2  = orb.apply_complex_potential(1.0, GK1b_2, alpha_12, prec)
+    GKa_spinorb1_0  = orb.apply_complex_potential(1.0, GK1a_0, spinorb2, prec)
+    GKa_spinorb1_1  = orb.apply_complex_potential(1.0, GK1a_1, spinorb2, prec)
+    GKa_spinorb1_2  = orb.apply_complex_potential(1.0, GK1a_2, spinorb2, prec)
+    GKb_spinorb1_0  = orb.apply_complex_potential(1.0, GK1b_0, spinorb1, prec)
+    GKb_spinorb1_1  = orb.apply_complex_potential(1.0, GK1b_1, spinorb1, prec)
+    GKb_spinorb1_2  = orb.apply_complex_potential(1.0, GK1b_2, spinorb1, prec)
 
-    GKa_spinorb2_0  = orb.apply_complex_potential(1.0, GK2a_0, alpha_10, prec)
-    GKa_spinorb2_1  = orb.apply_complex_potential(1.0, GK2a_1, alpha_11, prec)
-    GKa_spinorb2_2  = orb.apply_complex_potential(1.0, GK2a_2, alpha_12, prec)
-    GKb_spinorb2_0  = orb.apply_complex_potential(1.0, GK2b_0, alpha_20, prec)
-    GKb_spinorb2_1  = orb.apply_complex_potential(1.0, GK2b_1, alpha_21, prec)
-    GKb_spinorb2_2  = orb.apply_complex_potential(1.0, GK2b_2, alpha_22, prec)
+    GKa_spinorb2_0  = orb.apply_complex_potential(1.0, GK2a_0, spinorb1, prec)
+    GKa_spinorb2_1  = orb.apply_complex_potential(1.0, GK2a_1, spinorb1, prec)
+    GKa_spinorb2_2  = orb.apply_complex_potential(1.0, GK2a_2, spinorb1, prec)
+    GKb_spinorb2_0  = orb.apply_complex_potential(1.0, GK2b_0, spinorb2, prec)
+    GKb_spinorb2_1  = orb.apply_complex_potential(1.0, GK2b_1, spinorb2, prec)
+    GKb_spinorb2_2  = orb.apply_complex_potential(1.0, GK2b_2, spinorb2, prec)
     
     GK_spinorb1 = GKa_spinorb1_0 + GKb_spinorb1_0 + GKa_spinorb1_1 + GKb_spinorb1_1 + GKa_spinorb1_2 + GKb_spinorb1_2
     GK_spinorb2 = GKa_spinorb2_0 + GKb_spinorb2_0 + GKa_spinorb2_1 + GKb_spinorb2_1 + GKa_spinorb2_2 + GKb_spinorb2_2
