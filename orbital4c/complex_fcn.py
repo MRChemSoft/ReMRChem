@@ -126,27 +126,27 @@ class complex_fcn:
 # Other is complex conjugate
 #
 
-    def exchange(self, other, prec):
-        exchange = vp.FunctionTree(self.mra)
-        add_vector = []
-        a_ = vp.FunctionTree(self.mra)
-        a_.setZero()
-        b_ = vp.FunctionTree(self.mra)
-        b_.setZero()
-        c_ = vp.FunctionTree(other.mra)
-        c_.setZero()
-        d_ = vp.FunctionTree(other.mra)
-        d_.setZero()        
-        if(self.real.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-            vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
-        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-            vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
-        if(self.real.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-            vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
-        if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
-        vp.advanced.add(prec/10, exchange, [a_, b_, c_, d_])
-        return exchange
+#    def exchange(self, other, prec):
+#        exchange = vp.FunctionTree(self.mra)
+#        add_vector = []
+#        a_ = vp.FunctionTree(self.mra)
+#        a_.setZero()
+#        b_ = vp.FunctionTree(self.mra)
+#        b_.setZero()
+#        c_ = vp.FunctionTree(other.mra)
+#        c_.setZero()
+#        d_ = vp.FunctionTree(other.mra)
+#        d_.setZero()        
+#        if(self.real.squaredNorm() > 0 and other.real.squaredNorm() > 0):
+#            vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
+#        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
+#            vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
+#        if(self.real.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
+#            vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
+#        if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
+#            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
+#        vp.advanced.add(prec/10, exchange, [a_, b_, c_, d_])
+#        return exchange
 
     def alpha_exchange(self, other, prec):
         alpha_exchange = vp.FunctionTree(self.mra)
