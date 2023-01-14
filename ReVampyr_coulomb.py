@@ -239,7 +239,7 @@ if args.coulgau == 'coulomb':
 
         # Compute U matrix
 
-                       sigma, U = LA.eig(S_tilde)
+        sigma, U = LA.eig(S_tilde)
 
         # Compute matrix S^-1/2
         Sm5 = U @ np.diag(sigma ** (-0.5)) @ U.transpose()
