@@ -16,7 +16,6 @@ import sys, getopt
 import importlib
 importlib.reload(orb)
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
     parser.add_argument('-a', '--atype', dest='atype', type=str, default='He',
@@ -142,31 +141,21 @@ if args.coulgau == 'coulomb':
         n_22 = spinorb2.overlap_density(spinorb2, prec)
 
         # Definition of two electron operators
-        K11_Re = P(n_11.real) * (4 * np.pi)
-        K11_Im = P(n_11.imag) * (4 * np.pi)
-        K12_Re = P(n_12.real) * (4 * np.pi)
-        K12_Im = P(n_12.imag) * (4 * np.pi)
-        K21_Re = P(n_21.real) * (4 * np.pi)
-        K21_Im = P(n_21.imag) * (4 * np.pi)
-        K22_Re = P(n_22.real) * (4 * np.pi)
-        K22_Im = P(n_22.imag) * (4 * np.pi)
+        B11    = P(n_11.real) * (4 * np.pi)
+        B22    = P(n_22.real) * (4 * np.pi)
+        B12_Re = P(n_12.real) * (4 * np.pi)
+        B12_Im = P(n_12.imag) * (4 * np.pi)
+        B21_Re = P(n_21.real) * (4 * np.pi)
+        B21_Im = P(n_21.imag) * (4 * np.pi)
 
-        K11 = cf.complex_fcn()
-        K11.real = K11_Re
-        K11.imag = K11_Im
+        B12 = cf.complex_fcn()
+        B12.real = K12_Re
+        B12.imag = K12_Im 
         
-        K12 = cf.complex_fcn()
-        K12.real = K12_Re
-        K12.imag = K12_Im 
+        B21 = cf.complex_fcn()
+        B21.real = K21_Re
+        B21.imag = K21_Im
         
-        K21 = cf.complex_fcn()
-        K21.real = K21_Re
-        K21.imag = K21_Im
-        
-        K22 = cf.complex_fcn()
-        K22.real = K22_Re
-        K22.imag = K22_Im
-
         # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
         hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
@@ -180,31 +169,34 @@ if args.coulgau == 'coulomb':
         add_psi_2 = hd_psi_2 + v_psi_2
 
         # Calculation of two electron terms
-        K22_phi1 = orb.apply_complex_potential(1.0, K22, spinorb1, prec)
-        K21_phi2 = orb.apply_complex_potential(1.0, K21, spinorb2, prec)
-        K11_phi2 = orb.apply_complex_potential(1.0, K11, spinorb2, prec)
-        K12_phi1 = orb.apply_complex_potential(1.0, K12, spinorb1, prec)
+        J2_phi1 = orb.apply_potential(1.0, B22, spinorb1, prec)
+        J1_phi2 = orb.apply_potential(1.0, B11, spinorb2, prec)
+        K2_phi1 = orb.apply_complex_potential(1.0, B21, spinorb2, prec)
+        K1_phi2 = orb.apply_complex_potential(1.0, B12, spinorb1, prec)
 
-        JmK_phi1 = K22_phi1 - K21_phi2
-        JmK_phi2 = K11_phi2 - K12_phi1
+        JmK_phi1 = J2_phi1 - K2_phi1
+        JmK_phi2 = J1_phi2 - K1_phi2
 
-        JmK11, imag_JmK11 = spinorb1.dot(JmK_phi1)
-        JmK12, imag_JmK12 = spinorb1.dot(JmK_phi2)
-        JmK21, imag_JmK21 = spinorb2.dot(JmK_phi1)
-        JmK22, imag_JmK22 = spinorb2.dot(JmK_phi2)
+        JmK11_r, JmK11_i = spinorb1.dot(JmK_phi1)
+        JmK12_r, JmK12_i = spinorb1.dot(JmK_phi2)
+        JmK21_r, JmK21_i = spinorb2.dot(JmK_phi1)
+        JmK22_r, JmK22_i = spinorb2.dot(JmK_phi2)
 
         # Orbital Energy calculation
-        energy_11, imag_11 = spinorb1.dot(add_psi_1)
-        energy_12, imag_12 = spinorb1.dot(add_psi_2)
-        energy_21, imag_21 = spinorb2.dot(add_psi_1)
-        energy_22, imag_22 = spinorb2.dot(add_psi_2)
+        hd_V_11_r, hd_V_11_i = spinorb1.dot(add_psi_1)
+        hd_V_12_r, hd_V_12_i = spinorb1.dot(add_psi_2)
+        hd_V_21_r, hd_V_21_i = spinorb2.dot(add_psi_1)
+        hd_V_22_r, hd_V_22_i = spinorb2.dot(add_psi_2)
 
+        hd_V = np.array XXXXXXXX
 
         # Calculate Fij Fock matrix
         F_11 = energy_11 + JmK11
         F_12 = energy_12 + JmK12
         F_21 = energy_21 + JmK21
         F_22 = energy_22 + JmK22
+
+        Fmat = np.
         
         # Orbital Energy
         print('Energy_Spin_Orbit_1', F_11 - light_speed**2)
