@@ -212,7 +212,7 @@ class orbital4c:
         alpha_coeff = np.array([[ 1,  1,   1,  1],
                                 [-1j, 1j, -1j, 1j],
                                 [ 1, -1,   1, -1]])
-#        alpha = np.array([[[0, 0, 0, 1],
+#        Alpha = np.array([[[0, 0, 0, 1],
 #                           [0, 0, 1, 0],
 #                           [0, 1, 0, 0],
 #                           [1, 0, 0, 0]],
@@ -234,11 +234,17 @@ class orbital4c:
     def ktrs(self):   #Kramers´ Time Reversal Symmetry
         out_orb = orbital4c()
         tmp = self.complex_conj()
-        ktrs = np.array([[ 0,  -1,  0,    0,],
-                         [ 1,   0,  0,    0,],
-                         [ 0,   0,  0,   -1,],
-                         [ 0,   0,  1,    0,]])
-        out_orb.comp_array = ktrs@tmp.comp_array
+#        ktrs = np.array([[ 0,  -1,  0,    0,],
+#                         [ 1,   0,  0,    0,],
+#                         [ 0,   0,  0,   -1,],
+#                         [ 0,   0,  1,    0,]])
+        ktrs_order = np.array([1, 0, 3, 2])
+        ktrs_coeff = np.array([-1,  1,  -1,  1])
+#        out_orb.comp_array = ktrs@tmp.comp_array
+        for idx in range(4):
+            coeff = ktrs_coeff[idx]
+            comp = ktrs_order[idx]
+            out_orb.comp_array[idx] = coeff * tmp.comp_array[comp]
         return out_orb
 
 #Beta c**2
