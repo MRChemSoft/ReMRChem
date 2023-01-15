@@ -34,13 +34,13 @@ if __name__ == '__main__':
                         help='position of nucleus in z')
     parser.add_argument('-l', '--light_speed', dest='lux_speed', type=float, default=137.03599913900001,
                         help='light of speed')
-    parser.add_argument('-o', '--order', dest='order', type=int, default=8,
+    parser.add_argument('-o', '--order', dest='order', type=int, default=7,
                         help='put the order of Polinomial')
     parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-4,
                         help='put the precision')
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
-    parser.add_argument('-v', '--potential', dest='potential', type=str, default='point_charge',
+    parser.add_argument('-v', '--potential', dest='potential', type=str, default='coulomb_HFYGB',
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     args = parser.parse_args()
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     assert args.charge > 1.0, 'Please consider only atoms with more than one electron'
 
-    assert args.coulgau in ['coulomb', 'gaunt', 'gaunt-test'], 'Please, specify coulgau in a rigth way – coulomb or gaunt'
+    assert args.coulgau in ['coulomb', 'gaunt', 'gaunt-test'], 'Please, specify coulgau in a rigth way: coulomb or gaunt'
 
     assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
 
@@ -130,14 +130,11 @@ P = vp.PoissonOperator(mra, prec)
 
 #############################START WITH CALCULATION###################################
 if args.coulgau == 'coulomb':
-    print('Hartree-Fock (Coulombic bielectric interaction)')
+    print('Hartree-Fock (Coulomb interaction)')
     error_norm = 1
     compute_last_energy = False
     
     while (error_norm > prec or compute_last_energy):
-        if (error_norm < prec):
-            compute_last_energy = True
-
         n_11 = spinorb1.overlap_density(spinorb1, prec)
         n_12 = spinorb1.overlap_density(spinorb2, prec)
         n_21 = spinorb2.overlap_density(spinorb1, prec)
@@ -203,7 +200,7 @@ if args.coulgau == 'coulomb':
         
         # Orbital Energy
         print('Energy_Spin_Orbit_1', eps1 - light_speed**2)
-        print('Energy_Spin_Orbit_2', eps2 - light_speed**2)
+ #       print('Energy_Spin_Orbit_2', eps2 - light_speed**2)
 
         # Total Energy 
         E_tot_JK = np.trace(Fmat) - 0.5 * (np.trace(JmK))
@@ -213,7 +210,7 @@ if args.coulgau == 'coulomb':
             break
 
         V_J_K_spinorb1 = v_psi_1 + JmK_phi1 - (Fmat[0,1] * spinorb2)
-        V_J_K_spinorb2 = v_psi_2 + JmK_phi2 - (Fmat[1,0] * spinorb1)
+#        V_J_K_spinorb2 = v_psi_2 + JmK_phi2 - (Fmat[1,0] * spinorb1)
 
         # Calculation of Helmotz
         tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, eps1, prec)
@@ -231,26 +228,31 @@ if args.coulgau == 'coulomb':
         deltasq1 = delta_psi_1.squaredNorm()
         error_norm = np.sqrt(deltasq1)
         print('Orbital_Error norm', error_norm)
+        spinorb1 = new_orbital_1
+        spinorb2 = new_orbital_2
+        if (error_norm < prec):
+            compute_last_energy = True
+
 
         # Compute overlap
-        dot_11 = new_orbital_1.dot(new_orbital_1)
-        dot_12 = new_orbital_1.dot(new_orbital_2)
-        dot_21 = new_orbital_2.dot(new_orbital_1)
-        dot_22 = new_orbital_2.dot(new_orbital_2)
+#        dot_11 = new_orbital_1.dot(new_orbital_1)
+#        dot_12 = new_orbital_1.dot(new_orbital_2)
+#        dot_21 = new_orbital_2.dot(new_orbital_1)
+#        dot_22 = new_orbital_2.dot(new_orbital_2)
 
-        S_tilde = np.array([[dot_11[0] + 1j * dot_11[1], dot_12[0] + 1j * dot_12[1]],
-                            [dot_21[0] + 1j * dot_21[1], dot_22[0] + 1j * dot_22[1]]])
+#        S_tilde = np.array([dot_11[0] + 1j * dot_11[1], dot_12[0] + 1j * dot_12[1],
+#                            dot_21[0] + 1j * dot_21[1], dot_22[0] + 1j * dot_22[1]])
 
         # Compute U matrix
 
-        sigma, U = LA.eig(S_tilde)
+#        sigma, U = LA.eig(S_tilde)
 
         # Compute matrix S^-1/2
-        Sm5 = U @ np.diag(sigma ** (-0.5)) @ U.transpose()
+#        Sm5 = U @ np.diag(sigma ** (-0.5)) @ U.transpose()
 
         # Compute the new orthogonalized orbitals
-        spinorb1 = Sm5[0, 0] * new_orbital_1 + Sm5[0, 1] * new_orbital_2
-        spinorb2 = Sm5[1, 0] * new_orbital_1 + Sm5[1, 1] * new_orbital_2
+#        spinorb1 = Sm5[0, 0] * new_orbital_1 + Sm5[0, 1] * new_orbital_2
+#        spinorb2 = Sm5[1, 0] * new_orbital_1 + Sm5[1, 1] * new_orbital_2
         spinorb1.crop(prec)       
         spinorb2.crop(prec)
 
