@@ -194,7 +194,7 @@ class orbital4c:
         for comp in self.comp_dict.keys():
             func_i = self[comp]
             func_j = other[comp]
-            temp = func_i * func_j
+            temp = func_i.complex_conj() * func_j
             if(temp.real.squaredNorm() > 0):
                 add_vector_real.append((1.0,temp.real))
             if(temp.imag.squaredNorm() > 0):
@@ -233,12 +233,13 @@ class orbital4c:
 
     def ktrs(self):   #Kramers´ Time Reversal Symmetry
         out_orb = orbital4c()
+        tmp = self.complex_conj()
         ktrs = np.array([[ 0,  -1,  0,    0,],
                          [ 1,   0,  0,    0,],
                          [ 0,   0,  0,   -1,],
                          [ 0,   0,  1,    0,]])
-        out_orb.comp_array = ktrs@self.comp_array
-        return out_orb 
+        out_orb.comp_array = ktrs@tmp.comp_array
+        return out_orb
 
 #Beta c**2
     def beta(self, shift = 0):
