@@ -177,45 +177,45 @@ if args.coulgau == 'coulomb':
         JmK_phi1 = J2_phi1 - K2_phi1
         JmK_phi2 = J1_phi2 - K1_phi2
 
-        JmK11_r, JmK11_i = spinorb1.dot(JmK_phi1)
-        JmK12_r, JmK12_i = spinorb1.dot(JmK_phi2)
-        JmK21_r, JmK21_i = spinorb2.dot(JmK_phi1)
-        JmK22_r, JmK22_i = spinorb2.dot(JmK_phi2)
+        JmK_11_r, JmK_11_i = spinorb1.dot(JmK_phi1)
+        JmK_12_r, JmK_12_i = spinorb1.dot(JmK_phi2)
+        JmK_21_r, JmK_21_i = spinorb2.dot(JmK_phi1)
+        JmK_22_r, JmK_22_i = spinorb2.dot(JmK_phi2)
 
+        JmK = np.array([ JmK_11_r + JmK_11_i * 1j , JmK_12_r + JmK_12_i * 1j ],
+                       [ JmK_21_r + JmK_21_i * 1j , JmK_22_r + JmK_22_i * 1j])
         # Orbital Energy calculation
-        hd_V_11_r, hd_V_11_i = spinorb1.dot(add_psi_1)
+        hd_V_11_r, hd_V_11_i = Spinorb1.dot(add_psi_1)
         hd_V_12_r, hd_V_12_i = spinorb1.dot(add_psi_2)
         hd_V_21_r, hd_V_21_i = spinorb2.dot(add_psi_1)
         hd_V_22_r, hd_V_22_i = spinorb2.dot(add_psi_2)
 
-        hd_V = np.array XXXXXXXX
+        hd_V = np.array([ hd_V_11_r + hd_V_11_i * 1j , hd_V_12_r + hd_V_12_i * 1j ],
+                        [ hd_V_21_r + hd_V_21_i * 1j , hd_V_22_r + hd_V_22_i * 1j])
 
         # Calculate Fij Fock matrix
-        F_11 = energy_11 + JmK11
-        F_12 = energy_12 + JmK12
-        F_21 = energy_21 + JmK21
-        F_22 = energy_22 + JmK22
-
-        Fmat = np.
+        Fmat = hd_V + JmK
+        eps1 = Fmat[0,0]
+        eps2 = Fmat[1,1]
         
         # Orbital Energy
-        print('Energy_Spin_Orbit_1', F_11 - light_speed**2)
-        print('Energy_Spin_Orbit_2', F_22 - light_speed**2)
+        print('Energy_Spin_Orbit_1', eps1 - light_speed**2)
+        print('Energy_Spin_Orbit_2', eps2 - light_speed**2)
 
         # Total Energy 
-        E_tot_JK = F_11 + F_22 - 0.5 * (JmK11 + JmK22)
+        E_tot_JK = numpy.trace(Fmat) - 0.5 * (numpy.trace(JmK))
         print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
 
-        V_J_K_spinorb1 = v_psi_1 + JmK_phi1 - (F_12 * spinorb2)
-        V_J_K_spinorb2 = v_psi_2 + JmK_phi2 - (F_21 * spinorb1)
+        V_J_K_spinorb1 = v_psi_1 + JmK_phi1 - (F_[0,1] * spinorb2)
+        V_J_K_spinorb2 = v_psi_2 + JmK_phi2 - (F_[1,0] * spinorb1)
 
         # Calculation of Helmotz
-        tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, F_11, prec)
-        tmp_2 = orb.apply_helmholtz(V_J_K_spinorb2, F_22, prec)
-        new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, F_11, der = default_der)
+        tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, eps1, prec)
+        tmp_2 = orb.apply_helmholtz(V_J_K_spinorb2, eps2, prec)
+        new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, eps1, der = default_der)
         new_orbital_1 *= 0.5/light_speed**2
         new_orbital_1.normalize()
-        new_orbital_2 = orb.apply_dirac_hamiltonian(tmp_2, prec, F_22, der = default_der)
+        new_orbital_2 = orb.apply_dirac_hamiltonian(tmp_2, prec, eps2, der = default_der)
         new_orbital_2 *= 0.5/light_speed**2
         new_orbital_2.normalize()
 
@@ -234,16 +234,12 @@ if args.coulgau == 'coulomb':
         dot_21 = new_orbital_2.dot(new_orbital_1)
         dot_22 = new_orbital_2.dot(new_orbital_2)
 
-        s_11 = dot_11[0] + 1j * dot_11[1]
-        s_12 = dot_12[0] + 1j * dot_12[1]
-        s_21 = dot_21[0] + 1j * dot_21[1]
-        s_22 = dot_22[0] + 1j * dot_22[1]
-
-        # Compute Overlap Matrix
-        S_tilde = np.array([[s_11, s_12], [s_21, s_22]])
+        S_tilde = np.array([dot_11[0] + 1j * dot_11[1], dot_12[0] + 1j * dot_12[1]],
+                           [dot_21[0] + 1j * dot_21[1], dot_22[0] + 1j * dot_22[1]])
 
         # Compute U matrix
-        sigma, U = LA.eig(S_tilde)
+
+                       sigma, U = LA.eig(S_tilde)
 
         # Compute matrix S^-1/2
         Sm5 = U @ np.diag(sigma ** (-0.5)) @ U.transpose()
@@ -251,42 +247,33 @@ if args.coulgau == 'coulomb':
         # Compute the new orthogonalized orbitals
         spinorb1 = Sm5[0, 0] * new_orbital_1 + Sm5[0, 1] * new_orbital_2
         spinorb2 = Sm5[1, 0] * new_orbital_1 + Sm5[1, 1] * new_orbital_2
-        spinorb1.crop(prec)
+        spinorb1.crop(prec)       
         spinorb2.crop(prec)
 
    ##########
-        
-    # Definition of different densities
+
+   
     n_11 = spinorb1.overlap_density(spinorb1, prec)
     n_12 = spinorb1.overlap_density(spinorb2, prec)
     n_21 = spinorb2.overlap_density(spinorb1, prec)
     n_22 = spinorb2.overlap_density(spinorb2, prec)
+
     # Definition of two electron operators
-    K11_Re = P(n_11.real) * (4 * np.pi)
-    K11_Im = P(n_11.imag) * (4 * np.pi)
-    K12_Re = P(n_12.real) * (4 * np.pi)
-    K12_Im = P(n_12.imag) * (4 * np.pi)
-    K21_Re = P(n_21.real) * (4 * np.pi)
-    K21_Im = P(n_21.imag) * (4 * np.pi)
-    K22_Re = P(n_22.real) * (4 * np.pi)
-    K22_Im = P(n_22.imag) * (4 * np.pi)
+    B11    = P(n_11.real) * (4 * np.pi)
+    B22    = P(n_22.real) * (4 * np.pi)
+    B12_Re = P(n_12.real) * (4 * np.pi)
+    B12_Im = P(n_12.imag) * (4 * np.pi)
+    B21_Re = P(n_21.real) * (4 * np.pi)
+    B21_Im = P(n_21.imag) * (4 * np.pi)
 
-    K11 = cf.complex_fcn()
-    K11.real = K11_Re
-    K11.imag = K11_Im
+    B12 = cf.complex_fcn()
+    B12.real = K12_Re
+    B12.imag = K12_Im 
     
-    K12 = cf.complex_fcn()
-    K12.real = K12_Re
-    K12.imag = K12_Im 
+    B21 = cf.complex_fcn()
+    B21.real = K21_Re
+    B21.imag = K21_Im
     
-    K21 = cf.complex_fcn()
-    K21.real = K21_Re
-    K21.imag = K21_Im
-    
-    K22 = cf.complex_fcn()
-    K22.real = K22_Re
-    K22.imag = K22_Im
-
     # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
     hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
     hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
@@ -300,39 +287,43 @@ if args.coulgau == 'coulomb':
     add_psi_2 = hd_psi_2 + v_psi_2
 
     # Calculation of two electron terms
-    K22_phi1 = orb.apply_complex_potential(1.0, K22, spinorb1, prec)
-    K21_phi2 = orb.apply_complex_potential(1.0, K21, spinorb2, prec)
-    K11_phi2 = orb.apply_complex_potential(1.0, K11, spinorb2, prec)
-    K12_phi1 = orb.apply_complex_potential(1.0, K12, spinorb1, prec)
+    J2_phi1 = orb.apply_potential(1.0, B22, spinorb1, prec)
+    J1_phi2 = orb.apply_potential(1.0, B11, spinorb2, prec)
+    K2_phi1 = orb.apply_complex_potential(1.0, B21, spinorb2, prec)
+    K1_phi2 = orb.apply_complex_potential(1.0, B12, spinorb1, prec)
 
-    JmK_phi1 = K22_phi1 - K21_phi2
-    JmK_phi2 = K11_phi2 - K12_phi1
+    JmK_phi1 = J2_phi1 - K2_phi1
+    JmK_phi2 = J1_phi2 - K1_phi2
 
-    JmK11, imag_JmK11 = spinorb1.dot(JmK_phi1)
-    JmK12, imag_JmK12 = spinorb1.dot(JmK_phi2)
-    JmK21, imag_JmK21 = spinorb2.dot(JmK_phi1)
-    JmK22, imag_JmK22 = spinorb2.dot(JmK_phi2)
+    JmK_11_r, JmK_11_i = spinorb1.dot(JmK_phi1)
+    JmK_12_r, JmK_12_i = spinorb1.dot(JmK_phi2)
+    JmK_21_r, JmK_21_i = spinorb2.dot(JmK_phi1)
+    JmK_22_r, JmK_22_i = spinorb2.dot(JmK_phi2)
 
+    JmK = np.array([ JmK_11_r + JmK_11_i * 1j , JmK_12_r + JmK_12_i * 1j ],
+                   [ JmK_21_r + JmK_21_i * 1j , JmK_22_r + JmK_22_i * 1j]
     # Orbital Energy calculation
-    energy_11, imag_11 = spinorb1.dot(add_psi_1)
-    energy_12, imag_12 = spinorb1.dot(add_psi_2)
-    energy_21, imag_21 = spinorb2.dot(add_psi_1)
-    energy_22, imag_22 = spinorb2.dot(add_psi_2)
+    hd_V_11_r, hd_V_11_i = Spinorb1.dot(add_psi_1)
+    hd_V_12_r, hd_V_12_i = spinorb1.dot(add_psi_2)
+    hd_V_21_r, hd_V_21_i = spinorb2.dot(add_psi_1)
+    hd_V_22_r, hd_V_22_i = spinorb2.dot(add_psi_2)
+
+    hd_V = np.array([ hd_V_11_r + hd_V_11_i * 1j , hd_V_12_r + hd_V_12_i * 1j ],
+                    [ hd_V_21_r + hd_V_21_i * 1j , hd_V_22_r + hd_V_22_i * 1j])
 
     # Calculate Fij Fock matrix
-    F_11 = energy_11 + JmK11
-    F_12 = energy_12 + JmK12
-    F_21 = energy_21 + JmK21
-    F_22 = energy_22 + JmK22
+    Fmat = hd_V + JmK
+    eps1 = Fmat[0,0]
+    eps2 = Fmat[1,1]
     
     # Orbital Energy
-    print('Energy_Spin_Orbit_1', F_11 - light_speed**2)
-    print('Energy_Spin_Orbit_2', F_22 - light_speed**2)
+    print('Energy_Spin_Orbit_1', eps1 - light_speed**2)
+    print('Energy_Spin_Orbit_2', eps2 - light_speed**2)
 
     # Total Energy 
-    E_tot_JK = F_11 + F_22 - 0.5 * (JmK11 + JmK22)
-
-    print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
+    E_tot_JK = numpy.trace(Fmat) - 0.5 * (numpy.trace(JmK))
+    print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 * light_speed**2))
+ 
 
 #####################################################END COULOMB & START GAUNT#######################################################################
 elif args.coulgau == 'gaunt':
