@@ -124,7 +124,7 @@ elif args.potential == 'gaussian':
    V_tree = Peps(f)
 
 default_der = args.deriv
-print('Define V Potetintal', args.potential, 'DONE')
+print('Define V Potential', args.potential, 'DONE')
 
 P = vp.PoissonOperator(mra, prec)
 
