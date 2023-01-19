@@ -257,6 +257,16 @@ if args.coulgau == 'coulomb':
         spinorb2.crop(prec)
 
     ##########
+    #Definition of alpha vectors for each orbital
+    alpha1_0 =  spinorb1.alpha(0)
+    alpha1_1 =  spinorb1.alpha(1)
+    alpha1_2 =  spinorb1.alpha(2)
+
+    alpha2_0 =  spinorb2.alpha(0)
+    alpha2_1 =  spinorb2.alpha(1)
+    alpha2_2 =  spinorb2.alpha(2)    
+    
+
     #Defintion of orbital * alpha(orbital)
     cphi1_alpha1_0 = spinorb1.overlap_density(alpha1_0, prec)
     cphi1_alpha1_1 = spinorb1.overlap_density(alpha1_1, prec)
