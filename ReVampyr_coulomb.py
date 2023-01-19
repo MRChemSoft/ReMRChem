@@ -256,6 +256,135 @@ if args.coulgau == 'coulomb':
         spinorb1.crop(prec)       
         spinorb2.crop(prec)
 
-   ##########
+    ##########
+    #Defintion of orbital * alpha(orbital)
+    cphi1_alpha1_0 = spinorb1.overlap_density(alpha1_0, prec)
+    cphi1_alpha1_1 = spinorb1.overlap_density(alpha1_1, prec)
+    cphi1_alpha1_2 = spinorb1.overlap_density(alpha1_2, prec)
+    
+    cphi1_alpha2_0 = spinorb1.overlap_density(alpha2_0, prec)
+    cphi1_alpha2_1 = spinorb1.overlap_density(alpha2_1, prec)
+    cphi1_alpha2_2 = spinorb1.overlap_density(alpha2_2, prec)
+    
+    cphi2_alpha1_0 = spinorb2.overlap_density(alpha1_0, prec)
+    cphi2_alpha1_1 = spinorb2.overlap_density(alpha1_1, prec)
+    cphi2_alpha1_2 = spinorb2.overlap_density(alpha1_2, prec)
+    
+    cphi2_alpha2_0 = spinorb2.overlap_density(alpha2_0, prec)
+    cphi2_alpha2_1 = spinorb2.overlap_density(alpha2_1, prec)
+    cphi2_alpha2_2 = spinorb2.overlap_density(alpha2_2, prec)
+    
+    #Definition of Gaunt two electron operators      
+    BG11_Re0 = P(cphi1_alpha1_0.real) * (4.0 * np.pi)
+    BG11_Re1 = P(cphi1_alpha1_1.real) * (4.0 * np.pi)
+    BG11_Re2 = P(cphi1_alpha1_2.real) * (4.0 * np.pi)
+    BG11_Im0 = P(cphi1_alpha1_0.imag) * (4.0 * np.pi)
+    BG11_Im1 = P(cphi1_alpha1_1.imag) * (4.0 * np.pi)
+    BG11_Im2 = P(cphi1_alpha1_2.imag) * (4.0 * np.pi)
+    
+    BG22_Re0 = P(cphi2_alpha2_0.real) * (4.0 * np.pi)
+    BG22_Re1 = P(cphi2_alpha2_1.real) * (4.0 * np.pi)
+    BG22_Re2 = P(cphi2_alpha2_2.real) * (4.0 * np.pi)
+    BG22_Im0 = P(cphi2_alpha2_0.imag) * (4.0 * np.pi)
+    BG22_Im1 = P(cphi2_alpha2_1.imag) * (4.0 * np.pi)
+    BG22_Im2 = P(cphi2_alpha2_2.imag) * (4.0 * np.pi)
+    BG12_Re0 = P(cphi1_alpha20.real) * (4.0 * np.pi)
+    BG12_Re1 = P(cphi1_alpha21.real) * (4.0 * np.pi)
+    BG12_Re2 = P(cphi1_alpha22.real) * (4.0 * np.pi) 
+    BG12_Im0 = P(cphi1_alpha20.imag) * (4.0 * np.pi)
+    BG12_Im1 = P(cphi1_alpha21.imag) * (4.0 * np.pi)
+    BG12_Im2 = P(cphi1_alpha22.imag) * (4.0 * np.pi)
+    BG21_Re0 = P(cphi2_alpha10.real) * (4.0 * np.pi)
+    BG21_Re1 = P(cphi2_alpha11.real) * (4.0 * np.pi)
+    BG21_Re2 = P(cphi2_alpha12.real) * (4.0 * np.pi)
+    BG21_Im0 = P(cphi2_alpha10.imag) * (4.0 * np.pi)
+    BG21_Im1 = P(cphi2_alpha11.imag) * (4.0 * np.pi)
+    BG21_Im2 = P(cphi2_alpha12.imag) * (4.0 * np.pi)
+    
+    BG11_0 = cf.complex_fcn()
+    BG11_0.real = BG11_Re0
+    BG11_0.imag = BG11_Im0
+    
+    BG11_1 = cf.complex_fcn()
+    BG11_1.real = BG11_Re1
+    BG11_1.imag = BG11_Im1
+    BG11_2 = cf.complex_fcn()
+    BG11_2.real = BG11_Re2
+    BG11_2.imag = BG11_Im2
 
+    BG22_0 = cf.complex_fcn()
+    BG22_0.real = BG22_Re0
+    BG22_0.imag = BG22_Im0
+    
+    BG22_1 = cf.complex_fcn()
+    BG22_1.real = BG22_Re1
+    BG22_1.imag = BG22_Im1
+    BG22_2 = cf.complex_fcn()
+    BG22_2.real = BG22_Re2
+    BG22_2.imag = BG22_Im2
+    BG12_0 = cf.complex_fcn()
+    BG12_0.real = BG12_Re0
+    BG12_0.imag = BG12_Im0
+    
+    BG12_1 = cf.complex_fcn()
+    BG12_1.real = BG12_Re1
+    BG12_1.imag = BG12_Im1
+    BG12_2 = cf.complex_fcn()
+    BG12_2.real = BG12_Re2
+    BG12_2.imag = BG12_Im2
+
+    BG21_0 = cf.complex_fcn()
+    BG21_0.real = BG21_Re0
+    BG21_0.imag = BG21_Im0
+    
+    BG21_1 = cf.complex_fcn()
+    BG21_1.real = BG21_Re1
+    BG21_1.imag = BG21_Im1
+    BG21_2 = cf.complex_fcn()
+    BG21_2.real = BG21_Re2
+    BG21_2.imag = BG21_Im2
+    
+    # Calculation of Gaunt two electron terms
+    VGJ1_0 = orb.apply_complex_potential(1.0, BG11_0, spinorb1, prec)
+    VGJ1_1 = orb.apply_complex_potential(1.0, BG11_1, spinorb1, prec)
+    VGJ1_2 = orb.apply_complex_potential(1.0, BG11_2, spinorb1, prec)
+    GJ1_phi1 = VGJ1_0 + VGJ1_1 + VGJ1_2
+    
+    VGJ20 = orb.apply_complex_potential(1.0, BG22_0, spinorb2, prec)
+    VGJ21 = orb.apply_complex_potential(1.0, BG22_1, spinorb2, prec)
+    VGJ22 = orb.apply_complex_potential(1.0, BG22_2, spinorb2, prec)
+    GJ2_phi2 = VGJ2_0 + VGJ2_1 + VGJ2_2
+    
+    VGK1_0 = orb.apply_complex_potential(1.0, BG12_0, spinorb2, prec)
+    VGK1_1 = orb.apply_complex_potential(1.0, BG12_1, spinorb2, prec)
+    VGK1_2 = orb.apply_complex_potential(1.0, BG12_2, spinorb2, prec)
+    GK1_phi2 = VGK1_0 + VGK1_1 + VGK1_2
+    
+    VGK2_0 = orb.apply_complex_potential(1.0, BG21_0, spinorb1, prec)
+    VGK2_1 = orb.apply_complex_potential(1.0, BG21_1, spinorb1, prec)
+    VGK2_2 = orb.apply_complex_potential(1.0, BG21_2, spinorb1, prec)
+    GK2_phi1 = VGK2_0 + VGK2_1 + VGK2_2
+
+    GJmK_phi1 = GJ1_phi1 - GK2_phi1
+    GJmK_phi2 = GJ2_phi2 - GK1_phi2
+
+
+    GJmK_11_r, GJmK_11_i = spinorb1.dot(GJmK_phi1)
+    GJmK_12_r, GJmK_12_i = spinorb1.dot(GJmK_phi2)
+    GJmK_21_r, GJmK_21_i = spinorb2.dot(GJmK_phi1)
+    GJmK_22_r, GJmK_22_i = spinorb2.dot(GJmK_phi2)
+
+
+    #GJmK = np.array([[ GJmK_11_r + GJmK_11_i * 1j , GJmK_12_r + GJmK_12_i * 1j],
+                    #[ GJmK_21_r + GJmK_21_i * 1j , GJmK_22_r + GJmK_22_i * 1j]])
+
+    print('GJmK_11_r', GJmK_11_r)
+    print('GJmK_12_r', GJmK_12_r)
+    print('GJmK_21_r', GJmK_21_r)
+    print('GJmK_22_r', GJmK_22_r)
+    
+    print('GJmK_11_i', GJmK_11_i)
+    print('GJmK_12_i', GJmK_12_i)
+    print('GJmK_21_i', GJmK_21_i)
+    print('GJmK_22_i', GJmK_22_i)    
    
