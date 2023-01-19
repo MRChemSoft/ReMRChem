@@ -372,14 +372,14 @@ if args.coulgau == 'coulomb':
     VGJ2_2 = orb.apply_complex_potential(1.0, BG22_2, alpha1_2, prec)
     GJ2_alpha1 = VGJ2_0 + VGJ2_1 + VGJ2_2
     
-    VGK1_0 = orb.apply_complex_potential(1.0, BG12_0, alpha2_0, prec)
-    VGK1_1 = orb.apply_complex_potential(1.0, BG12_1, alpha2_1, prec)
-    VGK1_2 = orb.apply_complex_potential(1.0, BG12_2, alpha2_2, prec)
+    VGK1_0 = orb.apply_complex_potential(1.0, BG12_0, alpha1_0, prec)
+    VGK1_1 = orb.apply_complex_potential(1.0, BG12_1, alpha1_1, prec)
+    VGK1_2 = orb.apply_complex_potential(1.0, BG12_2, alpha1_2, prec)
     GK1_alpha2 = VGK1_0 + VGK1_1 + VGK1_2
     
-    VGK2_0 = orb.apply_complex_potential(1.0, BG21_0, alpha1_0, prec)
-    VGK2_1 = orb.apply_complex_potential(1.0, BG21_1, alpha1_1, prec)
-    VGK2_2 = orb.apply_complex_potential(1.0, BG21_2, alpha1_2, prec)
+    VGK2_0 = orb.apply_complex_potential(1.0, BG21_0, alpha2_0, prec)
+    VGK2_1 = orb.apply_complex_potential(1.0, BG21_1, alpha2_1, prec)
+    VGK2_2 = orb.apply_complex_potential(1.0, BG21_2, alpha2_2, prec)
     GK2_alpha1 = VGK2_0 + VGK2_1 + VGK2_2
     
     GJmK_phi1 = GJ2_alpha1 - GK2_alpha1
@@ -394,9 +394,8 @@ if args.coulgau == 'coulomb':
     print('GJmK_12_r', GJmK_12_r)
     print('GJmK_21_r', GJmK_21_r)
     print('GJmK_22_r', GJmK_22_r)
-    
     print('GJmK_11_i', GJmK_11_i)
     print('GJmK_12_i', GJmK_12_i)
     print('GJmK_21_i', GJmK_21_i)
-    print('GJmK_22_i', GJmK_22_i)    
-   
+    print('GJmK_22_i', GJmK_22_i)
+
