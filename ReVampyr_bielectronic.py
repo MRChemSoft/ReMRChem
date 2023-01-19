@@ -1225,36 +1225,33 @@ elif args.coulgau == 'gaunt-test':
         BG21_2.imag = BG21_Im2
 
         # Calculation of Gaunt two electron terms
-        VGJ1_0 = orb.apply_complex_potential(1.0, BG11_0, spinorb1, prec)
-        VGJ1_1 = orb.apply_complex_potential(1.0, BG11_1, spinorb1, prec)
-        VGJ1_2 = orb.apply_complex_potential(1.0, BG11_2, spinorb1, prec)
-        GJ1_phi1 = VGJ1_0 + VGJ1_1 + VGJ1_2
+        VGJ1_0 = orb.apply_complex_potential(1.0, BG11_0, alpha2_0, prec)
+        VGJ1_1 = orb.apply_complex_potential(1.0, BG11_1, alpha2_1, prec)
+        VGJ1_2 = orb.apply_complex_potential(1.0, BG11_2, alpha2_2, prec)
+        GJ1_alpha2 = VGJ1_0 + VGJ1_1 + VGJ1_2
 
-        VGJ2_0 = orb.apply_complex_potential(1.0, BG22_0, spinorb2, prec)
-        VGJ2_1 = orb.apply_complex_potential(1.0, BG22_1, spinorb2, prec)
-        VGJ2_2 = orb.apply_complex_potential(1.0, BG22_2, spinorb2, prec)
-        GJ2_phi2 = VGJ2_0 + VGJ2_1 + VGJ2_2
+        VGJ2_0 = orb.apply_complex_potential(1.0, BG22_0, alpha1_0, prec)
+        VGJ2_1 = orb.apply_complex_potential(1.0, BG22_1, alpha1_1, prec)
+        VGJ2_2 = orb.apply_complex_potential(1.0, BG22_2, alpha1_2, prec)
+        GJ2_alpha1 = VGJ2_0 + VGJ2_1 + VGJ2_2
 
-        VGK1_0 = orb.apply_complex_potential(1.0, BG12_0, spinorb2, prec)
-        VGK1_1 = orb.apply_complex_potential(1.0, BG12_1, spinorb2, prec)
-        VGK1_2 = orb.apply_complex_potential(1.0, BG12_2, spinorb2, prec)
-        GK1_phi2 = VGK1_0 + VGK1_1 + VGK1_2
+        VGK1_0 = orb.apply_complex_potential(1.0, BG12_0, alpha2_0, prec)
+        VGK1_1 = orb.apply_complex_potential(1.0, BG12_1, alpha2_1, prec)
+        VGK1_2 = orb.apply_complex_potential(1.0, BG12_2, alpha2_2, prec)
+        GK1_alpha2 = VGK1_0 + VGK1_1 + VGK1_2
 
-        VGK2_0 = orb.apply_complex_potential(1.0, BG21_0, spinorb1, prec)
-        VGK2_1 = orb.apply_complex_potential(1.0, BG21_1, spinorb1, prec)
-        VGK2_2 = orb.apply_complex_potential(1.0, BG21_2, spinorb1, prec)
-        GK2_phi1 = VGK2_0 + VGK2_1 + VGK2_2
-        
+        VGK2_0 = orb.apply_complex_potential(1.0, BG21_0, alpha1_0, prec)
+        VGK2_1 = orb.apply_complex_potential(1.0, BG21_1, alpha1_1, prec)
+        VGK2_2 = orb.apply_complex_potential(1.0, BG21_2, alpha1_2, prec)
+        GK2_alpha1 = VGK2_0 + VGK2_1 + VGK2_2
 
-        GJmK_phi1 = GJ1_phi1 - GK2_phi1
-        GJmK_phi2 = GJ2_phi2 - GK1_phi2
-
+        GJmK_phi1 = GJ2_alpha1 - GK2_alpha1
+        GJmK_phi2 = GJ1_alpha2 - GK1_alpha2
 
         GJmK_11_r, GJmK_11_i = spinorb1.dot(GJmK_phi1)
         GJmK_12_r, GJmK_12_i = spinorb1.dot(GJmK_phi2)
         GJmK_21_r, GJmK_21_i = spinorb2.dot(GJmK_phi1)
         GJmK_22_r, GJmK_22_i = spinorb2.dot(GJmK_phi2)
-
 
         GJmK = np.array([[ GJmK_11_r + GJmK_11_i * 1j , GJmK_12_r + GJmK_12_i * 1j],
                         [ GJmK_21_r + GJmK_21_i * 1j , GJmK_22_r + GJmK_22_i * 1j]])
