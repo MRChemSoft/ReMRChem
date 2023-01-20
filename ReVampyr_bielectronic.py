@@ -1274,7 +1274,7 @@ elif args.coulgau == 'gaunt-test':
                          [ hd_V_21_r + hd_V_21_i * 1j , hd_V_22_r + hd_V_22_i * 1j]])
 
         # Calculate Fij Fock matrix
-        Fmat = hd_V + JmK -GJmK
+        Fmat = hd_V + JmK - GJmK
         eps1 = Fmat[0,0].real
         eps2 = Fmat[1,1].real
 
@@ -1282,7 +1282,7 @@ elif args.coulgau == 'gaunt-test':
         print('Energy_Spin_Orbit_1', eps1 - light_speed**2)
 
         # Total Energy 
-        E_tot_JK = np.trace(Fmat) - 0.5 * (np.trace(JmK))
+        E_tot_JK = np.trace(Fmat) - 0.5 * (np.trace(JmK))  + 0.5 * (np.trace(GJmK))
         print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
 
         if(compute_last_energy):
