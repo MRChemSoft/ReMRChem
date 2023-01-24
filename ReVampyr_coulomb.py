@@ -34,9 +34,9 @@ if __name__ == '__main__':
                         help='position of nucleus in z')
     parser.add_argument('-l', '--light_speed', dest='lux_speed', type=float, default=137.03599913900001,
                         help='light of speed')
-    parser.add_argument('-o', '--order', dest='order', type=int, default=7,
+    parser.add_argument('-o', '--order', dest='order', type=int, default=8,
                         help='put the order of Polinomial')
-    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-4,
+    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-6,
                         help='put the precision')
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
@@ -398,4 +398,4 @@ if args.coulgau == 'coulomb':
     print('GJmK_12_i', GJmK_12_i)
     print('GJmK_21_i', GJmK_21_i)
     print('GJmK_22_i', GJmK_22_i)
-
+    print('E_C_G', E_tot_JK - GJmK_11_r - (2.0 *light_speed**2))

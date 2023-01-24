@@ -32,6 +32,16 @@ class complex_fcn:
         self.real.setZero()
         self.imag.setZero()
 
+    def save(self, name):
+        self.real.saveTree(f"real_{name}")
+        self.imag.saveTree(f"imag_{name}")
+
+    def read(self, name):
+        #self.real = vp.FunctionTree(self.mra)
+        #self.imag = vp.FunctionTree(self.mra)
+        self.real.loadTree(f"real_test")
+        self.imag.loadTree(f"imag_test")
+
     def crop(self, prec):
         self.real.crop(prec)
         self.imag.crop(prec)
