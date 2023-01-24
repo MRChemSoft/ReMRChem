@@ -41,16 +41,16 @@ class orbital4c:
         return output
 
     def save(self, name):
-        self.comp_array[0].save(f"Large_alpha_{name}")
-        self.comp_array[1].save(f"Large_beta_{name}")
-        self.comp_array[2].save(f"Small_alpha_{name}")
-        self.comp_array[3].save(f"Small_beta_{name}")
+        self.comp_array[0].save(f"{name}_Large_alpha")
+        self.comp_array[1].save(f"{name}_Large_beta")
+        self.comp_array[2].save(f"{name}_Small_alpha")
+        self.comp_array[3].save(f"{name}_Small_beta")
 
     def read(self, name):
-        self.comp_array[0].read(f"Large_alpha_{name}")
-        self.comp_array[1].read(f"Large_beta_{name}")
-        self.comp_array[2].read(f"Small_alpha_{name}")
-        self.comp_array[3].read(f"Small_beta_{name}")
+        self.comp_array[0].read(f"{name}_Large_alpha")
+        self.comp_array[1].read(f"{name}_Large_beta")
+        self.comp_array[2].read(f"{name}_Small_alpha")
+        self.comp_array[3].read(f"{name}_Small_beta")
 
     def __rmul__(self, factor):
         output = orbital4c()
