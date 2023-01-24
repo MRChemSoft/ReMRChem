@@ -39,8 +39,8 @@ class complex_fcn:
     def read(self, name):
         #self.real = vp.FunctionTree(self.mra)
         #self.imag = vp.FunctionTree(self.mra)
-        self.real.loadTree(f"real_test")
-        self.imag.loadTree(f"imag_test")
+        self.real.loadTree(f"real_{name}")
+        self.imag.loadTree(f"imag_{name}")
 
     def crop(self, prec):
         self.real.crop(prec)
