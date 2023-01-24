@@ -37,8 +37,6 @@ class complex_fcn:
         self.imag.saveTree(f"{name}_imag")
 
     def read(self, name):
-        #self.real = vp.FunctionTree(self.mra)
-        #self.imag = vp.FunctionTree(self.mra)
         self.real.loadTree(f"{name}_real")
         self.imag.loadTree(f"{name}_imag")
 
