@@ -40,6 +40,25 @@ class orbital4c:
         output.comp_array = self.comp_array - other.comp_array
         return output
 
+    def save(self):
+        self.comp_array[0].save(f"Large_alpha")
+        self.comp_array[1].save(f"Large_beta")
+        self.comp_array[2].save(f"Small_alpha")
+        self.comp_array[3].save(f"Small_beta")
+
+    def read(self):
+        self.comp_array[0].read(f"Large_alpha")
+        self.comp_array[1].read(f"Large_beta")
+        self.comp_array[2].read(f"Small_alpha")
+        self.comp_array[3].read(f"Small_beta")
+        
+        output = orbital4c()
+        for i in range(4):
+            if __name__ == "La"          
+
+        return output
+        f_tree.saveTree()
+
     def __rmul__(self, factor):
         output = orbital4c()
         output.comp_array =  factor * self.comp_array
