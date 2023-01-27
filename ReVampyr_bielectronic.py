@@ -90,19 +90,19 @@ complexfc.copy_fcns(real=gauss_tree)
 print('Define orbital as a complex function DONE')
 
 ################ Define spinorbitals ########## 
-#spinorb1 = orb.orbital4c()
-#spinorb1.copy_components(La=complexfc)
-#spinorb1.init_small_components(prec/10)
-#spinorb1.normalize()
-##print('spinorb1',spinorb1)
-##print('cspinorb1',cspinorb1)
-#
-#spinorb2 = orb.orbital4c()
-#spinorb2.copy_components(Lb=complexfc)
-#spinorb2.init_small_components(prec/10)
-#spinorb2.normalize()
-##print('spinorb2',spinorb2)
-##print('cspinorb2',cspinorb2)
+spinorb1 = orb.orbital4c()
+spinorb1.copy_components(La=complexfc)
+spinorb1.init_small_components(prec/10)
+spinorb1.normalize()
+#print('spinorb1',spinorb1)
+#print('cspinorb1',cspinorb1)
+
+spinorb2 = orb.orbital4c()
+spinorb2.copy_components(Lb=complexfc)
+spinorb2.init_small_components(prec/10)
+spinorb2.normalize()
+#print('spinorb2',spinorb2)
+#print('cspinorb2',cspinorb2)
 
 #print('Define spinorbitals DONE')
 
@@ -134,14 +134,11 @@ if args.coulgau == 'coulomb':
 
     while error_norm > prec:
 
-        cspinorb1 = spinorb1.complex_conj()
-        cspinorb2 = spinorb2.complex_conj()
-        
         # Definition of different densities
-        n_11 = cspinorb1.overlap_density(spinorb1, prec)
-        n_12 = cspinorb1.overlap_density(spinorb2, prec)
-        n_21 = cspinorb2.overlap_density(spinorb1, prec)
-        n_22 = cspinorb2.overlap_density(spinorb2, prec)
+        n_11 = spinorb1.overlap_density(spinorb1, prec)
+        n_12 = spinorb1.overlap_density(spinorb2, prec)
+        n_21 = spinorb2.overlap_density(spinorb1, prec)
+        n_22 = spinorb2.overlap_density(spinorb2, prec)
 
         # Definition of Poisson operator
         Pua = vp.PoissonOperator(mra, prec)
@@ -170,62 +167,53 @@ if args.coulgau == 'coulomb':
         K1a = cf.complex_fcn()
         K1a.real = K1a_Re
         K1a.imag = K1a_Im
-        
+
         K1b = cf.complex_fcn()
         K1b.real = K1b_Re
-        K1b.imag = K1b_Im 
-        
+        K1b.imag = K1b_Im
+
         K2a = cf.complex_fcn()
         K2a.real = K2a_Re
         K2a.imag = K2a_Im
-        
+
         K2b = cf.complex_fcn()
         K2b.real = K2b_Re
         K2b.imag = K2b_Im
-
 
         # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
         hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
 
-
         # Applying nuclear potential to spin orbit 1 and 2
         v_psi_1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
         v_psi_2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec)
-
 
         # Definition of full 4c hamitoninan
         add_psi_1 = hd_psi_1 + v_psi_1
         add_psi_2 = hd_psi_2 + v_psi_2
 
-
         # Calculation of necessary potential contributions to Hellmotz
         J_spinorb1  = orb.apply_complex_potential(1.0, J, spinorb1, prec)
-        J_spinorb2  = orb.apply_complex_potential(1.0, J, spinorb2, prec)        
-
+        J_spinorb2  = orb.apply_complex_potential(1.0, J, spinorb2, prec)
 
         Ka_spinorb1  = orb.apply_complex_potential(1.0, K1a, spinorb2, prec)
         Kb_spinorb1  = orb.apply_complex_potential(1.0, K1b, spinorb1, prec)
         Ka_spinorb2  = orb.apply_complex_potential(1.0, K2a, spinorb1, prec)
         Kb_spinorb2  = orb.apply_complex_potential(1.0, K2b, spinorb2, prec)
 
-
         K_spinorb1 = Ka_spinorb1 + Kb_spinorb1
         K_spinorb2 = Ka_spinorb2 + Kb_spinorb2
         #print('K_spinorb1', K_spinorb1)
-
 
         E_H11, imag_H11 = spinorb1.dot(J_spinorb1)
         E_H12, imag_H12 = spinorb1.dot(J_spinorb2)
         E_H21, imag_H21 = spinorb2.dot(J_spinorb1)
         E_H22, imag_H22 = spinorb2.dot(J_spinorb2)
-             
-             
+
         E_K11, imag_K11 = spinorb1.dot(K_spinorb1)
         E_K12, imag_K12 = spinorb1.dot(K_spinorb2)
         E_K21, imag_K21 = spinorb2.dot(K_spinorb1)
         E_K22, imag_K22 = spinorb2.dot(K_spinorb2)
-
 
         # Orbital Energy calculation
         energy_11, imag_11 = spinorb1.dot(add_psi_1)
@@ -233,27 +221,22 @@ if args.coulgau == 'coulomb':
         energy_21, imag_21 = spinorb2.dot(add_psi_1)
         energy_22, imag_22 = spinorb2.dot(add_psi_2)
 
-
         # Calculate Fij Fock matrix
         F_11 = energy_11 + E_H11 - E_K11
         F_12 = energy_12 + E_H12 - E_K12
         F_21 = energy_21 + E_H21 - E_K21
         F_22 = energy_22 + E_H22 - E_K22
-        
 
         # Orbital Energy
         print('Energy_Spin_Orbit_1', F_11 - light_speed**2)
         print('Energy_Spin_Orbit_2', F_22 - light_speed**2)
 
-
         # Total Energy 
         E_tot_JK = F_11 + F_22 - 0.5 * (E_H11 + E_H22 - E_K11 - E_K22)
         print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
 
-
         V_J_K_spinorb1 = v_psi_1 + J_spinorb1 - K_spinorb1 - (F_12 * spinorb2)
         V_J_K_spinorb2 = v_psi_2 + J_spinorb2 - K_spinorb2 - (F_21 * spinorb1)
-
 
         # Calculation of Helmotz
         tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, F_11, prec)
@@ -265,7 +248,6 @@ if args.coulgau == 'coulomb':
         new_orbital_2 *= 0.5/light_speed**2
         new_orbital_2.normalize()
 
-
         # Compute orbital error
         delta_psi_1 = new_orbital_1 - spinorb1
         delta_psi_2 = new_orbital_2 - spinorb2
@@ -274,7 +256,6 @@ if args.coulgau == 'coulomb':
         orbital_error_sq = deltasq1 + deltasq2
         error_norm = np.sqrt(orbital_error_sq)
         print('Orbital_Error norm', error_norm)
-
 
         # Compute overlap
         dot_11 = new_orbital_1.dot(new_orbital_1)
@@ -287,18 +268,14 @@ if args.coulgau == 'coulomb':
         s_21 = dot_21[0] + 1j * dot_21[1]
         s_22 = dot_22[0] + 1j * dot_22[1]
 
-
         # Compute Overlap Matrix
         S_tilde = np.array([[s_11, s_12], [s_21, s_22]])
-
 
         # Compute U matrix
         sigma, U = LA.eig(S_tilde)
 
-
         # Compute matrix S^-1/2
         Sm5 = U @ np.diag(sigma ** (-0.5)) @ U.transpose()
-
 
         # Compute the new orthogonalized orbitals
         spinorb1 = Sm5[0, 0] * new_orbital_1 + Sm5[0, 1] * new_orbital_2
@@ -307,15 +284,12 @@ if args.coulgau == 'coulomb':
         spinorb2.crop(prec)
 
    ##########
-    cspinorb1 = spinorb1.complex_conj()
-    cspinorb2 = spinorb2.complex_conj()
 
-        
     # Definition of different densities
-    n_11 = cspinorb1.overlap_density(spinorb1, prec)
-    n_12 = cspinorb1.overlap_density(spinorb2, prec)
-    n_21 = cspinorb2.overlap_density(spinorb1, prec)
-    n_22 = cspinorb2.overlap_density(spinorb2, prec)
+    n_11 = spinorb1.overlap_density(spinorb1, prec)
+    n_12 = spinorb1.overlap_density(spinorb2, prec)
+    n_21 = spinorb2.overlap_density(spinorb1, prec)
+    n_22 = spinorb2.overlap_density(spinorb2, prec)
 
     # Definition of Poisson operator
     Pua = vp.PoissonOperator(mra, prec)
@@ -344,62 +318,53 @@ if args.coulgau == 'coulomb':
     K1a = cf.complex_fcn()
     K1a.real = K1a_Re
     K1a.imag = K1a_Im
-        
+
     K1b = cf.complex_fcn()
     K1b.real = K1b_Re
-    K1b.imag = K1b_Im 
-        
+    K1b.imag = K1b_Im
+
     K2a = cf.complex_fcn()
     K2a.real = K2a_Re
     K2a.imag = K2a_Im
-        
+
     K2b = cf.complex_fcn()
     K2b.real = K2b_Re
     K2b.imag = K2b_Im
-
 
     # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
     hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
     hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
 
-
     # Applying nuclear potential to spin orbit 1 and 2
     v_psi_1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
     v_psi_2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec)
-
 
     # Definition of full 4c hamitoninan
     add_psi_1 = hd_psi_1 + v_psi_1
     add_psi_2 = hd_psi_2 + v_psi_2
 
-
     # Calculation of necessary potential contributions to Hellmotz
     J_spinorb1  = orb.apply_complex_potential(1.0, J, spinorb1, prec)
-    J_spinorb2  = orb.apply_complex_potential(1.0, J, spinorb2, prec)        
-
+    J_spinorb2  = orb.apply_complex_potential(1.0, J, spinorb2, prec)
 
     Ka_spinorb1  = orb.apply_complex_potential(1.0, K1a, spinorb2, prec)
     Kb_spinorb1  = orb.apply_complex_potential(1.0, K1b, spinorb1, prec)
     Ka_spinorb2  = orb.apply_complex_potential(1.0, K2a, spinorb1, prec)
     Kb_spinorb2  = orb.apply_complex_potential(1.0, K2b, spinorb2, prec)
 
-
     K_spinorb1 = Ka_spinorb1 + Kb_spinorb1
     K_spinorb2 = Ka_spinorb2 + Kb_spinorb2
     #print('K_spinorb1', K_spinorb1)
-
 
     E_H11, imag_H11 = spinorb1.dot(J_spinorb1)
     E_H12, imag_H12 = spinorb1.dot(J_spinorb2)
     E_H21, imag_H21 = spinorb2.dot(J_spinorb1)
     E_H22, imag_H22 = spinorb2.dot(J_spinorb2)
-         
-         
+
     E_K11, imag_K11 = spinorb1.dot(K_spinorb1)
     E_K12, imag_K12 = spinorb1.dot(K_spinorb2)
     E_K21, imag_K21 = spinorb2.dot(K_spinorb1)
     E_K22, imag_K22 = spinorb2.dot(K_spinorb2)
-
 
     # Orbital Energy calculation
     energy_11, imag_11 = spinorb1.dot(add_psi_1)
@@ -407,18 +372,15 @@ if args.coulgau == 'coulomb':
     energy_21, imag_21 = spinorb2.dot(add_psi_1)
     energy_22, imag_22 = spinorb2.dot(add_psi_2)
 
-
     # Calculate Fij Fock matrix
     F_11 = energy_11 + E_H11 - E_K11
     F_12 = energy_12 + E_H12 - E_K12
     F_21 = energy_21 + E_H21 - E_K21
     F_22 = energy_22 + E_H22 - E_K22
-        
 
     # Orbital Energy
     print('Energy_Spin_Orbit_1', F_11 - light_speed**2)
     print('Energy_Spin_Orbit_2', F_22 - light_speed**2)
-
 
     # Total Energy 
     E_tot_JK = F_11 + F_22 - 0.5 * (E_H11 + E_H22 - E_K11 - E_K22)
