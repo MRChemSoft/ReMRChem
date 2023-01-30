@@ -93,7 +93,6 @@ spinorb1 = orb.orbital4c()
 spinorb1.copy_components(La=complexfc)
 spinorb1.init_small_components(prec/10)
 spinorb1.normalize()
-spinorb2 = spinorb1.ktrs()
 print('Define spinorbitals DONE')
 
 ################### Define V potential ######################
@@ -126,32 +125,11 @@ if args.coulgau == 'coulomb':
     compute_last_energy = False
 
     while (error_norm > prec or compute_last_energy):
-        #n_11 = spinorb1.overlap_density(spinorb1, prec)
-        #n_12 = spinorb1.overlap_density(spinorb2, prec)
-        #n_21 = spinorb2.overlap_density(spinorb1, prec)
+        spinorb2 = spinorb1.ktrs()
         n_22 = spinorb2.overlap_density(spinorb2, prec)
 
         # Definition of two electron operators
-        #B11    = P(n_11.real) * (4 * np.pi)
         B22    = P(n_22.real) * (4 * np.pi)
-        #B12_Re = P(n_12.real) * (4 * np.pi)
-        #B12_Im = P(n_12.imag) * (4 * np.pi)
-        #B21_Re = P(n_21.real) * (4 * np.pi)
-        #B21_Im = P(n_21.imag) * (4 * np.pi)
-        #print('B11',B11)
-        #print('B22',B22)
-        #print('B12_Re',B12_Re)
-        #print('B12_Im',B12_Im)
-        #print('B21_Re',B21_Re)
-        #print('B21_Im',B21_Im)
-
-        #B12 = cf.complex_fcn()
-        #B12.real = B12_Re
-        #B12.imag = B12_Im
-
-        #B21 = cf.complex_fcn()
-        #B21.real = B21_Re
-        #B21.imag = B21_Im
 
         # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
@@ -167,20 +145,13 @@ if args.coulgau == 'coulomb':
 
         # Calculation of two electron terms
         J2_phi1 = orb.apply_potential(1.0, B22, spinorb1, prec)
-        #J1_phi2 = orb.apply_potential(1.0, B11, spinorb2, prec)
-        #K2_phi1 = orb.apply_complex_potential(1.0, B21, spinorb2, prec)
-        #K1_phi2 = orb.apply_complex_potential(1.0, B12, spinorb1, prec)
 
-        JmK_phi1 = J2_phi1 #- K2_phi1
-        #JmK_phi2 = J1_phi2 #- K1_phi2
+        JmK_phi1 = J2_phi1 
 
         JmK_11_r, JmK_11_i = spinorb1.dot(JmK_phi1)
-        #JmK_12_r, JmK_12_i = spinorb1.dot(JmK_phi2)
-        #JmK_21_r, JmK_21_i = spinorb2.dot(JmK_phi1)
-        #JmK_22_r, JmK_22_i = spinorb2.dot(JmK_phi2)
 
-        JmK = np.array([[ JmK_11_r + JmK_11_i * 1j , JmK_11_r + JmK_11_i * 1j],
-                        [ JmK_11_r + JmK_11_i * 1j , JmK_11_r + JmK_11_i * 1j]])
+        JmK = np.array([[ JmK_11_r + JmK_11_i * 1j , 0.0],
+                        [ 0.0 , JmK_11_r + JmK_11_i * 1j]])
 
         # Orbital Energy calculation
         hd_V_11_r, hd_V_11_i = spinorb1.dot(add_psi_1)
@@ -206,14 +177,13 @@ if args.coulgau == 'coulomb':
         if(compute_last_energy):
             break
 
-        V_J_K_spinorb1 = v_psi_1 + JmK_phi1 - (Fmat[0,1] * spinorb2)
+        V_J_K_spinorb1 = v_psi_1 + JmK_phi1
 
         # Calculation of Helmotz
         tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, eps1, prec)
         new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, eps1, der = default_der)
         new_orbital_1 *= 0.5/light_speed**2
         new_orbital_1.normalize()
-        new_orbital_2 = new_orbital_1.ktrs()
 
         # Compute orbital error
         delta_psi_1 = new_orbital_1 - spinorb1
@@ -221,12 +191,10 @@ if args.coulgau == 'coulomb':
         error_norm = np.sqrt(deltasq1)
         print('Orbital_Error norm', error_norm)
         spinorb1 = new_orbital_1
-        spinorb2 = new_orbital_2
         if (error_norm < prec):
             compute_last_energy = True
 
         spinorb1.crop(prec)
-        spinorb2.crop(prec)
 
     ##########
 if args.coulgau == 'gaunt':  
