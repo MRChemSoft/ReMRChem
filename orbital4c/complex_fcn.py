@@ -40,9 +40,9 @@ class complex_fcn:
         self.real.loadTree(f"{name}_real")
         self.imag.loadTree(f"{name}_imag")
 
-    def crop(self, prec):
-        self.real.crop(prec)
-        self.imag.crop(prec)
+    def crop(self, prec, abs = False):
+        self.real.crop(prec, abs)
+        self.imag.crop(prec, abs)
 
     def __add__(self, other):
         output = complex_fcn()

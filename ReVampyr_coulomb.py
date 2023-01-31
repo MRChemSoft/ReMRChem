@@ -91,10 +91,10 @@ complexfc.copy_fcns(real=gauss_tree)
 print('Define orbital as a complex function DONE')
 
 ################ Define spinorbitals ########## 
-spinorb1 = orb.orbital4c()
-spinorb1.copy_components(La=complexfc)
-spinorb1.init_small_components(prec/10)
-spinorb1.normalize()
+spinorb = orb.orbital4c()
+spinorb.copy_components(La=complexfc)
+spinorb.init_small_components(prec/10)
+spinorb.normalize()
 print('Define spinorbitals DONE')
 
 ################### Define V potential ######################
@@ -119,11 +119,8 @@ default_der = args.deriv
 print('Define V Potential', args.potential, 'DONE')
 
 P = vp.PoissonOperator(mra, prec)
-
-#############################START WITH CALCULATION###################################
-if args.coulgau == 'coulomb':
-
-def coulomb_gs_2e(spinorb1, v_tree):
+    
+def coulomb_gs_2e(spinorb1, potential):
     print('Hartree-Fock (Coulomb interaction)')
     error_norm = 1
     compute_last_energy = False
@@ -146,7 +143,7 @@ def coulomb_gs_2e(spinorb1, v_tree):
                            [hd_21_r + hd_21_i * 1j, hd_22_r + hd_22_i * 1j]])
 
         # Applying nuclear potential to spin orbit 1 and 2
-        v_psi_1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
+        v_psi_1 = orb.apply_potential(-1.0, potential, spinorb1, prec)
         V_11_r, V_11_i = spinorb1.dot(v_psi_1)
         v_mat = np.array([[ V_11_r + V_11_i * 1j, 0],
                           [ 0,                    V_11_r + V_11_i * 1j]])
@@ -184,7 +181,7 @@ def coulomb_gs_2e(spinorb1, v_tree):
         new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, eps1, der = default_der)
         new_orbital_1 *= 0.5/light_speed**2
         new_orbital_1.normalize()
-        new_orbital_1.crop(prec)       
+        new_orbital_1.cropLargeSmall(prec)       
 
         # Compute orbital error
         delta_psi_1 = new_orbital_1 - spinorb1
@@ -196,3 +193,8 @@ def coulomb_gs_2e(spinorb1, v_tree):
             compute_last_energy = True
         print('ORBITAL\n', spinorb1)
     return(spinorb1, spinorb2)
+
+#############################START WITH CALCULATION###################################
+if args.coulgau == 'coulomb':
+    spinorb1, spinorb2 = coulomb_gs_2e(spinorb, V_tree)
+
