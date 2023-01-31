@@ -122,6 +122,8 @@ P = vp.PoissonOperator(mra, prec)
 
 #############################START WITH CALCULATION###################################
 if args.coulgau == 'coulomb':
+
+def coulomb_gs_2e(spinorb1, v_tree):
     print('Hartree-Fock (Coulomb interaction)')
     error_norm = 1
     compute_last_energy = False
@@ -193,4 +195,4 @@ if args.coulgau == 'coulomb':
         if(error_norm < prec):
             compute_last_energy = True
         print('ORBITAL\n', spinorb1)
-
+    return(spinorb1, spinorb2)
