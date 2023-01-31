@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
     parser.add_argument('-a', '--atype', dest='atype', type=str, default='He',
                         help='put the atom type')
-    parser.add_argument('-d', '--derivative', dest='deriv', type=str, default='PH',
+    parser.add_argument('-d', '--derivative', dest='deriv', type=str, default='ABGV',
                         help='put the type of derivative')
     parser.add_argument('-z', '--charge', dest='charge', type=float, default=2.0,
                         help='put the atom charge')
@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
 
-    assert args.deriv in ['PH', 'BS'], 'Please, specify the type of derivative'
+    assert args.deriv in ['PH', 'BS', 'ABGV'], 'Please, specify the type of derivative'
 
 
 ################# Define Paramters ###########################
