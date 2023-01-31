@@ -134,44 +134,38 @@ if args.coulgau == 'coulomb':
         # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
         hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
+        hd_11_r, hd_11_i = spinorb1.dot(hd_psi_1)
+        hd_12_r, hd_12_i = spinorb1.dot(hd_psi_2)
+        hd_21_r, hd_21_i = spinorb2.dot(hd_psi_1)
+        hd_22_r, hd_22_i = spinorb2.dot(hd_psi_2)
+        hd_mat = np.array([[hd_11_r + hd_11_i * 1j, hd_12_r + hd_12_i * 1j],
+                           [hd_21_r + hd_21_i * 1j, hd_22_r + hd_22_i * 1j]])
 
         # Applying nuclear potential to spin orbit 1 and 2
         v_psi_1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
-        v_psi_2 = orb.apply_potential(-1.0, V_tree, spinorb2, prec)
-
-        # Add Dirac and ext potential parts
-        add_psi_1 = hd_psi_1 + v_psi_1
-        add_psi_2 = hd_psi_2 + v_psi_2
-
+        V_11_r, V_11_i = spinorb1.dot(v_psi_1)
+        v_mat = np.array([[ V_11_r + V_11_i * 1j, 0],
+                          [ 0,                    V_11_r + V_11_i * 1j]])
         # Calculation of two electron terms
         J2_phi1 = orb.apply_potential(1.0, B22, spinorb1, prec)
-
-        JmK_phi1 = J2_phi1 
-
+        JmK_phi1 = J2_phi1  # K part is zero for 2e system in GS
         JmK_11_r, JmK_11_i = spinorb1.dot(JmK_phi1)
+        JmK_mat = np.array([[ JmK_11_r + JmK_11_i * 1j, 0],
+                        [ 0,                        JmK_11_r + JmK_11_i * 1j]])
 
-        JmK = np.array([[ JmK_11_r + JmK_11_i * 1j , 0.0],
-                        [ 0.0 , JmK_11_r + JmK_11_i * 1j]])
-
-        # Orbital Energy calculation
-        hd_V_11_r, hd_V_11_i = spinorb1.dot(add_psi_1)
-        hd_V_12_r, hd_V_12_i = spinorb1.dot(add_psi_2)
-        hd_V_21_r, hd_V_21_i = spinorb2.dot(add_psi_1)
-        hd_V_22_r, hd_V_22_i = spinorb2.dot(add_psi_2)
-
-        hd_V = np.array([[ hd_V_11_r + hd_V_11_i * 1j , hd_V_12_r + hd_V_12_i * 1j],
-                         [ hd_V_21_r + hd_V_21_i * 1j , hd_V_22_r + hd_V_22_i * 1j]])
+        hd_V_mat = hd_mat + v_mat
 
         # Calculate Fij Fock matrix
-        Fmat = hd_V + JmK
-        eps1 = Fmat[0,0].real
-        eps2 = Fmat[1,1].real
+        F_mat = hd_V_mat + JmK_mat
+        eps1 = F_mat[0,0].real
+        eps2 = F_mat[1,1].real
+        E_tot_JK = np.trace(F_mat) - 0.5 * (np.trace(JmK_mat))
 
-        # Orbital Energy
-        print('Energy_Spin_Orbit_1', eps1 - light_speed**2)
-
-        # Total Energy 
-        E_tot_JK = np.trace(Fmat) - 0.5 * (np.trace(JmK))
+        print('h_d matrix\n', hd_mat)
+        print('v matrix\n', v_mat)
+        print('JmK matrix\n', JmK_mat)
+        print('F matrix\n', F_mat)
+        print('Spinor Energy', eps1 - light_speed**2)
         print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
 
         if(compute_last_energy):
@@ -180,21 +174,21 @@ if args.coulgau == 'coulomb':
         V_J_K_spinorb1 = v_psi_1 + JmK_phi1
 
         # Calculation of Helmotz
-        tmp_1 = orb.apply_helmholtz(V_J_K_spinorb1, eps1, prec)
-        new_orbital_1 = orb.apply_dirac_hamiltonian(tmp_1, prec, eps1, der = default_der)
-        new_orbital_1 *= 0.5/light_speed**2
-        new_orbital_1.normalize()
+        tmp = orb.apply_helmholtz(V_J_K_spinorb1, eps1, prec)
+        new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps1, der = default_der)
+        new_orbital *= 0.5/light_speed**2
+        new_orbital.normalize()
 
         # Compute orbital error
-        delta_psi_1 = new_orbital_1 - spinorb1
-        deltasq1 = delta_psi_1.squaredNorm()
-        error_norm = np.sqrt(deltasq1)
+        delta_psi = new_orbital - spinorb1
+        deltasq = delta_psi.squaredNorm()
+        error_norm = np.sqrt(deltasq)
         print('Orbital_Error norm', error_norm)
-        spinorb1 = new_orbital_1
+        spinorb1 = new_orbital
+        spinorb1.crop(prec)
         if (error_norm < prec):
             compute_last_energy = True
 
-        spinorb1.crop(prec)
 
     ##########
 if args.coulgau == 'gaunt':  
