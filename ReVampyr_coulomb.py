@@ -93,9 +93,6 @@ spinorb1 = orb.orbital4c()
 spinorb1.copy_components(La=complexfc)
 spinorb1.init_small_components(prec/10)
 spinorb1.normalize()
-#print('spinorb1',spinorb1)
-#print('cspinorb1',cspinorb1)
-
 print('Define spinorbitals DONE')
 
 ################### Define V potential ######################
