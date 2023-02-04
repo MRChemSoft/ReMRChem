@@ -456,21 +456,21 @@ if args.coulgau == 'gauge':
     GaugeJ2_alpha1 = GaugeJ2_alpha1_xy + GaugeJ2_alpha1_xz + GaugeJ2_alpha1_yz
 
 
-    VgaugeK2_0 = orb.apply_complex_potential(1.0, Bgauge21_0_xy, alpha2_0, prec)
-    VgaugeK2_1 = orb.apply_complex_potential(1.0, Bgauge21_1_xy, alpha2_1, prec)
-    VgaugeK2_2 = orb.apply_complex_potential(1.0, Bgauge21_2_xy, alpha2_2, prec)
+    VgaugeK2_0_xy = orb.apply_complex_potential(1.0, Bgauge21_0_xy, alpha2_0, prec)
+    VgaugeK2_1_xy = orb.apply_complex_potential(1.0, Bgauge21_1_xy, alpha2_1, prec)
+    VgaugeK2_2_xy = orb.apply_complex_potential(1.0, Bgauge21_2_xy, alpha2_2, prec)
     GaugeK2_alpha1_xy = VgaugeK2_0_xy + VgaugeK2_1_xy + VgaugeK2_2_xy
 
 
-    VgaugeK2_0 = orb.apply_complex_potential(1.0, Bgauge21_0_xz, alpha2_0, prec)
-    VgaugeK2_1 = orb.apply_complex_potential(1.0, Bgauge21_1_xz, alpha2_1, prec)
-    VgaugeK2_2 = orb.apply_complex_potential(1.0, Bgauge21_2_xz, alpha2_2, prec)
+    VgaugeK2_0_xz = orb.apply_complex_potential(1.0, Bgauge21_0_xz, alpha2_0, prec)
+    VgaugeK2_1_xz = orb.apply_complex_potential(1.0, Bgauge21_1_xz, alpha2_1, prec)
+    VgaugeK2_2_xz = orb.apply_complex_potential(1.0, Bgauge21_2_xz, alpha2_2, prec)
     GaugeK2_alpha1_xz = VgaugeK2_0_xz + VgaugeK2_1_xz + VgaugeK2_2_xz
 
 
-    VgaugeK2_0 = orb.apply_complex_potential(1.0, Bgauge21_0_yz, alpha2_0, prec)
-    VgaugeK2_1 = orb.apply_complex_potential(1.0, Bgauge21_1_yz, alpha2_1, prec)
-    VgaugeK2_2 = orb.apply_complex_potential(1.0, Bgauge21_2_yz, alpha2_2, prec)
+    VgaugeK2_0_yz = orb.apply_complex_potential(1.0, Bgauge21_0_yz, alpha2_0, prec)
+    VgaugeK2_1_yz = orb.apply_complex_potential(1.0, Bgauge21_1_yz, alpha2_1, prec)
+    VgaugeK2_2_yz = orb.apply_complex_potential(1.0, Bgauge21_2_yz, alpha2_2, prec)
     GaugeK2_alpha1_yz = VgaugeK2_0_yz + VgaugeK2_1_yz + VgaugeK2_2_yz
 
 
@@ -479,7 +479,7 @@ if args.coulgau == 'gauge':
 
     GaugeJmK_phi1 = GaugeJ2_alpha1 - GaugeK2_alpha1
     
-    GJmK_11_r, GJmK_11_i = spinorb1.dot(GJmK_phi1)
+    GaugeJmK_11_r, GJmK_11_i = spinorb1.dot(GJmK_phi1)
 
     print('GaugeJmK_11_r', GaugeJmK_11_r)
 #############################END GAUGE ################################### 
