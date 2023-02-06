@@ -36,9 +36,9 @@ if __name__ == '__main__':
                         help='position of nucleus in z')
     parser.add_argument('-l', '--light_speed', dest='lux_speed', type=float, default=137.03599913900001,
                         help='light of speed')
-    parser.add_argument('-o', '--order', dest='order', type=int, default=8,
+    parser.add_argument('-o', '--order', dest='order', type=int, default=6,
                         help='put the order of Polinomial')
-    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-6,
+    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-4,
                         help='put the precision')
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     assert args.charge > 1.0, 'Please consider only atoms with more than one electron'
 
-    assert args.coulgau in ['coulomb', 'gaunt', 'gaunt-test'], 'Please, specify coulgau in a rigth way: coulomb or gaunt'
+    assert args.coulgau in ['coulomb', 'gaunt', 'gauge'], 'Please, specify coulgau in a rigth way: coulomb or gaunt'
 
     assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
 
@@ -302,7 +302,8 @@ if args.coulgau == 'gauge':
     cphi2_alpha2_2 = spinorb2.overlap_density(alpha2_2, prec)    
     
     #Definitioin of Gauge operator 
-    O = r3m.GaugeOperator(mra, 0.0001, args.box, prec)
+    O = r3m.GaugeOperator(mra, 0.0001, 60.0, prec)
+    print('Gauge operator DONE')
 
     #Definition of Gaunt two electron operators       
     Bgauge22_Re0_xy = O(cphi2_alpha2_0.real, 1, 1, 0) 
@@ -479,7 +480,7 @@ if args.coulgau == 'gauge':
 
     GaugeJmK_phi1 = GaugeJ2_alpha1 - GaugeK2_alpha1
     
-    GaugeJmK_11_r, GJmK_11_i = spinorb1.dot(GJmK_phi1)
+    GaugeJmK_11_r, GaugeJmK_11_i = spinorb1.dot(GaugeJmK_phi1)
 
     print('GaugeJmK_11_r', GaugeJmK_11_r)
 #############################END GAUGE ################################### 

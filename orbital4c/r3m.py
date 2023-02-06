@@ -12,7 +12,7 @@ class GaugeOperator():
         iexp = self.fill_separated_expansion(r_min, r_max, prec)
         self.gauge = vp.CartesianConvolution(mra, iexp, prec)   
 
-    def alpha_beta_rm3(t):
+    def alpha_beta_rm3(self, t):
         c = np.cosh(t)
         s = np.sinh(t)
         e = np.exp(-s)
@@ -24,7 +24,7 @@ class GaugeOperator():
         alpha, beta = self.alpha_beta_rm3(t)
         return alpha * np.exp(-beta * r**2)
         
-    def calc_min_max_rm3(r_min, prec):
+    def calc_min_max_rm3(self, r_min, prec):
         t1 = 1.0
         t2 = 1.0
         while ((2 * t1 * np.exp(-t1)) > prec): t1 *= 1.1
