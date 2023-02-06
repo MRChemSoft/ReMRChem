@@ -302,7 +302,7 @@ if args.coulgau == 'gauge':
     cphi2_alpha2_2 = spinorb2.overlap_density(alpha2_2, prec)    
     
     #Definitioin of Gauge operator 
-    O = r3m.GaugeOperator(mra, 0.0001, 60.0, prec)
+    O = r3m.GaugeOperator(mra, 0.0001, args.box, prec)
     print('Gauge operator DONE')
 
     #Definition of Gaunt two electron operators       
