@@ -401,19 +401,3 @@ if args.coulgau == 'coulomb':
     print('GJmK_21_i', GJmK_21_i)
     print('GJmK_22_i', GJmK_22_i)
     print('E_C_G', E_tot_JK - GJmK_11_r - (2.0 *light_speed**2))
-
-if args.colgau == 'gauge':
-iexp = vp1.GaussExp() 
-    while (iexp > prec or fuck):
-        b = [1.0e4,...,..]
-        a = [(b / np.pi) ** (D / 2.0),....] #they are worng ask Luca
-        ifunc = vp1.GaussFunc(alpha=a, beta=b)
-        iexp.append(ifunc)
-    
-    Gauge_Operator = vp.CartesianConvolution(mra, iexp, prec=epsilon)
-    Gauge_Operator.setCartesianComponents(0, 0, 0)
-
-        O = r3m.GaugeOperator(mra, 0.0001, args.box, prec)
-        I0 = O(cphi1_alpha1_0, 1, 0, 0)
-        I1 = O(cphi1_alpha1_0, 0, 1, 0)  
-        I2 = O(cphi1_alpha1_0, 0, 0, 1)  
