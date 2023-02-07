@@ -292,195 +292,111 @@ if args.coulgau == 'gauge':
     alpha2_1 =  spinorb2.alpha(1)
     alpha2_2 =  spinorb2.alpha(2)
 
-    #Defintion of orbital * alpha(orbital)
-    cphi2_alpha1_0 = spinorb2.overlap_density(alpha1_0, prec)
-    cphi2_alpha1_1 = spinorb2.overlap_density(alpha1_1, prec)
-    cphi2_alpha1_2 = spinorb2.overlap_density(alpha1_2, prec)
-   
-    cphi2_alpha2_0 = spinorb2.overlap_density(alpha2_0, prec)
-    cphi2_alpha2_1 = spinorb2.overlap_density(alpha2_1, prec)
-    cphi2_alpha2_2 = spinorb2.overlap_density(alpha2_2, prec)    
+    calpha2_0 = alpha2_0.complex_conj()
+    calpha2_1 = alpha2_1.complex_conj()
+    calpha2_2 = alpha2_2.complex_conj()
+
+    calpha1_0 = alpha1_0.complex_conj()
+    calpha1_1 = alpha1_1.complex_conj()
+    calpha1_2 = alpha1_2.complex_conj()
+
+    alpha22_xy = calpha2_0.overlap_density(alpha2_1, prec)
+    alpha22_xz = calpha2_0.overlap_density(alpha2_2, prec)
+    alpha22_yz = calpha2_1.overlap_density(alpha2_2, prec)
+
+
+    alpha21_xy = calpha2_0.overlap_density(alpha1_1, prec)
+    alpha21_xz = calpha2_0.overlap_density(alpha1_2, prec)
+    alpha21_yz = calpha2_1.overlap_density(alpha1_2, prec)
+
     
     #Definitioin of Gauge operator 
-    O = r3m.GaugeOperator(mra, 0.0001, args.box, prec)
+    O = r3m.GaugeOperator(mra, 1e-5, args.box, prec)
     print('Gauge operator DONE')
 
     #Definition of Gaunt two electron operators       
-    Bgauge22_Re0_xy = O(cphi2_alpha2_0.real, 1, 1, 0) 
-    Bgauge22_Re1_xy = O(cphi2_alpha2_1.real, 1, 1, 0) 
-    Bgauge22_Re2_xy = O(cphi2_alpha2_2.real, 1, 1, 0) 
-    
-    Bgauge22_Re0_xz = O(cphi2_alpha2_0.real, 1, 0, 1) 
-    Bgauge22_Re1_xz = O(cphi2_alpha2_1.real, 1, 0, 1) 
-    Bgauge22_Re2_xz = O(cphi2_alpha2_2.real, 1, 0, 1) 
-    
-    Bgauge22_Re0_yz = O(cphi2_alpha2_0.real, 0 ,1 ,1) 
-    Bgauge22_Re1_yz = O(cphi2_alpha2_1.real, 0 ,1 ,1) 
-    Bgauge22_Re2_yz = O(cphi2_alpha2_2.real, 0 ,1 ,1) 
+    Bgauge22_Re_xy = O(alpha22_xy.real, 1, 1, 0) 
+    Bgauge22_Re_xz = O(alpha22_xz.real, 1, 0, 1)    
+    Bgauge22_Re_yz = O(alpha22_yz.real, 0 ,1 ,1) 
+
+    Bgauge22_Im_xy = O(alpha22_xy.imag, 1, 1, 0) 
+    Bgauge22_Im_xz = O(alpha22_xz.imag, 1, 0, 1)    
+    Bgauge22_Im_yz = O(alpha22_yz.imag, 0 ,1 ,1) 
      
-    Bgauge22_Im0_xy = O(cphi2_alpha2_0.imag, 1, 1, 0) 
-    Bgauge22_Im1_xy = O(cphi2_alpha2_1.imag, 1, 1, 0) 
-    Bgauge22_Im2_xy = O(cphi2_alpha2_2.imag, 1, 1, 0) 
+    Bgauge22_Re_xy = O(alpha22_xy.real, 1, 1, 0) 
+    Bgauge22_Re_xz = O(alpha22_xz.real, 1, 0, 1)    
+    Bgauge22_Re_yz = O(alpha22_yz.real, 0 ,1 ,1) 
+
+    Bgauge22_Im_xy = O(alpha22_xy.imag, 1, 1, 0) 
+    Bgauge22_Im_xz = O(alpha22_xz.imag, 1, 0, 1)    
+    Bgauge22_Im_yz = O(alpha22_yz.imag, 0 ,1 ,1) 
   
-    Bgauge22_Im0_xz = O(cphi2_alpha2_0.imag, 1, 0, 1) 
-    Bgauge22_Im1_xz = O(cphi2_alpha2_1.imag, 1, 0, 1) 
-    Bgauge22_Im2_xz = O(cphi2_alpha2_2.imag, 1, 0, 1) 
-  
-    Bgauge22_Im0_yz = O(cphi2_alpha2_0.imag, 0 ,1 ,1) 
-    Bgauge22_Im1_yz = O(cphi2_alpha2_1.imag, 0 ,1 ,1) 
-    Bgauge22_Im2_yz = O(cphi2_alpha2_2.imag, 0 ,1 ,1) 
- 
+    Bgauge21_Re_xy = O(alpha21_xy.real, 1, 1, 0) 
+    Bgauge21_Re_xz = O(alpha21_xz.real, 1, 0, 1)    
+    Bgauge21_Re_yz = O(alpha21_yz.real, 0 ,1 ,1) 
 
+    Bgauge21_Im_xy = O(alpha21_xy.imag, 1, 1, 0) 
+    Bgauge21_Im_xz = O(alpha21_xz.imag, 1, 0, 1)    
+    Bgauge21_Im_yz = O(alpha21_yz.imag, 0 ,1 ,1) 
+     
+    Bgauge21_Re_xy = O(alpha21_xy.real, 1, 1, 0) 
+    Bgauge21_Re_xz = O(alpha21_xz.real, 1, 0, 1)    
+    Bgauge21_Re_yz = O(alpha21_yz.real, 0 ,1 ,1) 
 
-    Bgauge21_Re0_xy = O(cphi2_alpha1_0.real, 1, 1, 0) 
-    Bgauge21_Re1_xy = O(cphi2_alpha1_1.real, 1, 1, 0) 
-    Bgauge21_Re2_xy = O(cphi2_alpha1_2.real, 1, 1, 0) 
-   
-    Bgauge21_Re0_xz = O(cphi2_alpha1_0.real, 1, 0, 1) 
-    Bgauge21_Re1_xz = O(cphi2_alpha1_1.real, 1, 0, 1) 
-    Bgauge21_Re2_xz = O(cphi2_alpha1_2.real, 1, 0, 1) 
-   
-    Bgauge21_Re0_yz = O(cphi2_alpha1_0.real, 0 ,1 ,1) 
-    Bgauge21_Re1_yz = O(cphi2_alpha1_1.real, 0 ,1 ,1) 
-    Bgauge21_Re2_yz = O(cphi2_alpha1_2.real, 0 ,1 ,1) 
-  
-    Bgauge21_Im0_xy = O(cphi2_alpha1_0.imag, 1, 1, 0) 
-    Bgauge21_Im1_xy = O(cphi2_alpha1_1.imag, 1, 1, 0) 
-    Bgauge21_Im2_xy = O(cphi2_alpha1_2.imag, 1, 1, 0) 
- 
-    Bgauge21_Im0_xz = O(cphi2_alpha1_0.imag, 1, 0, 1) 
-    Bgauge21_Im1_xz = O(cphi2_alpha1_1.imag, 1, 0, 1) 
-    Bgauge21_Im2_xz = O(cphi2_alpha1_2.imag, 1, 0, 1) 
- 
-    Bgauge21_Im0_yz = O(cphi2_alpha1_0.imag, 0 ,1 ,1) 
-    Bgauge21_Im1_yz = O(cphi2_alpha1_1.imag, 0 ,1 ,1) 
-    Bgauge21_Im2_yz = O(cphi2_alpha1_2.imag, 0 ,1 ,1)     
+    Bgauge21_Im_xy = O(alpha21_xy.imag, 1, 1, 0) 
+    Bgauge21_Im_xz = O(alpha21_xz.imag, 1, 0, 1)    
+    Bgauge21_Im_yz = O(alpha21_yz.imag, 0 ,1 ,1)      
    
 
-    Bgauge22_0_xy = cf.complex_fcn()
-    Bgauge22_0_xy.real = Bgauge22_Re0_xy
-    Bgauge22_0_xy.imag = Bgauge22_Im0_xy
- 
-    Bgauge22_1_xy = cf.complex_fcn()
-    Bgauge22_1_xy.real = Bgauge22_Re1_xy
-    Bgauge22_1_xy.imag = Bgauge22_Im1_xy   
-
-    Bgauge22_2_xy = cf.complex_fcn()
-    Bgauge22_2_xy.real = Bgauge22_Re2_xy
-    Bgauge22_2_xy.imag = Bgauge22_Im2_xy    
+    Bgauge22_xy = cf.complex_fcn()
+    Bgauge22_xy.real = Bgauge22_Re_xy
+    Bgauge22_xy.imag = Bgauge22_Im_xy 
    
 
-    Bgauge22_0_xz = cf.complex_fcn()
-    Bgauge22_0_xz.real = Bgauge22_Re0_xz
-    Bgauge22_0_xz.imag = Bgauge22_Im0_xz
+    Bgauge22_xz = cf.complex_fcn()
+    Bgauge22_xz.real = Bgauge22_Re_xz
+    Bgauge22_xz.imag = Bgauge22_Im_xz
  
-    Bgauge22_1_xz = cf.complex_fcn()
-    Bgauge22_1_xz.real = Bgauge22_Re1_xz
-    Bgauge22_1_xz.imag = Bgauge22_Im1_xz   
 
-    Bgauge22_2_xz = cf.complex_fcn()
-    Bgauge22_2_xz.real = Bgauge22_Re2_xz
-    Bgauge22_2_xz.imag = Bgauge22_Im2_xz
+    Bgauge22_yz = cf.complex_fcn()
+    Bgauge22_yz.real = Bgauge22_Re_yz
+    Bgauge22_yz.imag = Bgauge22_Im_yz
 
 
-    Bgauge22_0_yz = cf.complex_fcn()
-    Bgauge22_0_yz.real = Bgauge22_Re0_yz
-    Bgauge22_0_yz.imag = Bgauge22_Im0_yz
+    Bgauge21_xy = cf.complex_fcn()
+    Bgauge21_xy.real = Bgauge21_Re_xy
+    Bgauge21_xy.imag = Bgauge21_Im_xy
  
-    Bgauge22_1_yz = cf.complex_fcn()
-    Bgauge22_1_yz.real = Bgauge22_Re1_yz
-    Bgauge22_1_yz.imag = Bgauge22_Im1_yz   
 
-    Bgauge22_2_yz = cf.complex_fcn()
-    Bgauge22_2_yz.real = Bgauge22_Re2_yz
-    Bgauge22_2_yz.imag = Bgauge22_Im2_yz
-
-
-    Bgauge21_0_xy = cf.complex_fcn()
-    Bgauge21_0_xy.real = Bgauge21_Re0_xy
-    Bgauge21_0_xy.imag = Bgauge21_Im0_xy
+    Bgauge21_xz = cf.complex_fcn()
+    Bgauge21_xz.real = Bgauge21_Re_xz
+    Bgauge21_xz.imag = Bgauge21_Im_xz
  
-    Bgauge21_1_xy = cf.complex_fcn()
-    Bgauge21_1_xy.real = Bgauge21_Re1_xy
-    Bgauge21_1_xy.imag = Bgauge21_Im1_xy   
 
-    Bgauge21_2_xy = cf.complex_fcn()
-    Bgauge21_2_xy.real = Bgauge21_Re2_xy
-    Bgauge21_2_xy.imag = Bgauge21_Im2_xy    
-   
-
-    Bgauge21_0_xz = cf.complex_fcn()
-    Bgauge21_0_xz.real = Bgauge21_Re0_xz
-    Bgauge21_0_xz.imag = Bgauge21_Im0_xz
- 
-    Bgauge21_1_xz = cf.complex_fcn()
-    Bgauge21_1_xz.real = Bgauge21_Re1_xz
-    Bgauge21_1_xz.imag = Bgauge21_Im1_xz   
-
-    Bgauge21_2_xz = cf.complex_fcn()
-    Bgauge21_2_xz.real = Bgauge21_Re2_xz
-    Bgauge21_2_xz.imag = Bgauge21_Im2_xz
-
-
-    Bgauge21_0_yz = cf.complex_fcn()
-    Bgauge21_0_yz.real = Bgauge21_Re0_yz
-    Bgauge21_0_yz.imag = Bgauge21_Im0_yz
- 
-    Bgauge21_1_yz = cf.complex_fcn()
-    Bgauge21_1_yz.real = Bgauge21_Re1_yz
-    Bgauge21_1_yz.imag = Bgauge21_Im1_yz   
-
-    Bgauge21_2_yz = cf.complex_fcn()
-    Bgauge21_2_yz.real = Bgauge21_Re2_yz
-    Bgauge21_2_yz.imag = Bgauge21_Im2_yz
+    Bgauge21_yz = cf.complex_fcn()
+    Bgauge21_yz.real = Bgauge21_Re_yz
+    Bgauge21_yz.imag = Bgauge21_Im_yz
 
 
     # Calculation of Gaunt two electron terms 
-    VgaugeJ2_0_xy = orb.apply_complex_potential(1.0, Bgauge22_0_xy, alpha1_0, prec)
-    VgaugeJ2_1_xy = orb.apply_complex_potential(1.0, Bgauge22_1_xy, alpha1_1, prec)
-    VgaugeJ2_2_xy = orb.apply_complex_potential(1.0, Bgauge22_2_xy, alpha1_2, prec)
-    GaugeJ2_alpha1_xy = VgaugeJ2_0_xy + VgaugeJ2_1_xy + VgaugeJ2_2_xy
+    VgaugeJ2_xy = orb.apply_complex_potential(1.0, Bgauge22_xy, spinorb1, prec)
+    VgaugeJ2_xz = orb.apply_complex_potential(1.0, Bgauge22_xz, spinorb1, prec)
+    VgaugeJ2_yz = orb.apply_complex_potential(1.0, Bgauge22_yz, spinorb1, prec)
+
+    VgaugeK2_xy = orb.apply_complex_potential(1.0, Bgauge21_xy, spinorb2, prec)
+    VgaugeK2_xz = orb.apply_complex_potential(1.0, Bgauge21_xz, spinorb2, prec)
+    VgaugeK2_yz = orb.apply_complex_potential(1.0, Bgauge21_yz, spinorb2, prec)
 
 
-    VgaugeJ2_0_xz = orb.apply_complex_potential(1.0, Bgauge22_0_xz, alpha1_0, prec)
-    VgaugeJ2_1_xz = orb.apply_complex_potential(1.0, Bgauge22_1_xz, alpha1_1, prec)
-    VgaugeJ2_2_xz = orb.apply_complex_potential(1.0, Bgauge22_2_xz, alpha1_2, prec)
-    GaugeJ2_alpha1_xz = VgaugeJ2_0_xz + VgaugeJ2_1_xz + VgaugeJ2_2_xz
+    GaugeJ2_alpha1 = VgaugeJ2_xy + VgaugeJ2_xz + VgaugeJ2_yz
 
 
-    VgaugeJ2_0_yz = orb.apply_complex_potential(1.0, Bgauge22_0_yz, alpha1_0, prec)
-    VgaugeJ2_1_yz = orb.apply_complex_potential(1.0, Bgauge22_1_yz, alpha1_1, prec)
-    VgaugeJ2_2_yz = orb.apply_complex_potential(1.0, Bgauge22_2_yz, alpha1_2, prec)
-    GaugeJ2_alpha1_yz = VgaugeJ2_0_yz + VgaugeJ2_1_yz + VgaugeJ2_2_yz
-
-
-    GaugeJ2_alpha1 = GaugeJ2_alpha1_xy + GaugeJ2_alpha1_xz + GaugeJ2_alpha1_yz
-
-
-    VgaugeK2_0_xy = orb.apply_complex_potential(1.0, Bgauge21_0_xy, alpha2_0, prec)
-    VgaugeK2_1_xy = orb.apply_complex_potential(1.0, Bgauge21_1_xy, alpha2_1, prec)
-    VgaugeK2_2_xy = orb.apply_complex_potential(1.0, Bgauge21_2_xy, alpha2_2, prec)
-    GaugeK2_alpha1_xy = VgaugeK2_0_xy + VgaugeK2_1_xy + VgaugeK2_2_xy
-
-
-    VgaugeK2_0_xz = orb.apply_complex_potential(1.0, Bgauge21_0_xz, alpha2_0, prec)
-    VgaugeK2_1_xz = orb.apply_complex_potential(1.0, Bgauge21_1_xz, alpha2_1, prec)
-    VgaugeK2_2_xz = orb.apply_complex_potential(1.0, Bgauge21_2_xz, alpha2_2, prec)
-    GaugeK2_alpha1_xz = VgaugeK2_0_xz + VgaugeK2_1_xz + VgaugeK2_2_xz
-
-
-    VgaugeK2_0_yz = orb.apply_complex_potential(1.0, Bgauge21_0_yz, alpha2_0, prec)
-    VgaugeK2_1_yz = orb.apply_complex_potential(1.0, Bgauge21_1_yz, alpha2_1, prec)
-    VgaugeK2_2_yz = orb.apply_complex_potential(1.0, Bgauge21_2_yz, alpha2_2, prec)
-    GaugeK2_alpha1_yz = VgaugeK2_0_yz + VgaugeK2_1_yz + VgaugeK2_2_yz
-
-
-    GaugeK2_alpha1 = GaugeK2_alpha1_xy + GaugeK2_alpha1_xz + GaugeK2_alpha1_yz
+    GaugeK2_alpha1 = VgaugeK2_xy + VgaugeK2_xz + VgaugeK2_yz 
 
 
     GaugeJmK_phi1 = GaugeJ2_alpha1 - GaugeK2_alpha1
     
     GaugeJmK_11_r, GaugeJmK_11_i = spinorb1.dot(GaugeJmK_phi1)
 
-    print('GaugeJmK_11_r', GaugeJmK_11_r)
+    print('GaugeJmK_11_r', 0.5 * GaugeJmK_11_r)
 #############################END GAUGE ################################### 
