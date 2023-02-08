@@ -2,11 +2,13 @@
 from orbital4c import complex_fcn as cf
 from orbital4c import orbital as orb
 from orbital4c import nuclear_potential as nucpot
+from orbital4c import r3m as r3m
 from scipy.constants import hbar
 from scipy.linalg import eig, inv
 from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
 from vampyr import vampyr3d as vp
+from vampyr import vampyr1d as vp1 
 
 import argparse
 import numpy as np
@@ -34,9 +36,9 @@ if __name__ == '__main__':
                         help='position of nucleus in z')
     parser.add_argument('-l', '--light_speed', dest='lux_speed', type=float, default=137.03599913900001,
                         help='light of speed')
-    parser.add_argument('-o', '--order', dest='order', type=int, default=8,
+    parser.add_argument('-o', '--order', dest='order', type=int, default=6,
                         help='put the order of Polinomial')
-    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-6,
+    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-4,
                         help='put the precision')
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
@@ -48,7 +50,7 @@ if __name__ == '__main__':
 
     assert args.charge > 1.0, 'Please consider only atoms with more than one electron'
 
-    assert args.coulgau in ['coulomb', 'gaunt', 'gaunt-test'], 'Please, specify coulgau in a rigth way: coulomb or gaunt'
+    assert args.coulgau in ['coulomb', 'gaunt', 'gauge'], 'Please, specify coulgau in a rigth way: coulomb or gaunt'
 
     assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
 
@@ -118,7 +120,7 @@ print('Define V Potential', args.potential, 'DONE')
 
 P = vp.PoissonOperator(mra, prec)
 
-#############################START WITH CALCULATION###################################
+#############################START WITH COULOMB CALCULATION###################################
 if args.coulgau == 'coulomb':
     print('Hartree-Fock (Coulomb interaction)')
     error_norm = 1
@@ -190,8 +192,10 @@ if args.coulgau == 'coulomb':
             compute_last_energy = True
 
 
-    ##########
-if args.coulgau == 'gaunt':  
+#############################END COULOMB & START WITH GAUNT###################################
+if args.coulgau == 'gaunt':
+    spinorb2 = spinorb1.ktrs() 
+    
     #Definition of alpha vectors for each orbital
     alpha1_0 =  spinorb1.alpha(0)
     alpha1_1 =  spinorb1.alpha(1)
@@ -200,7 +204,6 @@ if args.coulgau == 'gaunt':
     alpha2_0 =  spinorb2.alpha(0)
     alpha2_1 =  spinorb2.alpha(1)
     alpha2_2 =  spinorb2.alpha(2)
-
 
     #Defintion of orbital * alpha(orbital)
     cphi2_alpha1_0 = spinorb2.overlap_density(alpha1_0, prec)
@@ -268,4 +271,126 @@ if args.coulgau == 'gaunt':
     GJmK_11_r, GJmK_11_i = spinorb1.dot(GJmK_phi1)
 
     print('GJmK_11_r', GJmK_11_r)
-    print('E_C_G', E_tot_JK - GJmK_11_r - (2.0 *light_speed**2))
+    #print('E_C_G', E_tot_JK - GJmK_11_r - (2.0 *light_speed**2))
+
+#############################END GAUNT & START WITH GAUGE###################################
+if args.coulgau == 'gauge': 
+    spinorb2 = spinorb1.ktrs()
+    
+    #Definition of alpha vectors for each orbital
+    alpha1_0 =  spinorb1.alpha(0)
+    alpha1_1 =  spinorb1.alpha(1)
+    alpha1_2 =  spinorb1.alpha(2)
+
+    alpha2_0 =  spinorb2.alpha(0)
+    alpha2_1 =  spinorb2.alpha(1)
+    alpha2_2 =  spinorb2.alpha(2)
+
+    calpha2_0 = alpha2_0.complex_conj()
+    calpha2_1 = alpha2_1.complex_conj()
+    calpha2_2 = alpha2_2.complex_conj()
+
+    calpha1_0 = alpha1_0.complex_conj()
+    calpha1_1 = alpha1_1.complex_conj()
+    calpha1_2 = alpha1_2.complex_conj()
+
+    alpha22_xy = calpha2_0.overlap_density(alpha2_1, prec)
+    alpha22_xz = calpha2_0.overlap_density(alpha2_2, prec)
+    alpha22_yz = calpha2_1.overlap_density(alpha2_2, prec)
+
+
+    alpha21_xy = calpha2_0.overlap_density(alpha1_1, prec)
+    alpha21_xz = calpha2_0.overlap_density(alpha1_2, prec)
+    alpha21_yz = calpha2_1.overlap_density(alpha1_2, prec)
+
+    
+    #Definitioin of Gauge operator 
+    O = r3m.GaugeOperator(mra, 1e-5, args.box, prec)
+    print('Gauge operator DONE')
+
+    #Definition of Gaunt two electron operators       
+    Bgauge22_Re_xy = O(alpha22_xy.real, 1, 1, 0) 
+    Bgauge22_Re_xz = O(alpha22_xz.real, 1, 0, 1)    
+    Bgauge22_Re_yz = O(alpha22_yz.real, 0 ,1 ,1) 
+
+    Bgauge22_Im_xy = O(alpha22_xy.imag, 1, 1, 0) 
+    Bgauge22_Im_xz = O(alpha22_xz.imag, 1, 0, 1)    
+    Bgauge22_Im_yz = O(alpha22_yz.imag, 0 ,1 ,1) 
+     
+    Bgauge22_Re_xy = O(alpha22_xy.real, 1, 1, 0) 
+    Bgauge22_Re_xz = O(alpha22_xz.real, 1, 0, 1)    
+    Bgauge22_Re_yz = O(alpha22_yz.real, 0 ,1 ,1) 
+
+    Bgauge22_Im_xy = O(alpha22_xy.imag, 1, 1, 0) 
+    Bgauge22_Im_xz = O(alpha22_xz.imag, 1, 0, 1)    
+    Bgauge22_Im_yz = O(alpha22_yz.imag, 0 ,1 ,1) 
+  
+    Bgauge21_Re_xy = O(alpha21_xy.real, 1, 1, 0) 
+    Bgauge21_Re_xz = O(alpha21_xz.real, 1, 0, 1)    
+    Bgauge21_Re_yz = O(alpha21_yz.real, 0 ,1 ,1) 
+
+    Bgauge21_Im_xy = O(alpha21_xy.imag, 1, 1, 0) 
+    Bgauge21_Im_xz = O(alpha21_xz.imag, 1, 0, 1)    
+    Bgauge21_Im_yz = O(alpha21_yz.imag, 0 ,1 ,1) 
+     
+    Bgauge21_Re_xy = O(alpha21_xy.real, 1, 1, 0) 
+    Bgauge21_Re_xz = O(alpha21_xz.real, 1, 0, 1)    
+    Bgauge21_Re_yz = O(alpha21_yz.real, 0 ,1 ,1) 
+
+    Bgauge21_Im_xy = O(alpha21_xy.imag, 1, 1, 0) 
+    Bgauge21_Im_xz = O(alpha21_xz.imag, 1, 0, 1)    
+    Bgauge21_Im_yz = O(alpha21_yz.imag, 0 ,1 ,1)      
+   
+
+    Bgauge22_xy = cf.complex_fcn()
+    Bgauge22_xy.real = Bgauge22_Re_xy
+    Bgauge22_xy.imag = Bgauge22_Im_xy 
+   
+
+    Bgauge22_xz = cf.complex_fcn()
+    Bgauge22_xz.real = Bgauge22_Re_xz
+    Bgauge22_xz.imag = Bgauge22_Im_xz
+ 
+
+    Bgauge22_yz = cf.complex_fcn()
+    Bgauge22_yz.real = Bgauge22_Re_yz
+    Bgauge22_yz.imag = Bgauge22_Im_yz
+
+
+    Bgauge21_xy = cf.complex_fcn()
+    Bgauge21_xy.real = Bgauge21_Re_xy
+    Bgauge21_xy.imag = Bgauge21_Im_xy
+ 
+
+    Bgauge21_xz = cf.complex_fcn()
+    Bgauge21_xz.real = Bgauge21_Re_xz
+    Bgauge21_xz.imag = Bgauge21_Im_xz
+ 
+
+    Bgauge21_yz = cf.complex_fcn()
+    Bgauge21_yz.real = Bgauge21_Re_yz
+    Bgauge21_yz.imag = Bgauge21_Im_yz
+
+
+    # Calculation of Gaunt two electron terms 
+    VgaugeJ2_xy = orb.apply_complex_potential(1.0, Bgauge22_xy, spinorb1, prec)
+    VgaugeJ2_xz = orb.apply_complex_potential(1.0, Bgauge22_xz, spinorb1, prec)
+    VgaugeJ2_yz = orb.apply_complex_potential(1.0, Bgauge22_yz, spinorb1, prec)
+
+    VgaugeK2_xy = orb.apply_complex_potential(1.0, Bgauge21_xy, spinorb2, prec)
+    VgaugeK2_xz = orb.apply_complex_potential(1.0, Bgauge21_xz, spinorb2, prec)
+    VgaugeK2_yz = orb.apply_complex_potential(1.0, Bgauge21_yz, spinorb2, prec)
+
+
+    GaugeJ2_alpha1 = VgaugeJ2_xy + VgaugeJ2_xz + VgaugeJ2_yz
+
+
+    GaugeK2_alpha1 = VgaugeK2_xy + VgaugeK2_xz + VgaugeK2_yz 
+
+
+    GaugeJmK_phi1 = GaugeJ2_alpha1 - GaugeK2_alpha1
+    
+    GaugeJmK_11_r, GaugeJmK_11_i = spinorb1.dot(GaugeJmK_phi1)
+
+    print('GaugeJmK_11_r', 0.5 * GaugeJmK_11_r)
+#############################END GAUGE ################################### 

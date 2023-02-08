@@ -1,12 +1,14 @@
 ########## Define Enviroment #################
 from orbital4c import complex_fcn as cf
-from orbital4c import orbital as orb
+from orbital4c import orbital as orb 
 from orbital4c import nuclear_potential as nucpot
+from orbital4c import r3m as r3m
 from scipy.constants import hbar
 from scipy.linalg import eig, inv
 from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
 from vampyr import vampyr3d as vp
+from vampyr import vampyr1d as vp1
 
 import argparse
 import numpy as np

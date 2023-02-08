@@ -46,7 +46,6 @@ class SpinorbGenerator():
         phi.normalize()
         return phi
 
-
 class CoulombDirectOperator():
     def __init__(self, mra, prec, Psi):
         self.mra = mra
