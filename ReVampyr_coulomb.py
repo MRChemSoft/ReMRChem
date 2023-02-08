@@ -146,9 +146,6 @@ orb.orbital4c.light_speed = light_speed
 cf.complex_fcn.mra = mra
 print('call MRA DONE')
 
-################# Definecs Gaussian function ########## 
-print('Define orbital as a complex function DONE')
-
 ################### Define V potential ######################
 if args.potential == 'point_charge':
    Peps = vp.ScalingProjector(mra,prec/10)
