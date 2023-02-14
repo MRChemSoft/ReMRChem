@@ -15,78 +15,10 @@ import numpy as np
 import numpy.linalg as LA
 import sys, getopt
 
+import two_electron
+
 import importlib
 importlib.reload(orb)
-
-def coulomb_gs_2e(spinorb1, potential):
-    print('Hartree-Fock (Coulomb interaction)')
-    error_norm = 1
-    compute_last_energy = False
-    
-    while (error_norm > prec or compute_last_energy):
-        n_11 = spinorb1.overlap_density(spinorb1, prec)
-        spinorb2 = spinorb1.ktrs()
-
-        # Definition of two electron operators
-        B11    = P(n_11.real) * (4 * np.pi)
-
-        # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
-        hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = default_der)
-        hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der = default_der)
-        hd_11_r, hd_11_i = spinorb1.dot(hd_psi_1)
-#        hd_12_r, hd_12_i = spinorb1.dot(hd_psi_2)
-#        hd_21_r, hd_21_i = spinorb2.dot(hd_psi_1)
-        hd_22_r, hd_22_i = spinorb2.dot(hd_psi_2)
-        hd_mat = np.array([[hd_11_r + hd_11_i * 1j, 0],
-                           [0, hd_22_r + hd_22_i * 1j]])
-
-        # Applying nuclear potential to spin orbit 1 and 2
-        v_psi_1 = orb.apply_potential(-1.0, potential, spinorb1, prec)
-        V_11_r, V_11_i = spinorb1.dot(v_psi_1)
-        v_mat = np.array([[ V_11_r + V_11_i * 1j, 0],
-                          [ 0,                    V_11_r + V_11_i * 1j]])
-        # Calculation of two electron terms
-        J2_phi1 = orb.apply_potential(1.0, B11, spinorb1, prec)
-        JmK_phi1 = J2_phi1 # K part is zero for 2e system in GS
-        JmK_11_r, JmK_11_i = spinorb1.dot(JmK_phi1)
-        JmK = np.array([[ JmK_11_r + JmK_11_i * 1j, 0],
-                        [ 0,                        JmK_11_r + JmK_11_i * 1j]])
-
-        hd_V_mat = hd_mat + v_mat 
-
-        print('HD_V MATRIX\n', hd_V_mat)
-         # Calculate Fij Fock matrix
-        Fmat = hd_V_mat + JmK
-        print('FOCK MATRIX\n', Fmat)
-        eps = Fmat[0,0].real
-        
-        print('Orbital energy', eps - light_speed**2)
-        E_tot_JK = np.trace(Fmat) - 0.5 * (np.trace(JmK))
-        print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
-
-        if(compute_last_energy):
-            break
-
-        V_J_K_spinorb1 = v_psi_1 + JmK_phi1
-
-        # Calculation of Helmotz
-        tmp = orb.apply_helmholtz(V_J_K_spinorb1, eps, prec)
-        new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der = default_der)
-        new_orbital *= 0.5/light_speed**2
-        print('Norm new orbital ', np.sqrt(new_orbital.squaredNorm()))
-        new_orbital.normalize()
-        new_orbital.cropLargeSmall(prec)       
-
-        # Compute orbital error
-        delta_psi = new_orbital - spinorb1
-        deltasq = delta_psi.squaredNorm()
-        error_norm = np.sqrt(deltasq)
-        print('Orbital_Error norm', error_norm)
-        spinorb1 = new_orbital
-        if(error_norm < prec):
-            compute_last_energy = True
-#............................................................................................................................................................................        print('ORBITAL\n', spinorb1)
-    return(spinorb1, spinorb2)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
@@ -106,9 +38,9 @@ if __name__ == '__main__':
                         help='position of nucleus in z')
     parser.add_argument('-l', '--light_speed', dest='lux_speed', type=float, default=137.03599913900001,
                         help='light of speed')
-    parser.add_argument('-o', '--order', dest='order', type=int, default=8,
+    parser.add_argument('-o', '--order', dest='order', type=int, default=6,
                         help='put the order of Polinomial')
-    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-6,
+    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-4,
                         help='put the precision')
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
@@ -167,18 +99,20 @@ elif args.potential == 'gaussian':
 default_der = args.deriv
 print('Define V Potential', args.potential, 'DONE')
 
-P = vp.PoissonOperator(mra, prec)
-    
 #############################START WITH CALCULATION###################################
 
 
-readOrbitals = False
-runCoulomb = True
-saveOrbitals = True
+readOrbitals = True
+runCoulomb = False
+saveOrbitals = False
+runGaunt = True
+runGauge = False
 
-spinorb = orb.orbital4c()
+spinorb1 = orb.orbital4c()
+spinorb2 = orb.orbital4c()
 if readOrbitals:
-    spinorb.read("spinorb1")
+    spinorb1.read("spinorb1")
+    spinorb2.read("spinorb2")
 else:
     a_coeff = 3.0
     b_coeff = np.sqrt(a_coeff/np.pi)**3
@@ -189,14 +123,18 @@ else:
     gauss_tree.normalize()
     complexfc = cf.complex_fcn()
     complexfc.copy_fcns(real=gauss_tree)
-    spinorb.copy_components(La=complexfc)
-    spinorb.init_small_components(prec/10)
-print('Define spinorbital DONE')
-spinorb.normalize()    
+    spinorb1.copy_components(La=complexfc)
+    spinorb1.init_small_components(prec/10)
+    spinorb1.normalize()
+    spinorb2 = spinorb1.ktrs() #does this go out of scope?
 
 if runCoulomb:
-    spinorb1, spinorb2 = coulomb_gs_2e(spinorb, V_tree)
+    spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb, V_tree, mra, prec)
 
+if runGaunt:
+    two_electron.gauntPert(spinorb1, spinorb2, mra, prec)
+    
 if saveOrbitals:
     spinorb1.save("spinorb1")
     spinorb2.save("spinorb2")
+
