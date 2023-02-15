@@ -77,10 +77,34 @@ class orbital4c:
             out += comp_norm
         return out
 
+    def squaredLargeNorm(self):
+        alpha_ns = self.squaredNormComp('La')
+        beta_ns = self.squaredNormComp('Lb')
+        return alpha_ns + beta_ns
+
+    def squaredSmallNorm(self):
+        alpha_ns = self.squaredNormComp('Sa')
+        beta_ns = self.squaredNormComp('Sb')
+        return alpha_ns + beta_ns
+    
+    def squaredNormComp(self, comp):
+        return self[comp].squaredNorm()
+
     def crop(self, prec):
         for func in self.comp_array:
             func.crop(prec)
 
+    def cropLargeSmall(self, prec):
+        largeNorm = np.sqrt(self.squaredLargeNorm())
+        smallNorm = np.sqrt(self.squaredSmallNorm())
+        precLarge = prec * largeNorm
+        precSmall = prec * smallNorm
+        print('precisions', precLarge, precSmall)
+        self['La'].crop(precLarge, True)
+        self['Lb'].crop(precLarge, True)
+        self['Sa'].crop(precSmall, True)
+        self['Sb'].crop(precSmall, True)        
+        
     def setZero(self):
         for func in self.comp_array:
             func.setZero()
