@@ -105,8 +105,8 @@ print('Define V Potential', args.potential, 'DONE')
 readOrbitals = True
 runCoulomb = False
 saveOrbitals = False
-runGaunt = True
-runGauge = False
+runGaunt = False
+runGauge = True
 
 spinorb1 = orb.orbital4c()
 spinorb2 = orb.orbital4c()
@@ -133,7 +133,11 @@ if runCoulomb:
 
 if runGaunt:
     two_electron.gauntPert(spinorb1, spinorb2, mra, prec)
-    
+
+if runGauge:
+    length = 2 * args.box
+    two_electron.gaugePert(spinorb1, spinorb2, mra, length, prec)
+
 if saveOrbitals:
     spinorb1.save("spinorb1")
     spinorb2.save("spinorb2")

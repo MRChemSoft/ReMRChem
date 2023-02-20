@@ -4,7 +4,12 @@ from scipy.constants import hbar
 from scipy.linalg import eig, inv
 from scipy.special import legendre, laguerre, erf, gamma
 from vampyr import vampyr3d as vp
+from orbital4c import r3m as r3m
+from vampyr import vampyr1d as vp1 
 import numpy as np
+import numpy.linalg as LA
+import sys, getopt
+
 
 def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
     print('Hartree-Fock (Coulomb interaction)')
@@ -60,7 +65,7 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
 
         V_J_K_spinorb1 = v_psi_1 + JmK_phi1
 
-        # Calculation of Helmotz
+        # Calculation of Helmholtz
         tmp = orb.apply_helmholtz(V_J_K_spinorb1, eps, prec)
         new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der)
         new_orbital *= 0.5/light_speed**2
@@ -185,7 +190,21 @@ def gauntPert(spinorb1, spinorb2, mra, prec):
     print('GJmK_11_r', EK - EJ)
 
 
-def gaugePert(spinorb1, spinorb2, mra, prec):
+def calcGaugePotential(density, oper, direction):
+    Bgauge = [cf.complex_fcn(), cf.complex_fcn(), cf.complex_fcn()]
+    index = [[1, 0, 0],
+             [0, 1, 0],
+             [0, 0, 1]]
+    index[0][direction] += 1
+    index[1][direction] += 1
+    index[2][direction] += 1
+    for i in range(3):
+        Bgauge[i].real = oper(density[i].real, index[i][0], index[i][1], index[i][2])
+        Bgauge[i].real = oper(density[i].imag, index[i][0], index[i][1], index[i][2])
+        
+    return Bgauge[0] + Bgauge[1] + Bgauge[2]
+
+def gaugePert(spinorb1, spinorb2, mra, length, prec):
     
     P = vp.PoissonOperator(mra, prec)
     light_speed = spinorb1.light_speed
@@ -202,42 +221,39 @@ def gaugePert(spinorb1, spinorb2, mra, prec):
            spinorb2.overlap_density(alpha1[1], prec),
            spinorb2.overlap_density(alpha1[2], prec)]
 
+    print("densities")
+    print(n22[0], n22[1], n22[2])
+    print(n21[0], n21[1], n21[2])
+
+
     del alpha1
     del alpha2
 
-    #Definition of Gauge operator 
-    O = r3m.GaugeOperator(mra, 1e-5, args.box, prec)
+    #Definition of Gauge operator
+    O = r3m.GaugeOperator(mra, 1e-5, length, prec)
     print('Gauge operator DONE')
 
     Bgauge22 = [calcGaugePotential(n22, O, 0), calcGaugePotential(n22, O, 1), calcGaugePotential(n22, O, 2)]
     Bgauge21 = [calcGaugePotential(n21, O, 0), calcGaugePotential(n21, O, 1), calcGaugePotential(n21, O, 2)]
 
+    print("Operators")
+    print(Bgauge22[0], Bgauge22[1], Bgauge22[2])
+    print(Bgauge21[0], Bgauge21[1], Bgauge21[2])
     # the following idientites hold for two orbitals connected by KTRS
     # n_11[i] == -n22[i]
     # n_12[i] ==  n21[i].complex_conj()
 
     gaugeEnergy = 0
     for i in range(3):
-        gaugeJ = n22[i].complex_conj().dot(Bgauge22[i])
-        gaugeK = n21[i].dot(Bgauge22[i])
-        gaugeEnergy = gaugeEnergy - gaugeJ - gaugeK
+        gaugeJr, gaugeJi = n22[i].complex_conj().dot(Bgauge22[i])
+        gaugeKr, gaugeKi = n21[i].dot(Bgauge22[i])
+        print("Direct   ", gaugeJr, gaugeJi)
+        print("Exchange ", gaugeKr, gaugeKi)
+        gaugeEnergy = gaugeEnergy - gaugeJr - gaugeKr
 
+    print("Gauge energy correction ", gaugeEnergy)
     return gaugeEnergy
     
-    def calcGaugePotential(density, oper, direction):
-        Bgauge = [cf.complex_fcn(), cf.complex_fcn(), cf_complex_fcn()]
-        index = [[1, 0, 0],
-                 [0, 1, 0],
-                 [0, 0, 1]]
-        index[0][direction] += 1
-        index[1][direction] += 1
-        index[2][direction] += 1
-        for i in range(3):
-            Bgauge[i].real = oper(density[i].real, index[i][0], index[i][1], index[i][2])
-            Bgauge[i].real = oper(density[i].imag, index[i][0], index[i][1], index[i][2])
-
-        return Bgauge[0] + Bgauge[1] + Bgauge[2]
-
 
 #    #Definition of Gaunt two electron operators       
 #    Bgauge22_xx = cf.complex_fcn()
@@ -366,18 +382,6 @@ def gaugePert(spinorb1, spinorb2, mra, prec):
     
 #    GaugeJmK_11_r, GaugeJmK_11_i = spinorb1.dot(GaugeJmK_phi1)
 
-    print('GaugeJmK_11_r', 0.5 * GaugeJmK_11_r)
+#    print('GaugeJmK_11_r', 0.5 * GaugeJmK_11_r)
 
 
-    def calcGaugePotential(density, oper, direction):
-            Bgauge = [cf.complex_fcn(), cf.complex_fcn(), cf_complex_fcn()]
-            index = [[1, 0, 0],
-                     [0, 1, 0],
-                     [0, 0, 1]]
-            index[0][direction] += 1
-            index[1][direction] += 1
-            index[2][direction] += 1
-            for i in range(3):
-                Bgauge[i].real = oper(density[i].real, index[i][0], index[i][1], index[i][2])
-                Bgauge[i].real = oper(density[i].imag, index[i][0], index[i][1], index[i][2])
-            return Bgauge[0] + Bgauge[1] + Bgauge[2]
