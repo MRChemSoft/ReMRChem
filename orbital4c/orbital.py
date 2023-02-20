@@ -267,6 +267,9 @@ class orbital4c:
             out_orb.comp_array[idx] = coeff * self.comp_array[comp]
         return out_orb
 
+    def alpha_vector(self):
+        return [self.alpha(0), self.alpha(1), self.alpha(2)]
+    
     def ktrs(self):   #Kramers´ Time Reversal Symmetry
         out_orb = orbital4c()
         tmp = self.complex_conj()
