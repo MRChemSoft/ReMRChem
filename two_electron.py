@@ -190,7 +190,7 @@ def gauntPert(spinorb1, spinorb2, mra, prec):
     print('GJmK_11_r', EK - EJ)
 
 
-def calcGaugePotential(density, oper, direction):
+def calcGaugePotential(density, operator, direction): # direction is i index
     Bgauge = [cf.complex_fcn(), cf.complex_fcn(), cf.complex_fcn()]
     index = [[1, 0, 0],
              [0, 1, 0],
@@ -198,10 +198,10 @@ def calcGaugePotential(density, oper, direction):
     index[0][direction] += 1
     index[1][direction] += 1
     index[2][direction] += 1
-    for i in range(3):
-        Bgauge[i].real = oper(density[i].real, index[i][0], index[i][1], index[i][2])
-        Bgauge[i].real = oper(density[i].imag, index[i][0], index[i][1], index[i][2])
-        
+    for i in range(3): # j index
+        Bgauge[i].real = operator(density[i].real, index[i][0], index[i][1], index[i][2])
+        Bgauge[i].imag = operator(density[i].imag, index[i][0], index[i][1], index[i][2])
+
     return Bgauge[0] + Bgauge[1] + Bgauge[2]
 
 def gaugePert(spinorb1, spinorb2, mra, length, prec):
@@ -230,11 +230,11 @@ def gaugePert(spinorb1, spinorb2, mra, length, prec):
     del alpha2
 
     #Definition of Gauge operator
-    O = r3m.GaugeOperator(mra, 1e-5, length, prec)
+    R3O = r3m.GaugeOperator(mra, 1e-5, length, prec)
     print('Gauge operator DONE')
 
-    Bgauge22 = [calcGaugePotential(n22, O, 0), calcGaugePotential(n22, O, 1), calcGaugePotential(n22, O, 2)]
-    Bgauge21 = [calcGaugePotential(n21, O, 0), calcGaugePotential(n21, O, 1), calcGaugePotential(n21, O, 2)]
+    Bgauge22 = [calcGaugePotential(n22, R3O, 0), calcGaugePotential(n22, R3O, 1), calcGaugePotential(n22, R3O, 2)]
+    Bgauge21 = [calcGaugePotential(n21, R3O, 0), calcGaugePotential(n21, R3O, 1), calcGaugePotential(n21, R3O, 2)]
 
     print("Operators")
     print(Bgauge22[0], Bgauge22[1], Bgauge22[2])
