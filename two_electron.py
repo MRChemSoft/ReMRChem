@@ -206,8 +206,8 @@ def calcGaugePotential(density, operator, direction): # direction is i index
 
 def gaugePert(spinorb1, spinorb2, mra, length, prec):
     
-    P = vp.PoissonOperator(mra, prec)
-    light_speed = spinorb1.light_speed
+    #P = vp.PoissonOperator(mra, prec)       Non serve
+    #light_speed = spinorb1.light_speed    Non serve
 
     #Definition of alpha vectors for each orbital
     alpha1 =  spinorb1.alpha_vector()
@@ -251,8 +251,8 @@ def gaugePert(spinorb1, spinorb2, mra, length, prec):
         print("Exchange ", gaugeKr, gaugeKi)
         gaugeEnergy = gaugeEnergy - gaugeJr - gaugeKr
 
-    print("Gauge energy correction ", gaugeEnergy)
-    return gaugeEnergy
+    print("Gauge energy correction ", 0.5 * gaugeEnergy)
+    return 0.5 * gaugeEnergy
     
 
 #    #Definition of Gaunt two electron operators       
