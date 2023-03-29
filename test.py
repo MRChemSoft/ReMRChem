@@ -24,6 +24,7 @@ importlib.reload(orb)
 def calcGaugePotential(density, operator, direction, P): # direction is i index
 
     print("calc gauge pot ", direction)
+
     Bgauge = [cf.complex_fcn(), cf.complex_fcn(), cf.complex_fcn()]
     index = [[1, 0, 0],
              [0, 1, 0],
@@ -31,18 +32,12 @@ def calcGaugePotential(density, operator, direction, P): # direction is i index
     index[0][direction] += 1
     index[1][direction] += 1
     index[2][direction] += 1
-    for idx in range(3):
-        Bgauge[idx].real = operator(density[idx].real, index[idx][0], index[idx][1], index[idx][2])
-        Bgauge[idx].imag = operator(density[idx].imag, index[idx][0], index[idx][1], index[idx][2])
-        #    Bgauge[i].real = P(density[i].real)
-        #    Bgauge[i].imag = P(density[i].imag)
-        
-    out = Bgauge[0] + Bgauge[1] + Bgauge[2]
-#    out = Bgauge[idx]
-    del Bgauge
-    return out
+    for i in range(3): # j index
+        Bgauge[i].real = operator(density[i].real, index[i][0], index[i][1], index[i][2])
+        Bgauge[i].imag = operator(density[i].imag, index[i][0], index[i][1], index[i][2])
+    return Bgauge[0] + Bgauge[1] + Bgauge[2]
 
-#@profile
+@profile
 def gaugePert(spinorb1, spinorb2, mra, length, prec):
     
     P = vp.PoissonOperator(mra, prec)
@@ -51,7 +46,6 @@ def gaugePert(spinorb1, spinorb2, mra, length, prec):
     #Definition of alpha vectors for each orbital
     alpha1 =  spinorb1.alpha_vector(prec)
     alpha2 =  spinorb2.alpha_vector(prec)
-
     n22 = [spinorb2.overlap_density(alpha2[0], prec),
            spinorb2.overlap_density(alpha2[1], prec),
            spinorb2.overlap_density(alpha2[2], prec)]
@@ -59,14 +53,6 @@ def gaugePert(spinorb1, spinorb2, mra, length, prec):
     n21 = [spinorb2.overlap_density(alpha1[0], prec),
            spinorb2.overlap_density(alpha1[1], prec),
            spinorb2.overlap_density(alpha1[2], prec)]
-
-#    n22 = [make_dens(spinorb2, alpha2[0], prec),
-#           make_dens(spinorb2, alpha2[1], prec),
-#           make_dens(spinorb2, alpha2[2], prec)]
-
-#    n21 = [make_dens(spinorb2, alpha1[0], prec),
-#           make_dens(spinorb2, alpha1[1], prec),
-#           make_dens(spinorb2, alpha1[2], prec)]
 
     for i in range(3):
         n22[i].crop(prec)
@@ -142,7 +128,6 @@ def testConv(spinorb1, spinorb2, mra, length, prec):
         gaugeEnergy = gaugeEnergy - gaugeJr
     print("Gauge energy correction ", gaugeEnergy)
     return gaugeEnergy
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
@@ -259,7 +244,6 @@ if __name__ == '__main__':
         spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb, V_tree, mra, prec)
     
     if runGaunt:
-#        two_electron.gauntPert(spinorb1, spinorb2, mra, prec)
         two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)
     
     if runGauge:

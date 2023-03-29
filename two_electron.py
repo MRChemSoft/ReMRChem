@@ -259,7 +259,11 @@ def gaugePert(spinorb1, spinorb2, mra, length, prec):
     R3O = r3m.GaugeOperator(mra, 1e-5, length, prec)
 
     Bgauge22 = [calcGaugePotential(n22, R3O, 0), calcGaugePotential(n22, R3O, 1), calcGaugePotential(n22, R3O, 2)]
+    print("Bgauge22")
+    print(Bgauge22[0], Bgauge22[1], Bgauge22[2])
     Bgauge21 = [calcGaugePotential(n21, R3O, 0), calcGaugePotential(n21, R3O, 1), calcGaugePotential(n21, R3O, 2)]
+    print("Bgauge21")
+    print(Bgauge21[0], Bgauge21[1], Bgauge21[2])
 
     # the following idientites hold for two orbitals connected by KTRS
     # n_11[i] == -n22[i]
@@ -464,5 +468,4 @@ def calcGauntPert(spinorb1, spinorb2, mra, prec):
     print("Exchange part ", EK)
 
     print('GJmK_11_r', EJt - EKt)
-
 
