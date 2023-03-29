@@ -196,7 +196,7 @@ class orbital4c:
             temp = comp.density(prec).crop(prec)
             if(temp.squaredNorm() > 0):
                 add_vector.append((1.0,temp))
-        vp.advanced.add(prec/10, density, add_vector)
+        vp.advanced.add(prec, density, add_vector)
         return density    
 
     def exchange(self, other, prec):
@@ -208,7 +208,7 @@ class orbital4c:
             temp = func_i.exchange(func_j, prec)
             if(temp.squaredNorm() > 0):
                 add_vector.append((1.0,temp))    
-        vp.advanced.add(prec/10, exchange, add_vector)
+        vp.advanced.add(prec, exchange, add_vector)
         return exchange
 
     def alpha_exchange(self, other, prec):
@@ -220,7 +220,7 @@ class orbital4c:
             temp = func_i.alpha_exchange(func_j, prec)
             if(temp.squaredNorm() > 0):
                 add_vector.append((1.0,temp))    
-        vp.advanced.add(prec/10, alpha_exchange, add_vector)
+        vp.advanced.add(prec, alpha_exchange, add_vector)
         return alpha_exchange    
 
     def overlap_density(self, other, prec):
@@ -230,16 +230,16 @@ class orbital4c:
         for comp in self.comp_dict.keys():
             func_i = self[comp]
             func_j = other[comp]
-            temp = func_i.complex_conj() * func_j
+            temp = cf.multiply(prec, func_i.complex_conj(), func_j)
             if(temp.real.squaredNorm() > 0):
                 add_vector_real.append((1.0,temp.real))
             if(temp.imag.squaredNorm() > 0):
-                add_vector_imag.append((1.0,temp.imag))                    
-        vp.advanced.add(prec/10, density.real, add_vector_real)
-        vp.advanced.add(prec/10, density.imag, add_vector_imag)
+                add_vector_imag.append((1.0,temp.imag))
+        vp.advanced.add(prec, density.real, add_vector_real)
+        vp.advanced.add(prec, density.imag, add_vector_imag)
         return density
 
-    def alpha(self,direction):
+    def alpha(self,direction, prec):
         out_orb = orbital4c()
         alpha_order = np.array([[3, 2, 1, 0],
                                 [3, 2, 1, 0],
@@ -265,10 +265,11 @@ class orbital4c:
             coeff = alpha_coeff[direction][idx]
             comp = alpha_order[direction][idx]
             out_orb.comp_array[idx] = coeff * self.comp_array[comp]
+            out_orb.comp_array[idx].crop(prec)
         return out_orb
 
-    def alpha_vector(self):
-        return [self.alpha(0), self.alpha(1), self.alpha(2)]
+    def alpha_vector(self, prec):
+        return [self.alpha(0, prec), self.alpha(1, prec), self.alpha(2, prec)]
     
     def ktrs(self):   #Kramers´ Time Reversal Symmetry
         out_orb = orbital4c()
