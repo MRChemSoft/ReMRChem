@@ -205,39 +205,46 @@ def calcGaugePotential(density, operator, direction): # direction is i index
     return Bgauge[0] + Bgauge[1] + Bgauge[2]
 
 def gaugePert(spinorb1, spinorb2, mra, length, prec):
+    print("gaugePert")
     
     #P = vp.PoissonOperator(mra, prec)       Non serve
     #light_speed = spinorb1.light_speed    Non serve
 
     #Definition of alpha vectors for each orbital
-    alpha1 =  spinorb1.alpha_vector()
-    alpha2 =  spinorb2.alpha_vector()
 
-    n22 = [spinorb2.overlap_density(alpha2[0], prec),
-           spinorb2.overlap_density(alpha2[1], prec),
-           spinorb2.overlap_density(alpha2[2], prec)]
-
+    print("alpha1")
+    alpha1 =  spinorb1.alpha_vector(prec)
+    print("n21")
     n21 = [spinorb2.overlap_density(alpha1[0], prec),
            spinorb2.overlap_density(alpha1[1], prec),
            spinorb2.overlap_density(alpha1[2], prec)]
+    del alpha1
+
+    print("alpha2")
+    alpha2 =  spinorb2.alpha_vector(prec)
+    print("n22")
+    n22 = [spinorb2.overlap_density(alpha2[0], prec),
+           spinorb2.overlap_density(alpha2[1], prec),
+           spinorb2.overlap_density(alpha2[2], prec)]
+    del alpha2
 
     print("densities")
     print(n22[0], n22[1], n22[2])
     print(n21[0], n21[1], n21[2])
 
 
-    del alpha1
-    del alpha2
 
     #Definition of Gauge operator
     R3O = r3m.GaugeOperator(mra, 1e-5, length, prec)
     print('Gauge operator DONE')
 
     Bgauge22 = [calcGaugePotential(n22, R3O, 0), calcGaugePotential(n22, R3O, 1), calcGaugePotential(n22, R3O, 2)]
-    Bgauge21 = [calcGaugePotential(n21, R3O, 0), calcGaugePotential(n21, R3O, 1), calcGaugePotential(n21, R3O, 2)]
-
-    print("Operators")
+    print("Bgauge22")
     print(Bgauge22[0], Bgauge22[1], Bgauge22[2])
+
+
+    Bgauge21 = [calcGaugePotential(n21, R3O, 0), calcGaugePotential(n21, R3O, 1), calcGaugePotential(n21, R3O, 2)]
+    print("Bgauge21")
     print(Bgauge21[0], Bgauge21[1], Bgauge21[2])
     # the following idientites hold for two orbitals connected by KTRS
     # n_11[i] == -n22[i]
@@ -246,7 +253,7 @@ def gaugePert(spinorb1, spinorb2, mra, length, prec):
     gaugeEnergy = 0
     for i in range(3):
         gaugeJr, gaugeJi = n22[i].complex_conj().dot(Bgauge22[i])
-        gaugeKr, gaugeKi = n21[i].dot(Bgauge22[i])
+        gaugeKr, gaugeKi = n21[i].dot(Bgauge21[i])
         print("Direct   ", gaugeJr, gaugeJi)
         print("Exchange ", gaugeKr, gaugeKi)
         gaugeEnergy = gaugeEnergy - gaugeJr - gaugeKr
