@@ -189,26 +189,36 @@ class complex_fcn:
            out_imag -= vp.dot(func_b, func_c)
         return out_real, out_imag
 
-
-    def pota(self, other):
-        out_real = 0
-        out_imag = 0
+    def advanced_overlap_density(self, other, prec):
         func_a = self.real
         func_b = self.imag
         func_c = other.real
         func_d = other.imag
+
+        rr = vp.FunctionTree(self.mra)
+        ii = vp.FunctionTree(self.mra)
+        ri = vp.FunctionTree(self.mra)
+        ir = vp.FunctionTree(self.mra)
+
         if(func_a.squaredNorm() > 0 and func_c.squaredNorm() > 0):
-           out_real += vp.dot(func_a, func_c)
+            vp.advanced.multiply(prec, rr, 1.0, func_a, func_c)
         if(func_b.squaredNorm() > 0 and func_d.squaredNorm() > 0):
-           out_real += vp.dot(func_b, func_d)
+            vp.advanced.multiply(prec, ii, 1.0, func_b, func_d)
         if(func_a.squaredNorm() > 0 and func_d.squaredNorm() > 0):
-           out_imag -= vp.dot(func_a, func_d)
+            vp.advanced.multiply(prec, ri, 1.0, func_a, func_d)
         if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
-           out_imag += vp.dot(func_b, func_c)
-        return out_real, out_imag
+            vp.advanced.multiply(prec, ir, -1.0, func_b, func_c)
+
+        output = complex_fcn()
+        output.real = rr + ii
+        output.imag = ri + ir
+
+        return output
 
 
-#Not too happy about this design. Potential is only a real FunctionTree...
+
+
+    #Not too happy about this design. Potential is only a real FunctionTree...
 def apply_potential(factor, potential, func, prec):
     output = complex_fcn()
     vp.advanced.multiply(prec, output.real, factor, potential, func.real)
@@ -248,6 +258,7 @@ def multiply(prec, lhs, rhs):
     output.imag = ri + ri
     output.crop(prec)
     return output
+
 
 
 

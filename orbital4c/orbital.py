@@ -110,7 +110,9 @@ class orbital4c:
             func.setZero()
 
     def rescale(self, factor):
-        self.comp_array *= factor
+        for comp in self.comp_array:
+            comp.real *= factor
+            comp.imag *= factor
             
     def copy_component(self, func, component='La'):
         self[component].copy_fcns(func.real, func.imag)
@@ -141,6 +143,7 @@ class orbital4c:
         
     def init_small_components(self,prec):
     # initalize the small components based on the kinetic balance
+    # TODO: should be optimized removing matrix operations.
         grad_a = self['La'].gradient()
         grad_b = self['Lb'].gradient()
         plx = np.array([grad_a[0],grad_b[0]])
@@ -274,13 +277,8 @@ class orbital4c:
     def ktrs(self):   #Kramers´ Time Reversal Symmetry
         out_orb = orbital4c()
         tmp = self.complex_conj()
-#        ktrs = np.array([[ 0,  -1,  0,    0,],
-#                         [ 1,   0,  0,    0,],
-#                         [ 0,   0,  0,   -1,],
-#                         [ 0,   0,  1,    0,]])
         ktrs_order = np.array([1, 0, 3, 2])
         ktrs_coeff = np.array([-1,  1,  -1,  1])
-#        out_orb.comp_array = ktrs@tmp.comp_array
         for idx in range(4):
             coeff = ktrs_coeff[idx]
             comp = ktrs_order[idx]
@@ -314,16 +312,6 @@ class orbital4c:
             out_imag += ci
         return out_real, out_imag
 
-    def pota(self, other):
-        out_real = 0
-        out_imag = 0
-        for comp in self.comp_dict.keys():
-            factor = 1
-#            if('S' in comp) factor = c**2
-            cr, ci = self[comp].pota(other[comp])
-            out_real += cr
-            out_imag += ci
-        return out_real, out_imag
 #    
 # here we should consider emulating the behavior of MRChem operators
 #
