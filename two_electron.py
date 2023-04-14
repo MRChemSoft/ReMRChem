@@ -292,7 +292,6 @@ def calcGaugePert(spinorb1, spinorb2, mra, prec):
            spinorb2.overlap_density(alpha1[1], prec),
            spinorb2.overlap_density(alpha1[2], prec)]
     del alpha1
-
     alpha2 =  spinorb2.alpha_vector(prec)
     n22 = [spinorb2.overlap_density(alpha2[0], prec),
            spinorb2.overlap_density(alpha2[1], prec),
@@ -468,4 +467,3 @@ def calcGauntPert(spinorb1, spinorb2, mra, prec):
     print("Exchange part ", EK)
 
     print('GJmK_11_r', EJt - EKt)
-

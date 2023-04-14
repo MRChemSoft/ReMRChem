@@ -32,12 +32,18 @@ def calcGaugePotential(density, operator, direction, P): # direction is i index
     index[0][direction] += 1
     index[1][direction] += 1
     index[2][direction] += 1
-    for i in range(3): # j index
-        Bgauge[i].real = operator(density[i].real, index[i][0], index[i][1], index[i][2])
-        Bgauge[i].imag = operator(density[i].imag, index[i][0], index[i][1], index[i][2])
-    return Bgauge[0] + Bgauge[1] + Bgauge[2]
+    for idx in range(3):
+        Bgauge[idx].real = operator(density[idx].real, index[idx][0], index[idx][1], index[idx][2])
+        Bgauge[idx].imag = operator(density[idx].imag, index[idx][0], index[idx][1], index[idx][2])
+        #    Bgauge[i].real = P(density[i].real)
+        #    Bgauge[i].imag = P(density[i].imag)
+        
+    out = Bgauge[0] + Bgauge[1] + Bgauge[2]
+#    out = Bgauge[idx]
+    del Bgauge
+    return out
 
-@profile
+#@profile
 def gaugePert(spinorb1, spinorb2, mra, length, prec):
     
     P = vp.PoissonOperator(mra, prec)
@@ -46,6 +52,7 @@ def gaugePert(spinorb1, spinorb2, mra, length, prec):
     #Definition of alpha vectors for each orbital
     alpha1 =  spinorb1.alpha_vector(prec)
     alpha2 =  spinorb2.alpha_vector(prec)
+
     n22 = [spinorb2.overlap_density(alpha2[0], prec),
            spinorb2.overlap_density(alpha2[1], prec),
            spinorb2.overlap_density(alpha2[2], prec)]
