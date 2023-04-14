@@ -47,12 +47,16 @@ class GaugeOperator():
         ab[0][0] /= 2
         ab[0][n_exp-1] /= 2
         iexp = vp1.GaussExp()
+        print("coeffs", ab[0])
+        print("exponents", ab[1])
         for i in range(n_exp):
             a = ab[0][i]
             b = ab[1][i] 
             ifunc = vp1.GaussFunc(a, b)
-            iexp.append(ifunc)       
+            iexp.append(ifunc)
         return iexp
+
+    
         
     def __call__(self, Phi, x, y, z):
         self.gauge.setCartesianComponents(x, y, z)

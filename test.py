@@ -20,37 +20,10 @@ import two_electron
 import importlib
 importlib.reload(orb)
 
-@profile
-def make_dens(orb1, orb2, prec):
-    dens = cf.complex_fcn()
-    add_real = []
-    add_imag = []
-    for comp in orb1.comp_dict.keys():
-        func_i = orb1[comp]
-        func_j = orb2[comp]
-        print("func_i func_j ", comp)
-        print(func_i)
-        print(func_j)
-        temp = func_i.advanced_overlap_density(func_j, prec)
-        if(temp.real.squaredNorm() > 0):
-            print('real ', comp)
-            add_real.append((1.0,temp.real))    
-        if(temp.imag.squaredNorm() > 0):
-            print('imag ', comp)
-            add_imag.append((1.0,temp.imag))
+#@profile
+def calcGaugePotential(density, operator, direction, P): # direction is i index
 
-    print(add_real)
-    print(add_imag)
-    if(len(add_real) > 0):
-        vp.advanced.add(prec/10, dens.real, add_real)
-    if(len(add_imag) > 0):
-        vp.advanced.add(prec/10, dens.imag, add_imag)
-    return dens
-
-
-@profile
-def calcGaugePotential(density, operator, direction): # direction is i index
-    
+    print("calc gauge pot ", direction)
     Bgauge = [cf.complex_fcn(), cf.complex_fcn(), cf.complex_fcn()]
     index = [[1, 0, 0],
              [0, 1, 0],
@@ -58,20 +31,26 @@ def calcGaugePotential(density, operator, direction): # direction is i index
     index[0][direction] += 1
     index[1][direction] += 1
     index[2][direction] += 1
-    for i in range(3): # j index
-        Bgauge[i].real = operator(density[i].real, index[i][0], index[i][1], index[i][2])
-        Bgauge[i].imag = operator(density[i].imag, index[i][0], index[i][1], index[i][2])
-    return Bgauge[0] + Bgauge[1] + Bgauge[2]
+    for idx in range(3):
+        Bgauge[idx].real = operator(density[idx].real, index[idx][0], index[idx][1], index[idx][2])
+        Bgauge[idx].imag = operator(density[idx].imag, index[idx][0], index[idx][1], index[idx][2])
+        #    Bgauge[i].real = P(density[i].real)
+        #    Bgauge[i].imag = P(density[i].imag)
+        
+    out = Bgauge[0] + Bgauge[1] + Bgauge[2]
+#    out = Bgauge[idx]
+    del Bgauge
+    return out
 
-@profile
+#@profile
 def gaugePert(spinorb1, spinorb2, mra, length, prec):
     
     P = vp.PoissonOperator(mra, prec)
     light_speed = spinorb1.light_speed
 
     #Definition of alpha vectors for each orbital
-    alpha1 =  spinorb1.alpha_vector()
-    alpha2 =  spinorb2.alpha_vector()
+    alpha1 =  spinorb1.alpha_vector(prec)
+    alpha2 =  spinorb2.alpha_vector(prec)
 
     n22 = [spinorb2.overlap_density(alpha2[0], prec),
            spinorb2.overlap_density(alpha2[1], prec),
@@ -80,7 +59,6 @@ def gaugePert(spinorb1, spinorb2, mra, length, prec):
     n21 = [spinorb2.overlap_density(alpha1[0], prec),
            spinorb2.overlap_density(alpha1[1], prec),
            spinorb2.overlap_density(alpha1[2], prec)]
-    return 0
 
 #    n22 = [make_dens(spinorb2, alpha2[0], prec),
 #           make_dens(spinorb2, alpha2[1], prec),
@@ -128,6 +106,40 @@ def gaugePert(spinorb1, spinorb2, mra, length, prec):
         print("Direct   ", gaugeJr, gaugeJi)
         print("Exchange ", gaugeKr, gaugeKi)
         gaugeEnergy = gaugeEnergy - gaugeJr - gaugeKr
+    print("Gauge energy correction ", gaugeEnergy)
+    return gaugeEnergy
+
+
+#@profile
+def testConv(spinorb1, spinorb2, mra, length, prec):
+
+    P = vp.PoissonOperator(mra, prec)
+    alpha2 =  spinorb2.alpha_vector(prec)
+
+    n22 = [spinorb2.overlap_density(alpha2[0], prec),
+           spinorb2.overlap_density(alpha2[1], prec),
+           spinorb2.overlap_density(alpha2[2], prec)]
+
+    for i in range(3):
+        n22[i].crop(prec)
+    
+    print("densities")
+    print("n22 x y z")
+    print(n22[0], n22[1], n22[2])
+
+    del alpha2
+    R3O = r3m.GaugeOperator(mra, 1e-5, length, prec)
+    print('Gauge operator DONE')
+
+    gaugeEnergy = 0
+#    index = 0
+    for index in range(3):
+        Bgauge22 = calcGaugePotential(n22, R3O, index, P)
+        print("Bgauge22 in loop")
+        print(Bgauge22)
+        gaugeJr, gaugeJi = n22[index].complex_conj().dot(Bgauge22)
+        print("Direct   ", gaugeJr, gaugeJi)
+        gaugeEnergy = gaugeEnergy - gaugeJr
     print("Gauge energy correction ", gaugeEnergy)
     return gaugeEnergy
 
@@ -190,35 +202,36 @@ if __name__ == '__main__':
     cf.complex_fcn.mra = mra
     print('call MRA DONE')
     
-    ################### Define V potential ######################
-    if args.potential == 'point_charge':
-       Peps = vp.ScalingProjector(mra,prec/10)
-       f = lambda x: nucpot.point_charge(x, origin, Z)
-       V_tree = Peps(f)
-    elif args.potential == 'coulomb_HFYGB':
-       Peps = vp.ScalingProjector(mra,prec/10)
-       f = lambda x: nucpot.coulomb_HFYGB(x, origin, Z, prec)
-       V_tree = Peps(f)
-    elif args.potential == 'homogeneus_charge_sphere':
-       Peps = vp.ScalingProjector(mra,prec/10)
-       f = lambda x: nucpot.homogeneus_charge_sphere(x, origin, Z, atom)
-       V_tree = Peps(f)
-    elif args.potential == 'gaussian':
-       Peps = vp.ScalingProjector(mra,prec/10)
-       f = lambda x: nucpot.gaussian(x, origin, Z, atom)
-       V_tree = Peps(f)
-    
-    default_der = args.deriv
-    print('Define V Potential', args.potential, 'DONE')
-    
-    #############################START WITH CALCULATION###################################
-    
-    
+    computeNuclearPotential = False
     readOrbitals = True
     runCoulomb = False
     saveOrbitals = False
-    runGaunt = False
+    runGaunt = True
     runGauge = True
+    runTest = False
+    default_der = args.deriv
+    
+    ################### Define V potential ######################
+    if(computeNuclearPotential):
+        if args.potential == 'point_charge':
+            Peps = vp.ScalingProjector(mra,prec/10)
+            f = lambda x: nucpot.point_charge(x, origin, Z)
+            V_tree = Peps(f)
+        elif args.potential == 'coulomb_HFYGB':
+            Peps = vp.ScalingProjector(mra,prec/10)
+            f = lambda x: nucpot.coulomb_HFYGB(x, origin, Z, prec)
+            V_tree = Peps(f)
+        elif args.potential == 'homogeneus_charge_sphere':
+            Peps = vp.ScalingProjector(mra,prec/10)
+            f = lambda x: nucpot.homogeneus_charge_sphere(x, origin, Z, atom)
+            V_tree = Peps(f)
+        elif args.potential == 'gaussian':
+            Peps = vp.ScalingProjector(mra,prec/10)
+            f = lambda x: nucpot.gaussian(x, origin, Z, atom)
+            V_tree = Peps(f)
+        print('Define V Potential', args.potential, 'DONE')
+    
+    #############################START WITH CALCULATION###################################
     
     spinorb1 = orb.orbital4c()
     spinorb2 = orb.orbital4c()
@@ -239,17 +252,22 @@ if __name__ == '__main__':
         spinorb1.init_small_components(prec/10)
         spinorb1.normalize()
         spinorb2 = spinorb1.ktrs() #does this go out of scope?
-    
+
+    length = 2 * args.box
+
     if runCoulomb:
         spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb, V_tree, mra, prec)
     
     if runGaunt:
         two_electron.gauntPert(spinorb1, spinorb2, mra, prec)
+        two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)
     
     if runGauge:
-        length = 2 * args.box
-        gaugePert(spinorb1, spinorb2, mra, length, prec)
-    
+        two_electron.calcGaugePert(spinorb1, spinorb2, mra, prec)
+        
+    if runTest:
+        testConv(spinorb1, spinorb2, mra, length, prec)
+
     if saveOrbitals:
         spinorb1.save("spinorb1")
         spinorb2.save("spinorb2")

@@ -40,6 +40,10 @@ class complex_fcn:
         self.real.loadTree(f"{name}_real")
         self.imag.loadTree(f"{name}_imag")
 
+    def cropRealImag(self, prec):
+        norm = np.sqrt(self.squaredNorm())
+        self.crop(prec * norm, True)
+
     def crop(self, prec, abs = False):
         self.real.crop(prec, abs)
         self.imag.crop(prec, abs)
@@ -65,11 +69,6 @@ class complex_fcn:
     def __str__(self):
         return ('Real part {}\n Imag part {}'.format(self.real, self.imag))
     
-    def dot(self, other):
-        re = vp.dot(self.real, other.real) - vp.dot(self.imag, other.imag)
-        im = vp.dot(self.real, other.imag) + vp.dot(self.imag, other.real)
-        return re + 1j * im
-      
     def gradient(self, der = 'ABGV'):
         if(der == 'ABGV'):
             D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
@@ -89,8 +88,8 @@ class complex_fcn:
         return grad
 
     def derivative(self, dir = 0, der = 'ABGV'):
-        if(der == 'ABGV', 0.0, 0.0):
-            D = vp.ABGVDerivative(self.mra)
+        if(der == 'ABGV'):
+            D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
         elif(der == 'PH'):
             D = vp.PHDerivative(self.mra)
         elif(der == 'BS'):
@@ -100,7 +99,8 @@ class complex_fcn:
         re_der = D(self.real, dir)
         im_der = D(self.imag, dir)
         der_func = complex_fcn()
-        der_func.init_fcn(re_der, im_der)
+        der_func.real = re_der
+        der_func.imag = im_der
         return der_func
 
     def complex_conj(self):
@@ -172,21 +172,29 @@ class complex_fcn:
         vp.advanced.add(prec/10, alpha_exchange, [a_, b_])
         return alpha_exchange
     
-    def dot(self, other):
+    def dot(self, other, cc_first = True):
         out_real = 0
         out_imag = 0
         func_a = self.real
         func_b = self.imag
         func_c = other.real
         func_d = other.imag
+
+        fbd = 1.0
+        fbc = -1.0
+        if(not cc_first):
+            fbd = -1.0
+            fbc = 1.0
+        
         if(func_a.squaredNorm() > 0 and func_c.squaredNorm() > 0):
-           out_real += vp.dot(func_a, func_c)
+           out_real = out_real + vp.dot(func_a, func_c)
         if(func_b.squaredNorm() > 0 and func_d.squaredNorm() > 0):
-           out_real += vp.dot(func_b, func_d)
+           out_real = out_real + fbd * vp.dot(func_b, func_d)
         if(func_a.squaredNorm() > 0 and func_d.squaredNorm() > 0):
-           out_imag += vp.dot(func_a, func_d)
+           out_imag = out_imag + vp.dot(func_a, func_d)
         if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
-           out_imag -= vp.dot(func_b, func_c)
+           out_imag = out_imag + fbc * vp.dot(func_b, func_c)
+
         return out_real, out_imag
 
     def advanced_overlap_density(self, other, prec):
@@ -235,13 +243,15 @@ def apply_helmholtz(func, energy, light_speed, prec):
         vp.advanced.apply(prec, out_func.imag, H, func.imag)
     return out_func
 
-def apply_poisson(func, mra, prec):
+def apply_poisson(func, mra, P, prec, thresholdNorm = 0, factor = 1.0):
     out_func = complex_fcn()
-    Pua = vp.PoissonOperator(mra, prec)
-    if(func.real.squaredNorm() > 0):
-        vp.advanced.apply(prec, out_func.real, Pua, func.real)
-    if(func.imag.squaredNorm() > 0):
-        vp.advanced.apply(prec, out_func.imag, Pua, func.imag)
+    if(func.real.squaredNorm() > thresholdNorm):
+        vp.advanced.apply(prec, out_func.real, P, func.real)
+        out_func.real *= factor
+    if(func.imag.squaredNorm() > thresholdNorm):
+        vp.advanced.apply(prec, out_func.imag, P, func.imag)
+        out_func.imag *= factor
+    out_func.cropRealImag(prec)
     return out_func
 
 def multiply(prec, lhs, rhs):
@@ -259,8 +269,31 @@ def multiply(prec, lhs, rhs):
     output.crop(prec)
     return output
 
+def divergence(vector, prec, der = "BS"):
+    out = complex_fcn()
+    der_vec = {}
+    for i in range(3):
+        der_vec[i] = vector[i].derivative(i, der)
+    out = der_vec[0] + der_vec[1] + der_vec[2]
+    out.cropRealImag(prec)
+    return out
 
+def vector_dot_r(vector, prec):
+    out = complex_fcn()
+    components = {}
+    projection_operator = vp.ScalingProjector(out.mra, prec)
+    for i in range(3):
+        r_i = projection_operator(lambda x : x[i])
+        components[i] = apply_potential(1.0, r_i, vector[i], prec)
+    out = components[0] + components[1] + components[2]
+    out.cropRealImag(prec)
+    return out
 
-
-
-
+def scalar_times_r(function, prec):
+    components = {}
+    projection_operator = vp.ScalingProjector(function.mra, prec)
+    for i in range(3):
+        r_i = projection_operator(lambda x : x[i])
+        components[i] = apply_potential(1.0, r_i, function, prec)
+        components[i].cropRealImag(prec)
+    return components

@@ -251,19 +251,7 @@ class orbital4c:
         alpha_coeff = np.array([[ 1,  1,   1,  1],
                                 [-1j, 1j, -1j, 1j],
                                 [ 1, -1,   1, -1]])
-#        Alpha = np.array([[[0, 0, 0, 1],
-#                           [0, 0, 1, 0],
-#                           [0, 1, 0, 0],
-#                           [1, 0, 0, 0]],
-#                          [[0,  0,  0,  -1j],
-#                           [0,  0,  1j,  0],
-#                           [0, -1j, 0,   0],
-#                           [1j, 0,  0,   0]],
-#                          [[0, 0, 1, 0],
-#                           [0, 0, 0,-1],
-#                           [1, 0, 0, 0],
-#                           [0,-1, 0, 0]]])
-#        out_orb.comp_array = alpha[direction]@self.comp_array
+
         for idx in range(4):
             coeff = alpha_coeff[direction][idx]
             comp = alpha_order[direction][idx]
@@ -410,3 +398,16 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
     tmp3 = np.exp(-Z*r)
     values = one_s_alpha(x,Z,alpha,gamma_factor)
     return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
+
+def alpha_gradient(orbital, prec):
+    out = orbital4c()
+    grad_vec = orbital.gradient(der = "BS")
+    alpha_vec = {}
+    for i in range(3):
+        alpha_vec[i] = grad_vec[i].alpha(i, prec)
+    out = alpha_vec[0] + alpha_vec[1] + alpha_vec[2]
+    return out
+
+
+
+

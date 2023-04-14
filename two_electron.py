@@ -99,13 +99,13 @@ def gauntPert(spinorb1, spinorb2, mra, prec):
 
     #Definition of alpha vectors for each orbital
     print("calculating alpha phi")
-    alpha1_0 =  spinorb1.alpha(0)
-    alpha1_1 =  spinorb1.alpha(1)
-    alpha1_2 =  spinorb1.alpha(2)
+    alpha1_0 =  spinorb1.alpha(0, prec)
+    alpha1_1 =  spinorb1.alpha(1, prec)
+    alpha1_2 =  spinorb1.alpha(2, prec)
 
-    alpha2_0 =  spinorb2.alpha(0)
-    alpha2_1 =  spinorb2.alpha(1)
-    alpha2_2 =  spinorb2.alpha(2)
+    alpha2_0 =  spinorb2.alpha(0, prec)
+    alpha2_1 =  spinorb2.alpha(1, prec)
+    alpha2_2 =  spinorb2.alpha(2, prec)
 
     #Defintion of orbital * alpha(orbital)
     n21_0 = spinorb2.overlap_density(alpha1_0, prec)
@@ -115,6 +115,19 @@ def gauntPert(spinorb1, spinorb2, mra, prec):
     n22_0 = spinorb2.overlap_density(alpha2_0, prec)
     n22_1 = spinorb2.overlap_density(alpha2_1, prec)
     n22_2 = spinorb2.overlap_density(alpha2_2, prec)
+
+    norm22 = [np.sqrt(n22_0.squaredNorm()),
+              np.sqrt(n22_1.squaredNorm()),
+              np.sqrt(n22_2.squaredNorm())
+            ]
+
+    norm21 = [np.sqrt(n21_0.squaredNorm()),
+              np.sqrt(n21_1.squaredNorm()),
+              np.sqrt(n21_2.squaredNorm())
+            ]
+
+    print(norm22)
+    print(norm21)
     
     n11_0 = spinorb1.overlap_density(alpha1_0, prec)
     n11_1 = spinorb1.overlap_density(alpha1_1, prec)
@@ -163,7 +176,7 @@ def gauntPert(spinorb1, spinorb2, mra, prec):
     BG21_2 = cf.complex_fcn()
     BG21_2.real = BG21_Re2
     BG21_2.imag = BG21_Im2
-    
+
     # Calculation of Gaunt two electron terms 
     print("applying potentials")
     #    VGJ2_0 = orb.apply_complex_potential(1.0, BG22_0, alpha1_0, prec)
@@ -179,6 +192,15 @@ def gauntPert(spinorb1, spinorb2, mra, prec):
     EK_1 = (n12_1.complex_conj()).dot(BG21_1)
     EK_2 = (n12_2.complex_conj()).dot(BG21_2)
 
+    print("Pot norm BG22_0", BG22_0.squaredNorm(), n22_0.squaredNorm(), EJ_0)
+    print("Pot norm BG21_0", BG21_0.squaredNorm(), n21_0.squaredNorm(), EK_0)
+    print("Pot norm BG22_1", BG22_1.squaredNorm(), n22_1.squaredNorm(), EJ_1)
+    print("Pot norm BG21_1", BG21_1.squaredNorm(), n21_1.squaredNorm(), EK_1)
+    print("Pot norm BG22_2", BG22_2.squaredNorm(), n22_2.squaredNorm(), EJ_2)
+    print("Pot norm BG21_2", BG21_2.squaredNorm(), n21_2.squaredNorm(), EK_2)
+
+    print(n22_0)
+    print(BG22_0)
     print("Direct part   ", EJ_0, EJ_1, EJ_2)
     print("Exchange part ", EK_0, EK_1, EK_2)
     
@@ -279,3 +301,219 @@ def gaugePert(spinorb1, spinorb2, mra, length, prec):
         del Bgauge21
     print("Gauge energy correction ", gaugeEnergy)
     return gaugeEnergy
+
+def calcGaugePert(spinorb1, spinorb2, mra, prec):
+    projection_operator = vp.ScalingProjector(mra, prec)
+    print("alpha1")
+    alpha1 =  spinorb1.alpha_vector(prec)
+    print("n21")
+    n21 = [spinorb2.overlap_density(alpha1[0], prec),
+           spinorb2.overlap_density(alpha1[1], prec),
+           spinorb2.overlap_density(alpha1[2], prec)]
+    del alpha1
+    
+    print("alpha2")
+    alpha2 =  spinorb2.alpha_vector(prec)
+    print("n22")
+    n22 = [spinorb2.overlap_density(alpha2[0], prec),
+           spinorb2.overlap_density(alpha2[1], prec),
+           spinorb2.overlap_density(alpha2[2], prec)]
+    del alpha2
+    
+    n21[0].cropRealImag(prec)
+    n21[1].cropRealImag(prec)
+    n21[2].cropRealImag(prec)
+    n22[0].cropRealImag(prec)
+    n22[1].cropRealImag(prec)
+    n22[2].cropRealImag(prec)
+    
+    print("densities")
+    print("n22 x y z")
+    print(n22[0], n22[1], n22[2])
+    print("n21 x y z")
+    print(n21[0], n21[1], n21[2])
+    
+    P = vp.PoissonOperator(mra, prec)
+    
+    div_n22 = cf.divergence(n22, prec)
+    div_n21 = cf.divergence(n21, prec)
+    n22_dot_r = cf.vector_dot_r(n22, prec)
+    n21_dot_r = cf.vector_dot_r(n21, prec)
+    div_n22_r = cf.scalar_times_r(div_n22, prec)
+    div_n21_r = cf.scalar_times_r(div_n21, prec)
+    
+    norm22 = {
+        "nx":np.sqrt(n22[0].squaredNorm()),
+        "ny":np.sqrt(n22[1].squaredNorm()),
+        "nz":np.sqrt(n22[2].squaredNorm()),
+        "divn":np.sqrt(div_n22.squaredNorm()),
+        "ndotr":np.sqrt(n22_dot_r.squaredNorm()),
+        "divnx":np.sqrt(div_n22_r[0].squaredNorm()),
+        "divny":np.sqrt(div_n22_r[1].squaredNorm()),
+        "divnz":np.sqrt(div_n22_r[2].squaredNorm())
+    }
+    
+    norm21 = {
+        "nx":np.sqrt(n21[0].squaredNorm()),
+        "ny":np.sqrt(n21[1].squaredNorm()),
+        "nz":np.sqrt(n21[2].squaredNorm()),
+        "divn":np.sqrt(div_n21.squaredNorm()),
+        "ndotr":np.sqrt(n21_dot_r.squaredNorm()),
+        "divnx":np.sqrt(div_n21_r[0].squaredNorm()),
+        "divny":np.sqrt(div_n21_r[1].squaredNorm()),
+        "divnz":np.sqrt(div_n21_r[2].squaredNorm())
+    }
+    
+    print(norm22)
+    print(norm21)
+    
+    val22 = norm22["nx"] * norm22["divnx"] + norm22["ny"] * norm22["divny"] + norm22["nz"] * norm22["divnz"] + norm22["ndotr"] * norm22["divn"]
+    val21 = norm21["nx"] * norm21["divnx"] + norm21["ny"] * norm21["divny"] + norm21["nz"] * norm21["divnz"] + norm21["ndotr"] * norm21["divn"]
+    val = val21 + val22
+    
+    print("val", val)
+    # the following idientites hold for two orbitals connected by KTRS
+    # n_11[i] == -n22[i]
+    # n_12[i] ==  n21[i].complex_conj()
+    
+    print("Potentials")
+    print("n11 term")
+    print("input")
+    print(div_n22)
+    threshold = 0.01 * prec * val / norm22["ndotr"]
+    print("threshold 22", threshold)
+    V_div_n11 = cf.apply_poisson(div_n22, div_n22.mra, P, prec, thresholdNorm = threshold, factor = 1.0)
+    print("output")
+    print(V_div_n11)
+    
+    print("n12 term")
+    print("input")
+    print(div_n21)
+    threshold = 0.01 * prec * val / norm21["ndotr"] 
+    print("threshold 21", threshold)
+    V_div_n12 = (cf.apply_poisson(div_n21, div_n21.mra, P, prec, thresholdNorm = threshold, factor = 1.0)).complex_conj()
+    print("output")
+    print(V_div_n12)
+    
+    V_div_n11_r = {}
+    V_div_n12_r = {}
+    
+    n1label = ["nx", "ny", "nz"]
+    
+    for i in range(3):
+        print("Potentials",i)
+        print("n11 term")
+        print("input")
+        print(div_n22_r[i])
+        threshold = 0.01 * prec * val / norm22[n1label[i]]
+        print("threshold 22", threshold)
+        V_div_n11_r[i] = cf.apply_poisson(div_n22_r[i], div_n22_r[i].mra, P, prec, thresholdNorm = threshold, factor = 4 * np.pi)
+        print("output")
+        print(V_div_n11_r[i])
+    
+        print("n12 term")
+        print("input")
+        print(div_n21_r[i])
+        threshold = 0.01 * prec * val / norm21[n1label[i]]
+        print("threshold 21", threshold)
+        V_div_n12_r[i] = (cf.apply_poisson(div_n21_r[i], div_n21_r[i].mra, P, prec, thresholdNorm = threshold, factor = 4 * np.pi)).complex_conj()
+        print("output")
+        print(V_div_n12_r[i])
+    
+    print("scalar products")
+    n22_dot_r_V_div_n11r, n22_dot_r_V_div_n11i = n22_dot_r.dot(V_div_n11, False)
+    n21_dot_r_V_div_n12r, n21_dot_r_V_div_n12i = n21_dot_r.dot(V_div_n12, False)
+    
+    result_22_11 = - n22_dot_r_V_div_n11r - 1j * n22_dot_r_V_div_n11i
+    result_21_12 = - n21_dot_r_V_div_n12r - 1j * n21_dot_r_V_div_n12i
+    print("result before loop")
+    print(result_22_11)
+    print(result_21_12)
+    for i in range(3):
+        result_22_11r, result_22_11i = n22[i].dot(V_div_n11_r[i], False)
+        result_21_12r, result_21_12i = n21[i].dot(V_div_n12_r[i], False)
+        print("in loop",i)
+        print(result_22_11r, result_22_11i)
+        print(result_21_12r, result_21_12i)
+        result_22_11 += result_22_11r + 1j * result_22_11i
+        result_21_12 += result_21_12r + 1j * result_21_12i
+    print(result_22_11/2)
+    print(result_21_12/2)
+
+def calcGauntPert(spinorb1, spinorb2, mra, prec):
+    
+    P = vp.PoissonOperator(mra, prec)
+    Light_speed = spinorb1.light_speed
+    print("alpha1")
+    alpha1 =  spinorb1.alpha_vector(prec)
+    print("n21")
+    n21 = [spinorb2.overlap_density(alpha1[0], prec),
+           spinorb2.overlap_density(alpha1[1], prec),
+           spinorb2.overlap_density(alpha1[2], prec)]
+    del alpha1
+    
+    print("alpha2")
+    alpha2 =  spinorb2.alpha_vector(prec)
+    print("n22")
+    n22 = [spinorb2.overlap_density(alpha2[0], prec),
+           spinorb2.overlap_density(alpha2[1], prec),
+           spinorb2.overlap_density(alpha2[2], prec)]
+    del alpha2
+    
+    n21[0].cropRealImag(prec)
+    n21[1].cropRealImag(prec)
+    n21[2].cropRealImag(prec)
+    n22[0].cropRealImag(prec)
+    n22[1].cropRealImag(prec)
+    n22[2].cropRealImag(prec)
+
+    norm22 = [np.sqrt(n22[0].squaredNorm()),
+              np.sqrt(n22[1].squaredNorm()),
+              np.sqrt(n22[2].squaredNorm())
+            ]
+
+    norm21 = [np.sqrt(n21[0].squaredNorm()),
+              np.sqrt(n21[1].squaredNorm()),
+              np.sqrt(n21[2].squaredNorm())
+            ]
+
+    print(norm22)
+    print(norm21)
+    
+    val22 = 0
+    val21 = 0
+    for i in range(3):
+        val22 += norm22[i]**2
+        val21 += norm21[i]**2
+    val = val21 + val22
+    
+    print("calculating potentials")
+    BG22 = []
+    BG21 = []
+    EJ = []
+    EK = []
+    EJt = 0
+    EKt = 0
+    for i in range(3):
+        threshold = 0.01 * prec * val / norm22[i]
+        pot = cf.apply_poisson(n22[i], n22[i].mra, P, prec, thresholdNorm = threshold, factor = 1)
+        BG22.append(pot)
+        EJ.append(n22[i].dot(BG22[i], True))
+        EJt += EJ[i][0] + 1j * EJ[i][1]
+        print("pot norm 22", i, BG22[i].squaredNorm(), n22[i].squaredNorm(), EJ[i])
+
+        threshold = 0.01 * prec * val / norm21[i]
+        pot = cf.apply_poisson(n21[i], n21[i].mra, P, prec, thresholdNorm = threshold, factor = 1)
+        BG21.append(pot)
+        EK.append(n21[i].dot(BG21[i], True))
+        EKt += EK[i][0] + 1j * EK[i][1]
+        print("pot norm 21", i, BG21[i].squaredNorm(), n21[i].squaredNorm(), EK[i])
+
+    print(n22[0])
+    print(BG22[0])
+    print("Direct part   ", EJ)
+    print("Exchange part ", EK)
+
+    print('GJmK_11_r', EKt + EJt)
+
+
