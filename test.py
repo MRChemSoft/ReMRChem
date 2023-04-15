@@ -259,7 +259,7 @@ if __name__ == '__main__':
         spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb, V_tree, mra, prec)
     
     if runGaunt:
-        two_electron.gauntPert(spinorb1, spinorb2, mra, prec)
+#        two_electron.gauntPert(spinorb1, spinorb2, mra, prec)
         two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)
     
     if runGauge:
