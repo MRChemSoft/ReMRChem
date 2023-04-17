@@ -22,8 +22,17 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
     while (error_norm > prec or compute_last_energy):
         n_11 = spinorb1.overlap_density(spinorb1, prec)
         spinorb2 = spinorb1.ktrs()
+        spinorb2.cropLargeSmall(prec)
+        spinorb2.normalize()
 
-        # Definition of two electron operators
+        print("Spinorb 1")
+        print(spinorb1)
+        print("Spinorb 2")
+        print(spinorb2)
+        
+        return spinorb1, spinorb2
+
+    # Definition of two electron operators
         B11    = P(n_11.real) * (4 * np.pi)
 
         # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
@@ -86,17 +95,17 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
 def gauntPert(spinorb1, spinorb2, mra, prec):
     
     P = vp.PoissonOperator(mra, prec)
-    light_speed = spinorb1.light_speed
+    Light_speed = spinorb1.light_speed
 
     #Definition of alpha vectors for each orbital
     print("calculating alpha phi")
-    alpha1_0 =  spinorb1.alpha(0)
-    alpha1_1 =  spinorb1.alpha(1)
-    alpha1_2 =  spinorb1.alpha(2)
+    alpha1_0 =  spinorb1.alpha(0, prec)
+    alpha1_1 =  spinorb1.alpha(1, prec)
+    alpha1_2 =  spinorb1.alpha(2, prec)
 
-    alpha2_0 =  spinorb2.alpha(0)
-    alpha2_1 =  spinorb2.alpha(1)
-    alpha2_2 =  spinorb2.alpha(2)
+    alpha2_0 =  spinorb2.alpha(0, prec)
+    alpha2_1 =  spinorb2.alpha(1, prec)
+    alpha2_2 =  spinorb2.alpha(2, prec)
 
     #Defintion of orbital * alpha(orbital)
     n21_0 = spinorb2.overlap_density(alpha1_0, prec)
@@ -106,6 +115,19 @@ def gauntPert(spinorb1, spinorb2, mra, prec):
     n22_0 = spinorb2.overlap_density(alpha2_0, prec)
     n22_1 = spinorb2.overlap_density(alpha2_1, prec)
     n22_2 = spinorb2.overlap_density(alpha2_2, prec)
+
+    norm22 = [np.sqrt(n22_0.squaredNorm()),
+              np.sqrt(n22_1.squaredNorm()),
+              np.sqrt(n22_2.squaredNorm())
+            ]
+
+    norm21 = [np.sqrt(n21_0.squaredNorm()),
+              np.sqrt(n21_1.squaredNorm()),
+              np.sqrt(n21_2.squaredNorm())
+            ]
+
+    print(norm22)
+    print(norm21)
     
     n11_0 = spinorb1.overlap_density(alpha1_0, prec)
     n11_1 = spinorb1.overlap_density(alpha1_1, prec)
@@ -154,7 +176,7 @@ def gauntPert(spinorb1, spinorb2, mra, prec):
     BG21_2 = cf.complex_fcn()
     BG21_2.real = BG21_Re2
     BG21_2.imag = BG21_Im2
-    
+
     # Calculation of Gaunt two electron terms 
     print("applying potentials")
     #    VGJ2_0 = orb.apply_complex_potential(1.0, BG22_0, alpha1_0, prec)
@@ -170,6 +192,15 @@ def gauntPert(spinorb1, spinorb2, mra, prec):
     EK_1 = (n12_1.complex_conj()).dot(BG21_1)
     EK_2 = (n12_2.complex_conj()).dot(BG21_2)
 
+    print("Pot norm BG22_0", BG22_0.squaredNorm(), n22_0.squaredNorm(), EJ_0)
+    print("Pot norm BG21_0", BG21_0.squaredNorm(), n21_0.squaredNorm(), EK_0)
+    print("Pot norm BG22_1", BG22_1.squaredNorm(), n22_1.squaredNorm(), EJ_1)
+    print("Pot norm BG21_1", BG21_1.squaredNorm(), n21_1.squaredNorm(), EK_1)
+    print("Pot norm BG22_2", BG22_2.squaredNorm(), n22_2.squaredNorm(), EJ_2)
+    print("Pot norm BG21_2", BG21_2.squaredNorm(), n21_2.squaredNorm(), EK_2)
+
+    print(n22_0)
+    print(BG22_0)
     print("Direct part   ", EJ_0, EJ_1, EJ_2)
     print("Exchange part ", EK_0, EK_1, EK_2)
     
@@ -190,7 +221,8 @@ def gauntPert(spinorb1, spinorb2, mra, prec):
     print('GJmK_11_r', EK - EJ)
 
 
-def calcGaugePotential(density, operator, direction): # direction is i index
+def calcGaugePotential(density, operator, direction, poisson): # direction is i index
+    
     Bgauge = [cf.complex_fcn(), cf.complex_fcn(), cf.complex_fcn()]
     index = [[1, 0, 0],
              [0, 1, 0],
@@ -201,194 +233,236 @@ def calcGaugePotential(density, operator, direction): # direction is i index
     for i in range(3): # j index
         Bgauge[i].real = operator(density[i].real, index[i][0], index[i][1], index[i][2])
         Bgauge[i].imag = operator(density[i].imag, index[i][0], index[i][1], index[i][2])
+#        Bgauge[i].real = poisson(density[i].real)
+#        Bgauge[i].imag = poisson(density[i].imag)
+        
 
     return Bgauge[0] + Bgauge[1] + Bgauge[2]
 
 def gaugePert(spinorb1, spinorb2, mra, length, prec):
-    print("gaugePert")
-    
+    print("Gauge Perturbation")
     #P = vp.PoissonOperator(mra, prec)       Non serve
     #light_speed = spinorb1.light_speed    Non serve
 
     #Definition of alpha vectors for each orbital
 
-    print("alpha1")
-    alpha1 =  spinorb1.alpha_vector(prec)
-    print("n21")
     n21 = [spinorb2.overlap_density(alpha1[0], prec),
            spinorb2.overlap_density(alpha1[1], prec),
            spinorb2.overlap_density(alpha1[2], prec)]
     del alpha1
-
-    print("alpha2")
-    alpha2 =  spinorb2.alpha_vector(prec)
-    print("n22")
     n22 = [spinorb2.overlap_density(alpha2[0], prec),
            spinorb2.overlap_density(alpha2[1], prec),
            spinorb2.overlap_density(alpha2[2], prec)]
     del alpha2
 
-    print("densities")
-    print(n22[0], n22[1], n22[2])
-    print(n21[0], n21[1], n21[2])
-
-
-
     #Definition of Gauge operator
     R3O = r3m.GaugeOperator(mra, 1e-5, length, prec)
-    print('Gauge operator DONE')
 
     Bgauge22 = [calcGaugePotential(n22, R3O, 0), calcGaugePotential(n22, R3O, 1), calcGaugePotential(n22, R3O, 2)]
-    print("Bgauge22")
-    print(Bgauge22[0], Bgauge22[1], Bgauge22[2])
-
-
     Bgauge21 = [calcGaugePotential(n21, R3O, 0), calcGaugePotential(n21, R3O, 1), calcGaugePotential(n21, R3O, 2)]
-    print("Bgauge21")
-    print(Bgauge21[0], Bgauge21[1], Bgauge21[2])
+
     # the following idientites hold for two orbitals connected by KTRS
     # n_11[i] == -n22[i]
     # n_12[i] ==  n21[i].complex_conj()
 
     gaugeEnergy = 0
-    for i in range(3):
-        gaugeJr, gaugeJi = n22[i].complex_conj().dot(Bgauge22[i])
-        gaugeKr, gaugeKi = n21[i].dot(Bgauge21[i])
+
+    for i in range(3): 
+        Bgauge22 = calcGaugePotential(n22, R3O, i, P)
+        Bgauge21 = calcGaugePotential(n21, R3O, i, P)
+        gaugeJr, gaugeJi = n22[i].complex_conj().dot(Bgauge22)
+        gaugeKr, gaugeKi = n21[i].dot(Bgauge21)
         print("Direct   ", gaugeJr, gaugeJi)
         print("Exchange ", gaugeKr, gaugeKi)
-        gaugeEnergy = gaugeEnergy - gaugeJr - gaugeKr
+        gaugeEnergy = gaugeEnergy - 0.5 * (gaugeJr + gaugeKr)
+        del Bgauge22
+        del Bgauge21
+    print("Gauge energy correction ", gaugeEnergy)
+    return gaugeEnergy
 
-    print("Gauge energy correction ", 0.5 * gaugeEnergy)
-    return 0.5 * gaugeEnergy
+def calcGaugePert(spinorb1, spinorb2, mra, prec):
+    print("Gauge Perturbation (Xiaosong Li version)")
+    projection_operator = vp.ScalingProjector(mra, prec)
+    alpha1 =  spinorb1.alpha_vector(prec)
+    n21 = [spinorb2.overlap_density(alpha1[0], prec),
+           spinorb2.overlap_density(alpha1[1], prec),
+           spinorb2.overlap_density(alpha1[2], prec)]
+    del alpha1
+
+    alpha2 =  spinorb2.alpha_vector(prec)
+    n22 = [spinorb2.overlap_density(alpha2[0], prec),
+           spinorb2.overlap_density(alpha2[1], prec),
+           spinorb2.overlap_density(alpha2[2], prec)]
+    del alpha2
     
-
-#    #Definition of Gaunt two electron operators       
-#    Bgauge22_xx = cf.complex_fcn()
-#    Bgauge22_xy = cf.complex_fcn()
-#    Bgauge22_xz = cf.complex_fcn()
-#    Bgauge22_xy.real = O(n22_x.real, 2, 0, 0)
-#    Bgauge22_xz.real = O(n22_y.real, 1, 1, 0)
-#    Bgauge22_xx.real = O(n22_z.real, 1 ,0 ,1)
-#    Bgauge22_xx.imag = O(n22_x.imag, 2, 0, 0)
-#    Bgauge22_xy.imag = O(n22_y.imag, 1, 1, 0)
-#    Bgauge22_xz.imag = O(n22_z.imag, 1 ,0 ,1)
-#    Bgauge22_x = Bgauge22_xx + Bgauge22_xy + Bgauge22_xz
-#    del Bgauge22_xx
-#    del Bgauge22_xy
-#    del Bgauge22_xz
-#    
-#    
-#    Bgauge22_Re_yx = O(n22_x.real, 1, 1, 0) 
-#    Bgauge22_Re_yy = O(n22_y.real, 0, 2, 0)    
-#    Bgauge22_Re_yz = O(n22_z.real, 0, 1, 1) 
-#    Bgauge22_Re_zx = O(n22_x.real, 1, 0, 1) 
-#    Bgauge22_Re_zy = O(n22_y.real, 0, 1, 1)    
-#    Bgauge22_Re_zz = O(n22_z.real, 0 ,0 ,2) 
-#
-#    Bgauge22_Im_yx = O(n22_x.imag, 1, 1, 0) 
-#    Bgauge22_Im_yy = O(n22_y.imag, 0, 2, 0)    
-#    Bgauge22_Im_yz = O(n22_z.imag, 0, 1, 1) 
-#    Bgauge22_Im_zx = O(n22_x.imag, 1, 0, 1) 
-#    Bgauge22_Im_zy = O(n22_y.imag, 0, 1, 1)    
-#    Bgauge22_Im_zz = O(n22_z.imag, 0 ,0 ,2) 
-#
-#    Bgauge21_Re_xx = O(n21_x.real, 2, 0, 0) 
-#    Bgauge21_Re_xy = O(n21_y.real, 1, 1, 0)    
-#    Bgauge21_Re_xz = O(n21_z.real, 1 ,0 ,1) 
-#    Bgauge21_Re_yx = O(n21_x.real, 1, 1, 0) 
-#    Bgauge21_Re_yy = O(n21_y.real, 0, 2, 0)    
-#    Bgauge21_Re_yz = O(n21_z.real, 0, 1, 1) 
-#    Bgauge21_Re_zx = O(n21_x.real, 1, 0, 1) 
-#    Bgauge21_Re_zy = O(n21_y.real, 0, 1, 1)    
-#    Bgauge21_Re_zz = O(n21_z.real, 0 ,0 ,2) 
-#                         
-#    Bgauge21_Im_xx = O(n21_x.imag, 2, 0, 0) 
-#    Bgauge21_Im_xy = O(n21_y.imag, 1, 1, 0)    
-#    Bgauge21_Im_xz = O(n21_z.imag, 1 ,0 ,1) 
-#    Bgauge21_Im_yx = O(n21_x.imag, 1, 1, 0) 
-#    Bgauge21_Im_yy = O(n21_y.imag, 0, 2, 0)    
-#    Bgauge21_Im_yz = O(n21_z.imag, 0, 1, 1) 
-#    Bgauge21_Im_zx = O(n21_x.imag, 1, 0, 1) 
-#    Bgauge21_Im_zy = O(n21_y.imag, 0, 1, 1)    
-#    Bgauge21_Im_zz = O(n21_z.imag, 0 ,0 ,2) 
-#
-#    Bgauge22_yx = cf.complex_fcn()
-#    Bgauge22_yy = cf.complex_fcn()
-#    Bgauge22_yz = cf.complex_fcn()
-#    Bgauge22_zx = cf.complex_fcn()
-#    Bgauge22_zy = cf.complex_fcn()
-#    Bgauge22_zz = cf.complex_fcn()
-#
-#    Bgauge21_xx = cf.complex_fcn()
-#    Bgauge21_xy = cf.complex_fcn()
-#    Bgauge21_xz = cf.complex_fcn()
-#    Bgauge21_yx = cf.complex_fcn()
-#    Bgauge21_yy = cf.complex_fcn()
-#    Bgauge21_yz = cf.complex_fcn()
-#    Bgauge21_zx = cf.complex_fcn()
-#    Bgauge21_zy = cf.complex_fcn()
-#    Bgauge21_zz = cf.complex_fcn()
-#
-#    Bgauge22_yx.real = Bgauge22_Re_yx
-#    Bgauge22_yy.real = Bgauge22_Re_yy
-#    Bgauge22_yz.real = Bgauge22_Re_yz
-#    Bgauge22_zx.real = Bgauge22_Re_zx
-#    Bgauge22_zy.real = Bgauge22_Re_zy
-#    Bgauge22_zz.real = Bgauge22_Re_zz
-#
-#    Bgauge22_yx.imag = Bgauge22_Im_yx
-#    Bgauge22_yy.imag = Bgauge22_Im_yy
-#    Bgauge22_yz.imag = Bgauge22_Im_yz
-#    Bgauge22_zx.imag = Bgauge22_Im_zx
-#    Bgauge22_zy.imag = Bgauge22_Im_zy
-#    Bgauge22_zz.imag = Bgauge22_Im_zz
-#    
-#    Bgauge21_xx.real = Bgauge21_Re_xx
-#    Bgauge21_xy.real = Bgauge21_Re_xy
-#    Bgauge21_xz.real = Bgauge21_Re_xz
-#    Bgauge21_yx.real = Bgauge21_Re_yx
-#    Bgauge21_yy.real = Bgauge21_Re_yy
-#    Bgauge21_yz.real = Bgauge21_Re_yz
-#    Bgauge21_zx.real = Bgauge21_Re_zx
-#    Bgauge21_zy.real = Bgauge21_Re_zy
-#    Bgauge21_zz.real = Bgauge21_Re_zz
-#
-#    Bgauge21_xx.imag = Bgauge21_Im_xx
-#    Bgauge21_xy.imag = Bgauge21_Im_xy
-#    Bgauge21_xz.imag = Bgauge21_Im_xz
-#    Bgauge21_yx.imag = Bgauge21_Im_yx
-#    Bgauge21_yy.imag = Bgauge21_Im_yy
-#    Bgauge21_yz.imag = Bgauge21_Im_yz
-#    Bgauge21_zx.imag = Bgauge21_Im_zx
-#    Bgauge21_zy.imag = Bgauge21_Im_zy
-#    Bgauge21_zz.imag = Bgauge21_Im_zz
-#    
-#    Bgauge22_y = Bgauge22_xx + Bgauge22_xy + Bgauge22_xz
-#    Bgauge22_z = Bgauge22_xx + Bgauge22_xy + Bgauge22_xz
-#    
-#    Bgauge21_x = Bgauge21_xx + Bgauge21_xy + Bgauge21_xz
-#    Bgauge21_y = Bgauge21_xx + Bgauge21_xy + Bgauge21_xz
-#    Bgauge21_z = Bgauge21_xx + Bgauge21_xy + Bgauge21_xz
-#    
-
-############################################################ Revised until this point....
-
-    # Calculation of Gaunt two electron terms 
-#    VgaugeJ2_x = orb.apply_complex_potential(1.0, Bgauge22_x, alpha1_0, prec)
-#    VgaugeJ2_y = orb.apply_complex_potential(1.0, Bgauge22_y, alpha1_1, prec)
-#    VgaugeJ2_z = orb.apply_complex_potential(1.0, Bgauge22_z, alpha1_2, prec)
-
-#    VgaugeK2_x = orb.apply_complex_potential(1.0, Bgauge21_x, alpha2_0, prec)
-#    VgaugeK2_y = orb.apply_complex_potential(1.0, Bgauge21_y, alpha2_1, prec)
-#    VgaugeK2_z = orb.apply_complex_potential(1.0, Bgauge21_z, alpha2_2, prec)
-
-#    GaugeJ2_alpha1 = VgaugeJ2_x + VgaugeJ2_y + VgaugeJ2_z
-#    GaugeK2_alpha1 = VgaugeK2_x + VgaugeK2_y + VgaugeK2_z 
-
-#    GaugeJmK_phi1 = GaugeJ2_alpha1 - GaugeK2_alpha1
+    n21[0].cropRealImag(prec)
+    n21[1].cropRealImag(prec)
+    n21[2].cropRealImag(prec)
+    n22[0].cropRealImag(prec)
+    n22[1].cropRealImag(prec)
+    n22[2].cropRealImag(prec)
     
-#    GaugeJmK_11_r, GaugeJmK_11_i = spinorb1.dot(GaugeJmK_phi1)
+    P = vp.PoissonOperator(mra, prec)
+    
+    div_n22 = cf.divergence(n22, prec)
+    div_n21 = cf.divergence(n21, prec)
+    n22_dot_r = cf.vector_dot_r(n22, prec)
+    n21_dot_r = cf.vector_dot_r(n21, prec)
+    div_n22_r = cf.scalar_times_r(div_n22, prec)
+    div_n21_r = cf.scalar_times_r(div_n21, prec)
+    
+    norm22 = {
+        "nx":np.sqrt(n22[0].squaredNorm()),
+        "ny":np.sqrt(n22[1].squaredNorm()),
+        "nz":np.sqrt(n22[2].squaredNorm()),
+        "divn":np.sqrt(div_n22.squaredNorm()),
+        "ndotr":np.sqrt(n22_dot_r.squaredNorm()),
+        "divnx":np.sqrt(div_n22_r[0].squaredNorm()),
+        "divny":np.sqrt(div_n22_r[1].squaredNorm()),
+        "divnz":np.sqrt(div_n22_r[2].squaredNorm())
+    }
+    
+    norm21 = {
+        "nx":np.sqrt(n21[0].squaredNorm()),
+        "ny":np.sqrt(n21[1].squaredNorm()),
+        "nz":np.sqrt(n21[2].squaredNorm()),
+        "divn":np.sqrt(div_n21.squaredNorm()),
+        "ndotr":np.sqrt(n21_dot_r.squaredNorm()),
+        "divnx":np.sqrt(div_n21_r[0].squaredNorm()),
+        "divny":np.sqrt(div_n21_r[1].squaredNorm()),
+        "divnz":np.sqrt(div_n21_r[2].squaredNorm())
+    }
+    
+    print(norm22)
+    print(norm21)
+    
+    val22 = norm22["nx"] * norm22["divnx"] + norm22["ny"] * norm22["divny"] + norm22["nz"] * norm22["divnz"] + norm22["ndotr"] * norm22["divn"]
+    val21 = norm21["nx"] * norm21["divnx"] + norm21["ny"] * norm21["divny"] + norm21["nz"] * norm21["divnz"] + norm21["ndotr"] * norm21["divn"]
+    val = val21 + val22
+    
+    print("val", val)
+    # the following idientites hold for two orbitals connected by KTRS
+    # n_11[i] == -n22[i]
+    # n_12[i] ==  n21[i].complex_conj()
+    
+    print("Potentials")
+    print("n11 term")
+    threshold = 0.01 * prec * val / norm22["ndotr"]
+    print("threshold 22", threshold)
+    V_div_n11 = cf.apply_poisson(div_n22, div_n22.mra, P, prec, thresholdNorm = threshold, factor = -1.0)
+    
+    print("n12 term")
+    threshold = 0.01 * prec * val / norm21["ndotr"] 
+    print("threshold 21", threshold)
+    V_div_n12 = (cf.apply_poisson(div_n21, div_n21.mra, P, prec, thresholdNorm = threshold, factor = -1.0)).complex_conj()
+    
+    V_div_n11_r = {}
+    V_div_n12_r = {}
+    
+    n1label = ["nx", "ny", "nz"]
+    
+    for i in range(3):
+        print("Potentials",i)
+        print("n11 term")
+        threshold = 0.01 * prec * val / norm22[n1label[i]]
+        print("threshold 22", threshold)
+        V_div_n11_r[i] = cf.apply_poisson(div_n22_r[i], div_n22_r[i].mra, P, prec, thresholdNorm = threshold, factor = 1.0)
+    
+        print("n12 term")
+        threshold = 0.01 * prec * val / norm21[n1label[i]]
+        print("threshold 21", threshold)
+        V_div_n12_r[i] = (cf.apply_poisson(div_n21_r[i], div_n21_r[i].mra, P, prec, thresholdNorm = threshold, factor = 1.0)).complex_conj()
+    
+    print("scalar products")
+    n22_dot_r_V_div_n11r, n22_dot_r_V_div_n11i = n22_dot_r.dot(V_div_n11, False)
+    n21_dot_r_V_div_n12r, n21_dot_r_V_div_n12i = n21_dot_r.dot(V_div_n12, False)    
 
-#    print('GaugeJmK_11_r', 0.5 * GaugeJmK_11_r)
+    result_22_11 = n22_dot_r_V_div_n11r + 1j * n22_dot_r_V_div_n11i
+    result_21_12 = n21_dot_r_V_div_n12r + 1j * n21_dot_r_V_div_n12i
+    print("result before loop")
+    print(result_22_11)
+    print(result_21_12)
+
+    for i in range(3):
+        result_22_11r, result_22_11i = n22[i].dot(V_div_n11_r[i], False)
+        result_21_12r, result_21_12i = n21[i].dot(V_div_n12_r[i], False)
+        print("in loop",i)
+        print(result_22_11r, result_22_11i)
+        print(result_21_12r, result_21_12i)
+        result_22_11 += result_22_11r + 1j * result_22_11i
+        result_21_12 += result_21_12r + 1j * result_21_12i
+    print("Final direct ", result_22_11)
+    print("Final exchange ", result_21_12)
+    print("Total ",  result_22_11 - result_21_12)
+
+def calcGauntPert(spinorb1, spinorb2, mra, prec):
+    print ("Gaunt Perturbation")
+    P = vp.PoissonOperator(mra, prec)
+    Light_speed = spinorb1.light_speed
+    alpha1 =  spinorb1.alpha_vector(prec)
+    n21 = [spinorb2.overlap_density(alpha1[0], prec),
+           spinorb2.overlap_density(alpha1[1], prec),
+           spinorb2.overlap_density(alpha1[2], prec)]
+    del alpha1
+    
+    alpha2 =  spinorb2.alpha_vector(prec)
+    n22 = [spinorb2.overlap_density(alpha2[0], prec),
+           spinorb2.overlap_density(alpha2[1], prec),
+           spinorb2.overlap_density(alpha2[2], prec)]
+    del alpha2
+    
+    n21[0].cropRealImag(prec)
+    n21[1].cropRealImag(prec)
+    n21[2].cropRealImag(prec)
+    n22[0].cropRealImag(prec)
+    n22[1].cropRealImag(prec)
+    n22[2].cropRealImag(prec)
+
+    norm22 = [np.sqrt(n22[0].squaredNorm()),
+              np.sqrt(n22[1].squaredNorm()),
+              np.sqrt(n22[2].squaredNorm())
+            ]
+
+    norm21 = [np.sqrt(n21[0].squaredNorm()),
+              np.sqrt(n21[1].squaredNorm()),
+              np.sqrt(n21[2].squaredNorm())
+            ]
+
+    print(norm22)
+    print(norm21)
+    
+    val22 = 0
+    val21 = 0
+    for i in range(3):
+        val22 += norm22[i]**2
+        val21 += norm21[i]**2
+    val = val21 + val22
+    
+    print("calculating potentials")
+    BG22 = []
+    BG21 = []
+    EJ = []
+    EK = []
+    EJt = 0
+    EKt = 0
+    for i in range(3):
+        threshold = 0.01 * prec * val / norm22[i]
+        pot = cf.apply_poisson(n22[i], n22[i].mra, P, prec, thresholdNorm = threshold, factor = 1)
+        BG22.append(pot)
+        EJ.append(n22[i].dot(BG22[i], False))
+        EJt += EJ[i][0] + 1j * EJ[i][1]
+        print("pot norm 22", i, BG22[i].squaredNorm(), n22[i].squaredNorm(), EJ[i])
+
+        threshold = 0.01 * prec * val / norm21[i]
+        pot = (cf.apply_poisson(n21[i], n21[i].mra, P, prec, thresholdNorm = threshold, factor = -1)).complex_conj()
+        BG21.append(pot)
+        EK.append(n21[i].dot(BG21[i], False))
+        EKt += EK[i][0] + 1j * EK[i][1]
+        print("pot norm 21", i, BG21[i].squaredNorm(), n21[i].squaredNorm(), EK[i])
+
+    print("Direct part   ", EJ)
+    print("Exchange part ", EK)
+
+    print('GJmK_11_r', EJt - EKt)
 
 

@@ -9,6 +9,7 @@ from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
 from vampyr import vampyr3d as vp
 from vampyr import vampyr1d as vp1
+from memory_profiler import profile
 
 import argparse
 import numpy as np
@@ -102,11 +103,11 @@ print('Define V Potential', args.potential, 'DONE')
 #############################START WITH CALCULATION###################################
 
 
-readOrbitals = True
-runCoulomb = False
+readOrbitals = False
+runCoulomb = True
 saveOrbitals = False
 runGaunt = False
-runGauge = True
+runGauge = False
 
 spinorb1 = orb.orbital4c()
 spinorb2 = orb.orbital4c()
@@ -125,11 +126,12 @@ else:
     complexfc.copy_fcns(real=gauss_tree)
     spinorb1.copy_components(La=complexfc)
     spinorb1.init_small_components(prec/10)
+    spinorb1.cropLargeSmall(prec)
     spinorb1.normalize()
     spinorb2 = spinorb1.ktrs() #does this go out of scope?
 
 if runCoulomb:
-    spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb, V_tree, mra, prec)
+    spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)
 
 if runGaunt:
     two_electron.gauntPert(spinorb1, spinorb2, mra, prec)
