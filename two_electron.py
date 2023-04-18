@@ -280,26 +280,22 @@ def gaugePert(spinorb1, spinorb2, mra, length, prec):
     print("Gauge energy correction ", gaugeEnergy)
     return gaugeEnergy
 
+def calcAlphaDensityVector(spinorb1, spinorb2, prec):
+    alphaOrbital =  spinorb2.alpha_vector(prec)
+    alphaDensity = [spinorb1.overlap_density(alphaOrbital[0], prec),
+                    spinorb1.overlap_density(alphaOrbital[1], prec),
+                    spinorb1.overlap_density(alphaOrbital[2], prec)]
+    del alphaOrbital
+    alphaDensity[0].cropRealImag(prec)
+    alphaDensity[1].cropRealImag(prec)
+    alphaDensity[2].cropRealImag(prec)
+    return alphaDensity
+    
 def calcGaugePert(spinorb1, spinorb2, mra, prec):
     print("Gauge Perturbation (Xiaosong Li version)")
     projection_operator = vp.ScalingProjector(mra, prec)
-    alpha1 =  spinorb1.alpha_vector(prec)
-    n21 = [spinorb2.overlap_density(alpha1[0], prec),
-           spinorb2.overlap_density(alpha1[1], prec),
-           spinorb2.overlap_density(alpha1[2], prec)]
-    del alpha1
-    alpha2 =  spinorb2.alpha_vector(prec)
-    n22 = [spinorb2.overlap_density(alpha2[0], prec),
-           spinorb2.overlap_density(alpha2[1], prec),
-           spinorb2.overlap_density(alpha2[2], prec)]
-    del alpha2
-    
-    n21[0].cropRealImag(prec)
-    n21[1].cropRealImag(prec)
-    n21[2].cropRealImag(prec)
-    n22[0].cropRealImag(prec)
-    n22[1].cropRealImag(prec)
-    n22[2].cropRealImag(prec)
+    n21 = calcAlphaDesnsityVector(spinorb2, spinorb1, prec)
+    n22 = calcAlphaDesnsityVector(spinorb2, spinorb2, prec)
     
     P = vp.PoissonOperator(mra, prec)
     
