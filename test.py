@@ -198,8 +198,9 @@ if __name__ == '__main__':
     readOrbitals = True
     runCoulomb = False
     saveOrbitals = False
-    runGaunt = True
-    runGauge = True
+    runGaunt = False
+    runGauge = False
+    runGaugeA = True
     runTest = False
     default_der = args.deriv
     
@@ -255,6 +256,9 @@ if __name__ == '__main__':
     
     if runGauge:
         two_electron.calcGaugePert(spinorb1, spinorb2, mra, prec)
+        
+    if runGaugeA:
+        two_electron.calcGaugePertA(spinorb1, spinorb2, mra, prec)
         
     if runTest:
         testConv(spinorb1, spinorb2, mra, length, prec)

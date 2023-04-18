@@ -294,8 +294,8 @@ def calcAlphaDensityVector(spinorb1, spinorb2, prec):
 def calcGaugePert(spinorb1, spinorb2, mra, prec):
     print("Gauge Perturbation (Xiaosong Li version)")
     projection_operator = vp.ScalingProjector(mra, prec)
-    n21 = calcAlphaDesnsityVector(spinorb2, spinorb1, prec)
-    n22 = calcAlphaDesnsityVector(spinorb2, spinorb2, prec)
+    n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
+    n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
     
     P = vp.PoissonOperator(mra, prec)
     
@@ -459,3 +459,73 @@ def calcGauntPert(spinorb1, spinorb2, mra, prec):
     print("Exchange part ", EK)
 
     print('GJmK_11_r', EJt - EKt)
+
+def computeTestNorm(contributions):
+    val = 0
+    for i in range(len(contributions["density"])):
+        squaredNormDensity = contributions["density"][i].squaredNorm()
+        squaredNormPotential = contributions["potential"][i].squaredNorm()
+        val += np.sqrt(squaredNormDensity * squaredNormPotential)
+    return val
+                   
+def calcPerturbationValues(contributions, P, prec, testNorm, sign = 1.0, conjugate = False):
+    val = 0
+    for i in range(len(contributions["density"])):
+#        print("term ", i)
+        density = contributions["density"][i]
+        auxDensity = contributions["potential"][i]
+        normDensity = np.sqrt(density.squaredNorm())
+        normAuxDensity = np.sqrt(auxDensity.squaredNorm())
+        threshold = 0
+        print("threshold ", i, threshold, normDensity, normAuxDensity)
+        potential = (cf.apply_poisson(auxDensity, auxDensity.mra, P, prec, thresholdNorm = threshold, factor = sign))
+#        print("scalar product", i)
+        spr, spi = density.dot(potential, conjugate)
+        print(spr, spi)
+        val += spr + 1j * spi
+    return val
+    
+def calcGaugePertA(spinorb1, spinorb2, mra, prec):
+    print("Gauge Perturbation Version A")
+    projection_operator = vp.ScalingProjector(mra, prec)
+    P = vp.PoissonOperator(mra, prec)
+    n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
+    n12 = calcAlphaDensityVector(spinorb1, spinorb2, prec)
+    n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
+    n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
+
+    div_n22 = cf.divergence(n22, prec)
+    div_n21 = cf.divergence(n21, prec)
+    n11_dot_r = cf.vector_dot_r(n11, prec)
+    n12_dot_r = cf.vector_dot_r(n12, prec)
+
+    n22_r_mat = cf.vector_tensor_r(n22, prec)
+    n21_r_mat = cf.vector_tensor_r(n21, prec)
+
+    grad_n11 = cf.vector_gradient(n11)
+    grad_n12 = cf.vector_gradient(n12)
+
+    contributions = {
+        "density":[n11_dot_r,
+                   grad_n11[0][0], grad_n11[0][1], grad_n11[0][2],
+                   grad_n11[1][0], grad_n11[1][1], grad_n11[1][2],
+                   grad_n11[2][0], grad_n11[2][1], grad_n11[2][2],
+                   n12_dot_r,
+                   grad_n12[0][0], grad_n12[0][1], grad_n12[0][2],
+                   grad_n12[1][0], grad_n12[1][1], grad_n12[1][2],
+                   grad_n12[2][0], grad_n12[2][1], grad_n12[2][2]],
+        "potential":[div_n21,
+                     n21_r_mat[0][0], n21_r_mat[0][1], n21_r_mat[0][2],
+                     n21_r_mat[1][0], n21_r_mat[1][1], n21_r_mat[1][2],
+                     n21_r_mat[2][0], n21_r_mat[2][1], n21_r_mat[2][2],
+                     div_n22,
+                     n22_r_mat[0][0], n22_r_mat[0][1], n22_r_mat[0][2],
+                     n22_r_mat[1][0], n22_r_mat[1][1], n22_r_mat[1][2],
+                     n22_r_mat[2][0], n22_r_mat[2][1], n22_r_mat[2][2]]
+    } 
+
+    testNorm = computeTestNorm(contributions)
+    print("Test Norm", testNorm)
+    result = calcPerturbationValues(contributions, P, prec, testNorm)
+    print("final Gauge", result)
+    return result
