@@ -468,18 +468,19 @@ def computeTestNorm(contributions):
         val += np.sqrt(squaredNormDensity * squaredNormPotential)
     return val
                    
-def calcPerturbationValues(contributions, P, prec, testNorm, sign = 1.0, conjugate = False):
+def calcPerturbationValues(contributions, P, prec, testNorm):
     val = 0
+    conjugate = False
     for i in range(len(contributions["density"])):
-#        print("term ", i)
+        sign = contributions["sign"][i]
         density = contributions["density"][i]
         auxDensity = contributions["potential"][i]
         normDensity = np.sqrt(density.squaredNorm())
         normAuxDensity = np.sqrt(auxDensity.squaredNorm())
-        threshold = 0
-        print("threshold ", i, threshold, normDensity, normAuxDensity)
+        threshold = 0.00001 * prec * testNorm / normDensity
+#        threshold = 0
+#        print("threshold ", i, threshold, normDensity, normAuxDensity)
         potential = (cf.apply_poisson(auxDensity, auxDensity.mra, P, prec, thresholdNorm = threshold, factor = sign))
-#        print("scalar product", i)
         spr, spi = density.dot(potential, conjugate)
         print(spr, spi)
         val += spr + 1j * spi
@@ -507,25 +508,198 @@ def calcGaugePertA(spinorb1, spinorb2, mra, prec):
 
     contributions = {
         "density":[n11_dot_r,
-                   grad_n11[0][0], grad_n11[0][1], grad_n11[0][2],
-                   grad_n11[1][0], grad_n11[1][1], grad_n11[1][2],
-                   grad_n11[2][0], grad_n11[2][1], grad_n11[2][2],
+                   grad_n11[0][0], grad_n11[1][0], grad_n11[2][0],
+                   grad_n11[0][1], grad_n11[1][1], grad_n11[2][1],
+                   grad_n11[0][2], grad_n11[1][2], grad_n11[2][2],
                    n12_dot_r,
-                   grad_n12[0][0], grad_n12[0][1], grad_n12[0][2],
-                   grad_n12[1][0], grad_n12[1][1], grad_n12[1][2],
-                   grad_n12[2][0], grad_n12[2][1], grad_n12[2][2]],
-        "potential":[div_n21,
-                     n21_r_mat[0][0], n21_r_mat[0][1], n21_r_mat[0][2],
-                     n21_r_mat[1][0], n21_r_mat[1][1], n21_r_mat[1][2],
-                     n21_r_mat[2][0], n21_r_mat[2][1], n21_r_mat[2][2],
-                     div_n22,
+                   grad_n12[0][0], grad_n12[1][0], grad_n12[2][0],
+                   grad_n12[0][1], grad_n12[1][1], grad_n12[2][1],
+                   grad_n12[0][2], grad_n12[1][2], grad_n12[2][2]],
+        "potential":[div_n22,
                      n22_r_mat[0][0], n22_r_mat[0][1], n22_r_mat[0][2],
                      n22_r_mat[1][0], n22_r_mat[1][1], n22_r_mat[1][2],
-                     n22_r_mat[2][0], n22_r_mat[2][1], n22_r_mat[2][2]]
+                     n22_r_mat[2][0], n22_r_mat[2][1], n22_r_mat[2][2],
+                     div_n21,
+                     n21_r_mat[0][0], n21_r_mat[0][1], n21_r_mat[0][2],
+                     n21_r_mat[1][0], n21_r_mat[1][1], n21_r_mat[1][2],
+                     n21_r_mat[2][0], n21_r_mat[2][1], n21_r_mat[2][2]],
+#        "sign":[ 1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+#                 1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+        "sign":[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     } 
 
     testNorm = computeTestNorm(contributions)
-    print("Test Norm", testNorm)
+    print("Test Norm A", testNorm)
     result = calcPerturbationValues(contributions, P, prec, testNorm)
-    print("final Gauge", result)
+    print("final Gauge A", result)
+    return result
+
+def calcGaugePertB(spinorb1, spinorb2, mra, prec):
+    print("Gauge Perturbation Version B")
+    projection_operator = vp.ScalingProjector(mra, prec)
+    P = vp.PoissonOperator(mra, prec)
+    n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
+    n12 = calcAlphaDensityVector(spinorb1, spinorb2, prec)
+    n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
+    n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
+
+    div_n22 = cf.divergence(n22, prec)
+    div_n21 = cf.divergence(n21, prec)
+    div_n22_r = cf.scalar_times_r(div_n22, prec)
+    div_n21_r = cf.scalar_times_r(div_n21, prec)
+    n11_dot_r = cf.vector_dot_r(n11, prec)
+    n12_dot_r = cf.vector_dot_r(n12, prec)
+
+    contributions = {
+        "potential":[n11_dot_r,
+                   n11[0], n11[1], n11[2],
+                   n12_dot_r,
+                   n12[0], n12[1], n12[2]],
+        "density":[div_n22,
+                     div_n22_r[0], div_n22_r[1], div_n22_r[2],
+                     div_n21,
+                     div_n21_r[0], div_n21_r[1], div_n21_r[2]],
+        "sign":[-1,  1,  1,  1,
+                 1, -1, -1, -1]
+    } 
+
+    testNorm = computeTestNorm(contributions)
+    print("Test Norm B", testNorm)
+    result = calcPerturbationValues(contributions, P, prec, testNorm)
+    print("final Gauge B", result)
+    return result
+
+def calcGaugePertC(spinorb1, spinorb2, mra, prec):
+    print("Gauge Perturbation Version C")
+    projection_operator = vp.ScalingProjector(mra, prec)
+    P = vp.PoissonOperator(mra, prec)
+    n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
+    n12 = calcAlphaDensityVector(spinorb1, spinorb2, prec)
+    n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
+    n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
+
+    grad_n11 = cf.vector_gradient(n11)
+    grad_n12 = cf.vector_gradient(n12)
+
+    grad_n11_r = [cf.vector_dot_r([grad_n11[i][0] for i in range(3)], prec),
+                  cf.vector_dot_r([grad_n11[i][1] for i in range(3)], prec),
+                  cf.vector_dot_r([grad_n11[i][2] for i in range(3)], prec)]
+    grad_n12_r = [cf.vector_dot_r([grad_n12[i][0] for i in range(3)], prec),
+                  cf.vector_dot_r([grad_n12[i][1] for i in range(3)], prec),
+                  cf.vector_dot_r([grad_n12[i][2] for i in range(3)], prec)]
+
+    n22_r_mat = cf.vector_tensor_r(n22, prec)
+    n21_r_mat = cf.vector_tensor_r(n21, prec)
+    
+    
+
+    div_n22 = cf.divergence(n22, prec)
+    div_n21 = cf.divergence(n21, prec)
+    div_n22_r = cf.scalar_times_r(div_n22, prec)
+    div_n21_r = cf.scalar_times_r(div_n21, prec)
+    n11_dot_r = cf.vector_dot_r(n11, prec)
+    n12_dot_r = cf.vector_dot_r(n12, prec)
+
+    contributions = {
+        "density":[n22[0], n22[1], n22[2],
+                   n22_r_mat[0][0], n22_r_mat[1][0], n22_r_mat[2][0],
+                   n22_r_mat[0][1], n22_r_mat[1][1], n22_r_mat[2][1],
+                   n22_r_mat[0][2], n22_r_mat[1][2], n22_r_mat[2][2],
+                   n21[0], n21[1], n21[2],
+                   n21_r_mat[0][0], n21_r_mat[1][0], n21_r_mat[2][0],
+                   n21_r_mat[0][1], n21_r_mat[1][1], n21_r_mat[2][1],
+                   n21_r_mat[0][2], n21_r_mat[1][2], n21_r_mat[2][2]],
+
+        "potential":[grad_n11_r[0], grad_n11_r[1], grad_n11_r[2],
+                     grad_n11[0][0], grad_n11[0][1], grad_n11[0][2],
+                     grad_n11[1][0], grad_n11[1][1], grad_n11[1][2],
+                     grad_n11[2][0], grad_n11[2][1], grad_n11[2][2],
+                     grad_n12_r[0], grad_n12_r[1], grad_n12_r[2],
+                     grad_n12[0][0], grad_n12[0][1], grad_n12[0][2],
+                     grad_n12[1][0], grad_n12[1][1], grad_n12[1][2],
+                     grad_n12[2][0], grad_n12[2][1], grad_n12[2][2]],
+
+        "sign":[ 1,  1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1,  1,  1,  1,  1,  1,  1,  1,  1,  1]
+    } 
+
+    testNorm = computeTestNorm(contributions)
+    print("Test Norm C", testNorm)
+    result = calcPerturbationValues(contributions, P, prec, testNorm)
+    print("final Gauge C", result)
+    return result
+
+def calcGaugePertD(spinorb1, spinorb2, mra, prec):
+    print("Gauge Perturbation Version D")
+    projection_operator = vp.ScalingProjector(mra, prec)
+    P = vp.PoissonOperator(mra, prec)
+    n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
+    n12 = calcAlphaDensityVector(spinorb1, spinorb2, prec)
+    n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
+    n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
+
+    grad_n11 = cf.vector_gradient(n11)
+    grad_n12 = cf.vector_gradient(n12)
+        
+    grad_n11_r = [cf.vector_dot_r([grad_n11[i][0] for i in range(3)], prec),
+                  cf.vector_dot_r([grad_n11[i][1] for i in range(3)], prec),
+                  cf.vector_dot_r([grad_n11[i][2] for i in range(3)], prec)]
+
+    grad_n12_r = [cf.vector_dot_r([grad_n12[i][0] for i in range(3)], prec),
+                  cf.vector_dot_r([grad_n12[i][1] for i in range(3)], prec),
+                  cf.vector_dot_r([grad_n12[i][2] for i in range(3)], prec)]
+
+    div_n22 = cf.divergence(n22, prec)
+    div_n21 = cf.divergence(n21, prec)
+
+    div_n22_r = cf.scalar_times_r(div_n22, prec)
+    div_n21_r = cf.scalar_times_r(div_n21, prec)
+
+    n22_r_mat = cf.vector_tensor_r(n22, prec)
+    n21_r_mat = cf.vector_tensor_r(n21, prec)
+    
+    n11_dot_r = cf.vector_dot_r(n11, prec)
+    n12_dot_r = cf.vector_dot_r(n12, prec)
+
+    contributions = {
+        "potential":[n22[0], n22[1], n22[2],
+                     div_n22_r[0], div_n22_r[1], div_n22_r[2],
+                     n21[0], n21[1], n21[2],
+                     div_n21_r[0], div_n21_r[1], div_n21_r[2]],
+        "density":[grad_n11_r[0], grad_n11_r[1], grad_n11_r[2],
+                   n11[0], n11[1], n11[2],
+                   grad_n12_r[0], grad_n12_r[1], grad_n12_r[2],
+                   n12[0], n12[1], n12[2]],
+        "sign":[ 1,  1,  1,  1,  1,  1,
+                -1, -1, -1, -1, -1, -1]
+    } 
+
+    testNorm = computeTestNorm(contributions)
+    print("Test Norm D", testNorm)
+    result = calcPerturbationValues(contributions, P, prec, testNorm)
+    print("final Gauge D", result)
+    return result
+
+def calcGaugeDelta(spinorb1, spinorb2, mra, prec):
+    print("Gauge Perturbation Delta")
+    projection_operator = vp.ScalingProjector(mra, prec)
+    P = vp.PoissonOperator(mra, prec)
+    n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
+    n12 = calcAlphaDensityVector(spinorb1, spinorb2, prec)
+    n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
+    n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
+
+    contributions = {
+        "potential":[n22[0], n22[1], n22[2],
+                     n21[0], n21[1], n21[2]],
+        "density":[n11[0], n11[1], n11[2],
+                   n12[0], n12[1], n12[2]],
+        "sign":[1, 1, 1, -1, -1, -1]
+    } 
+
+    testNorm = computeTestNorm(contributions)
+    print("Test Norm Delta", testNorm)
+    result = calcPerturbationValues(contributions, P, prec, testNorm)
+    print("final Gauge Delta", result)
     return result

@@ -200,7 +200,11 @@ if __name__ == '__main__':
     saveOrbitals = False
     runGaunt = False
     runGauge = False
-    runGaugeA = True
+    runGaugeA = False
+    runGaugeB = False
+    runGaugeC = True
+    runGaugeD = False
+    runGaugeDelta = False
     runTest = False
     default_der = args.deriv
     
@@ -259,6 +263,18 @@ if __name__ == '__main__':
         
     if runGaugeA:
         two_electron.calcGaugePertA(spinorb1, spinorb2, mra, prec)
+
+    if runGaugeB:
+        two_electron.calcGaugePertB(spinorb1, spinorb2, mra, prec)
+
+    if runGaugeC:
+        two_electron.calcGaugePertC(spinorb1, spinorb2, mra, prec)
+        
+    if runGaugeD:
+        two_electron.calcGaugePertD(spinorb1, spinorb2, mra, prec)
+        
+    if runGaugeDelta:
+        two_electron.calcGaugeDelta(spinorb1, spinorb2, mra, prec)
         
     if runTest:
         testConv(spinorb1, spinorb2, mra, length, prec)
