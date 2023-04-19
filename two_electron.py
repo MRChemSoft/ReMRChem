@@ -102,7 +102,12 @@ def calcAlphaDensityVector(spinorb1, spinorb2, prec):
     alphaDensity[1].cropRealImag(prec)
     alphaDensity[2].cropRealImag(prec)
     return alphaDensity
-    
+
+#
+# currently without the -1/2 factor
+# correct gaun term: multiply by -1/2
+# gaunt and delta-term from gauge: multiply by -1
+#
 def calcGauntPert(spinorb1, spinorb2, mra, prec):
     print ("Gaunt Perturbation")
     P = vp.PoissonOperator(mra, prec)
@@ -180,14 +185,17 @@ def calcPerturbationValues(contributions, P, prec, testNorm):
         normDensity = np.sqrt(density.squaredNorm())
         normAuxDensity = np.sqrt(auxDensity.squaredNorm())
         threshold = 0.00001 * prec * testNorm / normDensity
-#        threshold = 0
-#        print("threshold ", i, threshold, normDensity, normAuxDensity)
         potential = (cf.apply_poisson(auxDensity, auxDensity.mra, P, prec, thresholdNorm = threshold, factor = sign))
         spr, spi = density.dot(potential, conjugate)
         print(spr, spi)
         val += spr + 1j * spi
     return val
     
+#
+# currently without the -1/2 factor
+# correct gauge term: multiply by -1/2
+# no delta terms from this expression
+#
 def calcGaugePertA(spinorb1, spinorb2, mra, prec):
     print("Gauge Perturbation Version A")
     projection_operator = vp.ScalingProjector(mra, prec)
@@ -225,8 +233,6 @@ def calcGaugePertA(spinorb1, spinorb2, mra, prec):
                      n21_r_mat[0][0], n21_r_mat[0][1], n21_r_mat[0][2],
                      n21_r_mat[1][0], n21_r_mat[1][1], n21_r_mat[1][2],
                      n21_r_mat[2][0], n21_r_mat[2][1], n21_r_mat[2][2]],
-#        "sign":[ 1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-#                 1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
         "sign":[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
                  1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     } 
@@ -237,6 +243,12 @@ def calcGaugePertA(spinorb1, spinorb2, mra, prec):
     print("final Gauge A", result)
     return result
 
+#
+# currently without the -1/2 factor
+# correct gauge term: multiply by -1/2
+# one delta term excluded
+# most efficient method
+#
 def calcGaugePertB(spinorb1, spinorb2, mra, prec):
     print("Gauge Perturbation Version B")
     projection_operator = vp.ScalingProjector(mra, prec)
@@ -272,6 +284,13 @@ def calcGaugePertB(spinorb1, spinorb2, mra, prec):
     print("final Gauge B", result)
     return result
 
+#
+# currently without the -1/2 factor
+# correct gauge term: multiply by -1/2
+# one delta term excluded
+# same structure as Sun 2022
+# least efficeint method
+#
 def calcGaugePertC(spinorb1, spinorb2, mra, prec):
     print("Gauge Perturbation Version C")
     projection_operator = vp.ScalingProjector(mra, prec)
@@ -332,6 +351,11 @@ def calcGaugePertC(spinorb1, spinorb2, mra, prec):
     print("final Gauge C", result)
     return result
 
+#
+# currently without the -1/2 factor
+# correct gauge term: multiply by -1/2
+# double delta term excluded
+#
 def calcGaugePertD(spinorb1, spinorb2, mra, prec):
     print("Gauge Perturbation Version D")
     projection_operator = vp.ScalingProjector(mra, prec)
@@ -383,6 +407,10 @@ def calcGaugePertD(spinorb1, spinorb2, mra, prec):
     print("final Gauge D", result)
     return result
 
+#
+# currently without the -1/2 factor
+# correct gauge delta term: multiply by -1/2
+#
 def calcGaugeDelta(spinorb1, spinorb2, mra, prec):
     print("Gauge Perturbation Delta")
     projection_operator = vp.ScalingProjector(mra, prec)
