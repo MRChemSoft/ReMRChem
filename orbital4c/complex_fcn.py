@@ -297,3 +297,16 @@ def scalar_times_r(function, prec):
         components[i] = apply_potential(1.0, r_i, function, prec)
         components[i].cropRealImag(prec)
     return components
+
+def vector_tensor_r(vector, prec):
+    tensor = []
+    for i in range(len(vector)):
+        tensor.append(scalar_times_r(vector[i], prec))
+    return tensor
+
+def vector_gradient(vector, der = "BS"):
+    tensor = []
+    for i in range(len(vector)):
+        tensor.append(vector[i].gradient(der))
+    return tensor
+
