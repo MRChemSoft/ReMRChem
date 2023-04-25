@@ -11,68 +11,39 @@ import numpy.linalg as LA
 import sys, getopt
 
 
-def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
+def coulomb_gs_2e(spinorb1, spinorb2, potential, mra, prec, der, eps, E_tot_JK):
     print('Hartree-Fock (Coulomb interaction)')
     error_norm = 1
     compute_last_energy = False
     P = vp.PoissonOperator(mra, prec)
-    light_speed = spinorb1.light_speed
-
 
     while (error_norm > prec or compute_last_energy):
-        n_11 = spinorb1.overlap_density(spinorb1, prec)
-        spinorb2 = spinorb1.ktrs()
-        spinorb2.cropLargeSmall(prec)
-        spinorb2.normalize()
+        n_22 = spinorb1.overlap_density(spinorb2, prec)
 
-        print("Spinorb 1")
-        print(spinorb1)
-        print("Spinorb 2")
-        print(spinorb2)
-        
-        return spinorb1, spinorb2
+        # Definition of two electron operators
+        B22    = P(n_22.real) * (4 * np.pi)
 
-    # Definition of two electron operators
-        B11    = P(n_11.real) * (4 * np.pi)
-
-        # Definiton of Dirac Hamiltonian for spin orbit 1 and 2
+        # Definiton of Dirac Hamiltonian for spinorbit 1 that due to TRS is equal spinorbit 2
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der)
-        hd_psi_2 = orb.apply_dirac_hamiltonian(spinorb2, prec, 0.0, der)
         hd_11_r, hd_11_i = spinorb1.dot(hd_psi_1)
-        hd_12_r, hd_12_i = spinorb1.dot(hd_psi_2)
-        hd_21_r, hd_21_i = spinorb2.dot(hd_psi_1)
-        hd_22_r, hd_22_i = spinorb2.dot(hd_psi_2)
-        hd_mat = np.array([[hd_11_r + hd_11_i * 1j, hd_12_r + hd_12_i * 1j],
-                           [hd_21_r + hd_21_i * 1j, hd_22_r + hd_22_i * 1j]])
 
         # Applying nuclear potential to spin orbit 1 and 2
         v_psi_1 = orb.apply_potential(-1.0, potential, spinorb1, prec)
         V_11_r, V_11_i = spinorb1.dot(v_psi_1)
-        v_mat = np.array([[ V_11_r + V_11_i * 1j, 0],
-                          [ 0,                    V_11_r + V_11_i * 1j]])
-        # Calculation of two electron terms
-        J2_phi1 = orb.apply_potential(1.0, B11, spinorb1, prec)
-        JmK_phi1 = J2_phi1 # K part is zero for 2e system in GS
-        JmK_11_r, JmK_11_i = spinorb1.dot(JmK_phi1)
-        JmK = np.array([[ JmK_11_r + JmK_11_i * 1j, 0],
-                        [ 0,                        JmK_11_r + JmK_11_i * 1j]])
 
-        hd_V_mat = hd_mat + v_mat 
+        #  Calculation of two electron terms
+        J2_phi1 = orb.apply_potential(1.0, B22, spinorb1, prec)
 
-        print('HD_V MATRIX\n', hd_V_mat)
-         # Calculate Fij Fock matrix
-        Fmat = hd_V_mat + JmK
-        print('FOCK MATRIX\n', Fmat)
-        eps = Fmat[0,0].real
-        
-        print('Orbital energy', eps - light_speed**2)
-        E_tot_JK = np.trace(Fmat) - 0.5 * (np.trace(JmK))
-        print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
+        JmK_phi1 = J2_phi1  # K part is zero for 2e system in GS
+        JmK_r, JmK_i = spinorb1.dot(JmK_phi1)
+
+        JmK = complex(JmK_r, JmK_i)
+
+        eps = hd_V_11.real
+        E_tot_JK =  2*eps - JmK.real
 
         if(compute_last_energy):
             break
-
-        V_J_K_spinorb1 = v_psi_1 + JmK_phi1
 
         # Calculation of Helmholtz
         tmp = orb.apply_helmholtz(V_J_K_spinorb1, eps, prec)
@@ -90,7 +61,8 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
         spinorb1 = new_orbital
         if(error_norm < prec):
             compute_last_energy = True
-    return(spinorb1, spinorb2)
+
+    return(spinorb1, eps, E_tot_JK)
 
 def calcAlphaDensityVector(spinorb1, spinorb2, prec):
     alphaOrbital =  spinorb2.alpha_vector(prec)
@@ -103,13 +75,8 @@ def calcAlphaDensityVector(spinorb1, spinorb2, prec):
     alphaDensity[2].cropRealImag(prec)
     return alphaDensity
 
-#
-# currently without the -1/2 factor
-# correct gaun term: multiply by -1/2
-# gaunt and delta-term from gauge: multiply by -1
-#
-def calcGauntPert(spinorb1, spinorb2, mra, prec):
-    print ("Gaunt Perturbation")
+
+def calcGauntPert(spinorb1, spinorb2, mra, prec, gaunt):
     P = vp.PoissonOperator(mra, prec)
     alpha1 =  spinorb1.alpha_vector(prec)
     n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
@@ -146,7 +113,6 @@ def calcGauntPert(spinorb1, spinorb2, mra, prec):
         val21 += norm21[i]**2
     val = val21 + val22
     
-    print("calculating potentials")
     EJ = []
     EK = []
     EJt = 0
@@ -162,10 +128,8 @@ def calcGauntPert(spinorb1, spinorb2, mra, prec):
         EK.append(n21[i].dot(pot, False))
         EKt += EK[i][0] + 1j * EK[i][1]
 
-    print("Direct part   ", EJ)
-    print("Exchange part ", EK)
-
-    print('GJmK_11_r', EJt - EKt)
+    gaunt = -1.0 * (EJt - EKt)
+    return gaunt
 
 def computeTestNorm(contributions):
     val = 0
@@ -244,12 +208,10 @@ def calcGaugePertA(spinorb1, spinorb2, mra, prec):
     return result
 
 #
-# currently without the -1/2 factor
-# correct gauge term: multiply by -1/2
 # one delta term excluded
 # most efficient method
 #
-def calcGaugePertB(spinorb1, spinorb2, mra, prec):
+def calcGaugePertB(spinorb1, spinorb2, mra, prec, gauge2):
     print("Gauge Perturbation Version B")
     projection_operator = vp.ScalingProjector(mra, prec)
     P = vp.PoissonOperator(mra, prec)
@@ -279,10 +241,8 @@ def calcGaugePertB(spinorb1, spinorb2, mra, prec):
     } 
 
     testNorm = computeTestNorm(contributions)
-    print("Test Norm B", testNorm)
-    result = calcPerturbationValues(contributions, P, prec, testNorm)
-    print("final Gauge B", result)
-    return result
+    gauge2 = calcPerturbationValues(contributions, P, prec, testNorm)
+    return -0.5 gauge2 
 
 #
 # currently without the -1/2 factor
@@ -408,10 +368,9 @@ def calcGaugePertD(spinorb1, spinorb2, mra, prec):
     return result
 
 #
-# currently without the -1/2 factor
-# correct gauge delta term: multiply by -1/2
+# gauge delta term
 #
-def calcGaugeDelta(spinorb1, spinorb2, mra, prec):
+def calcGaugeDelta(spinorb1, spinorb2, mra, prec, gauge1):
     print("Gauge Perturbation Delta")
     projection_operator = vp.ScalingProjector(mra, prec)
     P = vp.PoissonOperator(mra, prec)
@@ -429,7 +388,5 @@ def calcGaugeDelta(spinorb1, spinorb2, mra, prec):
     } 
 
     testNorm = computeTestNorm(contributions)
-    print("Test Norm Delta", testNorm)
-    result = calcPerturbationValues(contributions, P, prec, testNorm)
-    print("final Gauge Delta", result)
-    return result
+    gauge1 = calcPerturbationValues(contributions, P, prec, testNorm)
+    return -0.5 * gauge1
