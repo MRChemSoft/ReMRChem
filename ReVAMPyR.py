@@ -24,7 +24,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
     parser.add_argument('-a', '--atype', dest='atype', type=str, default='He',
                         help='put the atom type')
-    parser.add_argument('-d', '--derivative', dest='deriv', type=str, default='BS',
+    parser.add_argument('-d', '--derivative', dest='deriv', type=str, default='ABGV',
                         help='put the type of derivative')
     parser.add_argument('-z', '--charge', dest='charge', type=float, default=2.0,
                         help='put the atom charge')
@@ -38,18 +38,18 @@ if __name__ == '__main__':
                         help='position of nucleus in z')
     parser.add_argument('-l', '--light_speed', dest='lux_speed', type=float, default=137.03599913900001,
                         help='light of speed')
-    parser.add_argument('-o', '--order', dest='order', type=int, default=8,
+    parser.add_argument('-o', '--order', dest='order', type=int, default=6,
                         help='put the order of Polinomial')
-    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-6,
+    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-4,
                         help='put the precision')
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb, gaunt or breit to have one of them')
     parser.add_argument('-v', '--potential', dest='potential', type=str, default='coulomb_HFYGB',
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     parser.add_argument('-s', '--save', dest='spinorb1', type=str, default='N',
-                        help='Save the function tree for that orbital')
+                        help='Save the FunctionTree for the alpha spinorbital called as Z')
     parser.add_argument('-r', '--read', dest='spinorb1', type=str, default='N',
-                        help='Read the function tree for that orbital')
+                        help='Read the FunctionTree for the aplha spinorbital called as Z')
     args = parser.parse_args()
 
     assert args.atype != 'H', 'Please consider only atoms with more than one electron'
@@ -141,7 +141,7 @@ if __name__ == '__main__':
         print('Spinor Energy =', eps - light_speed**2)
         print('E_total(Dirac-Coulomb) =', E_tot_JK - (2.0 *light_speed**2))
         two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec, der, gaunt)
-        print('Gaunt term', gaunt)
+        print('Gaunt term =', gaunt)
         print('E_total(Dirac-Coulomb-Gaunt) =', E_tot_JK - (2.0 *light_speed**2) + gaunt)
     
     elif args.coulgau == 'breit':
@@ -155,7 +155,7 @@ if __name__ == '__main__':
         print('Gauge term =', gauge1 + gauge2)
         print('E_total(Dirac-Coulomb-Breit) =', E_tot_JK - (2.0 *light_speed**2) + 0.5 * gaunt + gauge1 + gauge2)
 
-    ############################# Save of Spinorbitals ###################################
+    ############################# Save Spinorbitals ###################################
         
     if args.saveOrbitals == 'Y':
         spinorb1.save('args.atype')

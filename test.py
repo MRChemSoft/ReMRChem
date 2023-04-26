@@ -8,7 +8,6 @@ from scipy.linalg import eig, inv
 from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
 from vampyr import vampyr3d as vp
-from vampyr import vampyr1d as vp1
 
 import argparse
 import numpy as np
@@ -46,6 +45,10 @@ if __name__ == '__main__':
                         help='put the coulomb or gaunt')
     parser.add_argument('-v', '--potential', dest='potential', type=str, default='coulomb_HFYGB',
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
+    parser.add_argument('-s', '--save', dest='spinorb1', type=str, default='N',
+                        help='Save the FunctionTree for the alpha spinorbital called as Z')
+    parser.add_argument('-r', '--read', dest='spinorb1', type=str, default='N',
+                        help='Read the FunctionTree for the aplha spinorbital called as Z')
     args = parser.parse_args()
 
     assert args.atype != 'H', 'Please consider only atoms with more than one electron'
@@ -57,6 +60,10 @@ if __name__ == '__main__':
     assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
 
     assert args.deriv in ['PH', 'BS', 'ABGV'], 'Please, specify the type of derivative'
+
+        assert args.readOrbitals in ['Y', 'N'], 'Please, specify if you want (Y) or not (N) to read the FunctionTree of spinorbital.
+    
+    assert args.saveOrbitals in ['Y', 'N'], 'Please, specify if you want (Y) or not (N) to save the FunctionTree of spinorbital.
     
 
     ################# Define Paramters ###########################
@@ -79,8 +86,6 @@ if __name__ == '__main__':
     print('call MRA DONE')
     
     computeNuclearPotential = False
-    readOrbitals = True
-    runCoulomb = False
     saveOrbitals = False
     runGaunt = True
     runGaugeA = True
@@ -110,14 +115,12 @@ if __name__ == '__main__':
             V_tree = Peps(f)
         print('Define V Potential', args.potential, 'DONE')
     
-    #############################START WITH CALCULATION###################################
+    ############################# Define Spinorbitals ###################################
     
-    spinorb1 = orb.orbital4c()
-    spinorb2 = orb.orbital4c()
-    if readOrbitals:
-        spinorb1.read("spinorb1")
-        spinorb2.read("spinorb2")
-    else:
+    if args.readOrbitals == 'Y':
+        spinorb1 = orb.orbital4c()
+        spinorb1.read('args.atype')
+    elif args.readOrbitals == 'N':
         a_coeff = 3.0
         b_coeff = np.sqrt(a_coeff/np.pi)**3
         gauss = vp.GaussFunc(b_coeff, a_coeff, origin)
@@ -129,33 +132,50 @@ if __name__ == '__main__':
         complexfc.copy_fcns(real=gauss_tree)
         spinorb1.copy_components(La=complexfc)
         spinorb1.init_small_components(prec/10)
+        spinorb1.cropLargeSmall(prec)
         spinorb1.normalize()
-        spinorb2 = spinorb1.ktrs() #does this go out of scope?
+    
+    spinorb2 = spinorb1.ktrs()
+    spinorb2.cropLargeSmall(prec)
+    spinorb2.normalize()
 
-    length = 2 * args.box
+    print('Define alpha and beta spinorbitals DONE')
 
+    #############################START WITH CALCULATION###################################
     if runCoulomb:
-        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb, V_tree, mra, prec)
+        two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, eps, E_tot_JK)
+        print('Spinor Energy =', eps - light_speed**2)
+        print('E_total(Dirac-Coulomb) =', E_tot_JK - (2.0 *light_speed**2))
     
     if runGaunt:
-        two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)
+        two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec, der, gaunt)
+        print('Gaunt term =', gaunt)
     
     if runGaugeA:
-        two_electron.calcGaugePertA(spinorb1, spinorb2, mra, prec)
+        two_electron.calcGaugePertA(spinorb1, spinorb2, mra, prec, gauge2)
+        print('GaugePertA term =', gauge2)
 
     if runGaugeB:
-        two_electron.calcGaugePertB(spinorb1, spinorb2, mra, prec)
+        two_electron.calcGaugePertB(spinorb1, spinorb2, mra, prec, gauge2)
+        print('GaugePertB term =', gauge2)
 
     if runGaugeC:
-        two_electron.calcGaugePertC(spinorb1, spinorb2, mra, prec)
+        two_electron.calcGaugePertC(spinorb1, spinorb2, mra, prec, gauge2)
+        print('GaugePertC term =', gauge2)
         
     if runGaugeD:
-        two_electron.calcGaugePertD(spinorb1, spinorb2, mra, prec)
+        two_electron.calcGaugePertD(spinorb1, spinorb2, mra, prec, gauge2)
+        print('GaugePertD term =', gauge2)
         
     if runGaugeDelta:
-        two_electron.calcGaugeDelta(spinorb1, spinorb2, mra, prec)
+        two_electron.calcGaugeDelta(spinorb1, spinorb2, mra, prec, gauge2)
+        print('GaugeDelta term =', gauge2)
         
-    if saveOrbitals:
-        spinorb1.save("spinorb1")
-        spinorb2.save("spinorb2")
+    ############################# Save Spinorbitals ###################################
+        
+    if args.saveOrbitals == 'Y':
+        spinorb1.save('args.atype')
+        print('Calculation is finished saving the FunctionTree of spinorbital alpha', args.atype)
+    elif args.readOrbitals == 'N':
+        print('Calculation is finished')
     

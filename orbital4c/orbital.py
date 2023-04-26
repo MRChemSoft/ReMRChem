@@ -5,7 +5,6 @@ from scipy.special import gamma
 from orbital4c import complex_fcn as cf
 
 class orbital4c:
-    """Four components orbital."""
     mra = None
     light_speed = -1.0
     comp_dict = {'La': 0, 'Lb': 1, 'Sa': 2, 'Sb': 3}
@@ -166,25 +165,25 @@ class orbital4c:
         self['Sa'] = sigma_p_L[0]
         self['Sb'] = sigma_p_L[1]
         
-    def derivative(self, dir = 0, der = 'ABGV'):
-        orb_der = orbital4c()
-        for comp,func in self.comp_array.items():
-            orb_der[comp] = func.derivative(dir, der) 
-        return orb_der
-    
-    def gradient(self, der = 'ABGV'):
-        orb_grad = {}
-        for key in self.comp_dict.keys():
-            orb_grad[key] = self[key].gradient(der)
-        grad = []
-        for i in range(3):
-            comp = orbital4c()
-            comp.copy_components(La = orb_grad['La'][i], 
-                          Lb = orb_grad['Lb'][i], 
-                          Sa = orb_grad['Sa'][i], 
-                          Sb = orb_grad['Sb'][i])
-            grad.append(comp)
-        return grad
+#    def derivative(self, dir = 0, der):
+#        orb_der = orbital4c()
+#        for comp,func in self.comp_array.items():
+#            orb_der[comp] = func.derivative(dir, der) 
+#        return orb_der
+#    
+#    def gradient(self, der):
+#        orb_grad = {}
+#        for key in self.comp_dict.keys():
+#            orb_grad[key] = self[key].gradient(der)
+#        grad = []
+#        for i in range(3):
+#            comp = orbital4c()
+#            comp.copy_components(La = orb_grad['La'][i], 
+#                          Lb = orb_grad['Lb'][i], 
+#                          Sa = orb_grad['Sa'][i], 
+#                          Sb = orb_grad['Sb'][i])
+#            grad.append(comp)
+#        return grad
     
     def complex_conj(self):
         orb_out = orbital4c()
@@ -192,39 +191,39 @@ class orbital4c:
             orb_out[key] = self[key].complex_conj() 
         return orb_out
 
-    def density(self, prec):
-        density = vp.FunctionTree(self.mra)
-        add_vector = []
-        for comp in self.comp_array:
-            temp = comp.density(prec).crop(prec)
-            if(temp.squaredNorm() > 0):
-                add_vector.append((1.0,temp))
-        vp.advanced.add(prec, density, add_vector)
-        return density    
+#    def density(self, prec):
+#        density = vp.FunctionTree(self.mra)
+#        add_vector = []
+#        for comp in self.comp_array:
+#            temp = comp.density(prec).crop(prec)
+#            if(temp.squaredNorm() > 0):
+#                add_vector.append((1.0,temp))
+#        vp.advanced.add(prec, density, add_vector)
+#        return density    
+#
+#    def exchange(self, other, prec):
+#        exchange = vp.FunctionTree(self.mra)
+#        add_vector = []
+#        for comp in self.comp_dict.keys():
+#            func_i = self[comp]
+#            func_j = other[comp]
+#            temp = func_i.exchange(func_j, prec)
+#            if(temp.squaredNorm() > 0):
+#                add_vector.append((1.0,temp))    
+#        vp.advanced.add(prec, exchange, add_vector)
+#        return exchange
 
-    def exchange(self, other, prec):
-        exchange = vp.FunctionTree(self.mra)
-        add_vector = []
-        for comp in self.comp_dict.keys():
-            func_i = self[comp]
-            func_j = other[comp]
-            temp = func_i.exchange(func_j, prec)
-            if(temp.squaredNorm() > 0):
-                add_vector.append((1.0,temp))    
-        vp.advanced.add(prec, exchange, add_vector)
-        return exchange
-
-    def alpha_exchange(self, other, prec):
-        alpha_exchange = vp.FunctionTree(self.mra)
-        add_vector = []
-        for comp in self.comp_dict.keys():
-            func_i = self[comp]
-            func_j = other[comp]
-            temp = func_i.alpha_exchange(func_j, prec)
-            if(temp.squaredNorm() > 0):
-                add_vector.append((1.0,temp))    
-        vp.advanced.add(prec, alpha_exchange, add_vector)
-        return alpha_exchange    
+#    def alpha_exchange(self, other, prec):
+#        alpha_exchange = vp.FunctionTree(self.mra)
+#        add_vector = []
+#        for comp in self.comp_dict.keys():
+#            func_i = self[comp]
+#            func_j = other[comp]
+#            temp = func_i.alpha_exchange(func_j, prec)
+#            if(temp.squaredNorm() > 0):
+#                add_vector.append((1.0,temp))    
+#        vp.advanced.add(prec, alpha_exchange, add_vector)
+#        return alpha_exchange    
 
     def overlap_density(self, other, prec):
         density = cf.complex_fcn()
@@ -276,11 +275,6 @@ class orbital4c:
 #Beta c**2
     def beta(self, shift = 0):
         out_orb = orbital4c()
-#        beta = np.array([[orbital4c.light_speed**2 + shift, 0, 0, 0  ],
-#                         [0, orbital4c.light_speed**2 + shift, 0, 0  ],
-#                         [0, 0, -orbital4c.light_speed**2 + shift, 0 ],
-#                         [0, 0,  0, -orbital4c.light_speed**2 + shift]])
-#        out_orb.comp_array = beta@self.comp_array
         beta = np.array([orbital4c.light_speed**2 + shift,
                          orbital4c.light_speed**2 + shift,
                         -orbital4c.light_speed**2 + shift,
@@ -301,11 +295,11 @@ class orbital4c:
         return out_real, out_imag
 
 #    
-# here we should consider emulating the behavior of MRChem operators
-#
-def matrix_element(bra, operator, ket):
-    Opsi = operator(ket)
-    return bra.dot(Opsi)
+## here we should consider emulating the behavior of MRChem operators
+##
+#def matrix_element(bra, operator, ket):
+#    Opsi = operator(ket)
+#    return bra.dot(Opsi)
                    
 def apply_dirac_hamiltonian(orbital, prec, shift = 0.0, der = 'ABGV'):
     beta_phi = orbital.beta(shift)
@@ -401,7 +395,7 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
 
 def alpha_gradient(orbital, prec):
     out = orbital4c()
-    grad_vec = orbital.gradient(der = "BS")
+    grad_vec = orbital.gradient(der)
     alpha_vec = {}
     for i in range(3):
         alpha_vec[i] = grad_vec[i].alpha(i, prec)

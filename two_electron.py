@@ -100,11 +100,6 @@ def calcGauntPert(spinorb1, spinorb2, mra, prec, gaunt):
               np.sqrt(n12[1].squaredNorm()),
               np.sqrt(n12[2].squaredNorm())
             ]
-
-    print(norm11)
-    print(norm12)
-    print(norm21)
-    print(norm22)
     
     val22 = 0
     val21 = 0
@@ -155,13 +150,7 @@ def calcPerturbationValues(contributions, P, prec, testNorm):
         val += spr + 1j * spi
     return val
     
-#
-# currently without the -1/2 factor
-# correct gauge term: multiply by -1/2
-# no delta terms from this expression
-#
-def calcGaugePertA(spinorb1, spinorb2, mra, prec):
-    print("Gauge Perturbation Version A")
+def calcGaugePertA(spinorb1, spinorb2, mra, prec, der gauge2):
     projection_operator = vp.ScalingProjector(mra, prec)
     P = vp.PoissonOperator(mra, prec)
     n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
@@ -169,16 +158,16 @@ def calcGaugePertA(spinorb1, spinorb2, mra, prec):
     n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
     n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
 
-    div_n22 = cf.divergence(n22, prec)
-    div_n21 = cf.divergence(n21, prec)
+    div_n22 = cf.divergence(n22, prec, der)
+    div_n21 = cf.divergence(n21, prec, der)
     n11_dot_r = cf.vector_dot_r(n11, prec)
     n12_dot_r = cf.vector_dot_r(n12, prec)
 
     n22_r_mat = cf.vector_tensor_r(n22, prec)
     n21_r_mat = cf.vector_tensor_r(n21, prec)
 
-    grad_n11 = cf.vector_gradient(n11)
-    grad_n12 = cf.vector_gradient(n12)
+    grad_n11 = cf.vector_gradient(n11, der)
+    grad_n12 = cf.vector_gradient(n12, der)
 
     contributions = {
         "density":[n11_dot_r,
@@ -202,17 +191,10 @@ def calcGaugePertA(spinorb1, spinorb2, mra, prec):
     } 
 
     testNorm = computeTestNorm(contributions)
-    print("Test Norm A", testNorm)
-    result = calcPerturbationValues(contributions, P, prec, testNorm)
-    print("final Gauge A", result)
-    return result
+    gauge2 = -0.5 * calcPerturbationValues(contributions, P, prec, testNorm)
+    return gauge2
 
-#
-# one delta term excluded
-# most efficient method
-#
-def calcGaugePertB(spinorb1, spinorb2, mra, prec, gauge2):
-    print("Gauge Perturbation Version B")
+def calcGaugePertB(spinorb1, spinorb2, mra, prec, der, gauge2):
     projection_operator = vp.ScalingProjector(mra, prec)
     P = vp.PoissonOperator(mra, prec)
     n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
@@ -220,8 +202,8 @@ def calcGaugePertB(spinorb1, spinorb2, mra, prec, gauge2):
     n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
     n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
 
-    div_n22 = cf.divergence(n22, prec)
-    div_n21 = cf.divergence(n21, prec)
+    div_n22 = cf.divergence(n22, prec, der)
+    div_n21 = cf.divergence(n21, prec, der)
     div_n22_r = cf.scalar_times_r(div_n22, prec)
     div_n21_r = cf.scalar_times_r(div_n21, prec)
     n11_dot_r = cf.vector_dot_r(n11, prec)
@@ -241,18 +223,11 @@ def calcGaugePertB(spinorb1, spinorb2, mra, prec, gauge2):
     } 
 
     testNorm = computeTestNorm(contributions)
-    gauge2 = calcPerturbationValues(contributions, P, prec, testNorm)
-    return -0.5 gauge2 
+    gauge2 = -0.5 * calcPerturbationValues(contributions, P, prec, testNorm)
+    return gauge2 
 
-#
-# currently without the -1/2 factor
-# correct gauge term: multiply by -1/2
-# one delta term excluded
-# same structure as Sun 2022
-# least efficeint method
-#
-def calcGaugePertC(spinorb1, spinorb2, mra, prec):
-    print("Gauge Perturbation Version C")
+def calcGaugePertC(spinorb1, spinorb2, mra, prec, der, gauge2):
+    print("Gauge Perturbation Version Sun 2022")
     projection_operator = vp.ScalingProjector(mra, prec)
     P = vp.PoissonOperator(mra, prec)
     n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
@@ -260,8 +235,8 @@ def calcGaugePertC(spinorb1, spinorb2, mra, prec):
     n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
     n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
 
-    grad_n11 = cf.vector_gradient(n11)
-    grad_n12 = cf.vector_gradient(n12)
+    grad_n11 = cf.vector_gradient(n11, der)
+    grad_n12 = cf.vector_gradient(n12, der)
 
     grad_n11_r = [cf.vector_dot_r([grad_n11[i][0] for i in range(3)], prec),
                   cf.vector_dot_r([grad_n11[i][1] for i in range(3)], prec),
@@ -275,8 +250,8 @@ def calcGaugePertC(spinorb1, spinorb2, mra, prec):
     
     
 
-    div_n22 = cf.divergence(n22, prec)
-    div_n21 = cf.divergence(n21, prec)
+    div_n22 = cf.divergence(n22, prec, der)
+    div_n21 = cf.divergence(n21, prec, der)
     div_n22_r = cf.scalar_times_r(div_n22, prec)
     div_n21_r = cf.scalar_times_r(div_n21, prec)
     n11_dot_r = cf.vector_dot_r(n11, prec)
@@ -306,18 +281,10 @@ def calcGaugePertC(spinorb1, spinorb2, mra, prec):
     } 
 
     testNorm = computeTestNorm(contributions)
-    print("Test Norm C", testNorm)
-    result = calcPerturbationValues(contributions, P, prec, testNorm)
-    print("final Gauge C", result)
-    return result
+    gauge2 = -0.5 * calcPerturbationValues(contributions, P, prec, testNorm)
+    return gauge2
 
-#
-# currently without the -1/2 factor
-# correct gauge term: multiply by -1/2
-# double delta term excluded
-#
-def calcGaugePertD(spinorb1, spinorb2, mra, prec):
-    print("Gauge Perturbation Version D")
+def calcGaugePertD(spinorb1, spinorb2, mra, prec, der, gauge2):
     projection_operator = vp.ScalingProjector(mra, prec)
     P = vp.PoissonOperator(mra, prec)
     n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
@@ -325,8 +292,8 @@ def calcGaugePertD(spinorb1, spinorb2, mra, prec):
     n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
     n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
 
-    grad_n11 = cf.vector_gradient(n11)
-    grad_n12 = cf.vector_gradient(n12)
+    grad_n11 = cf.vector_gradient(n11, der)
+    grad_n12 = cf.vector_gradient(n12, der)
         
     grad_n11_r = [cf.vector_dot_r([grad_n11[i][0] for i in range(3)], prec),
                   cf.vector_dot_r([grad_n11[i][1] for i in range(3)], prec),
@@ -336,8 +303,8 @@ def calcGaugePertD(spinorb1, spinorb2, mra, prec):
                   cf.vector_dot_r([grad_n12[i][1] for i in range(3)], prec),
                   cf.vector_dot_r([grad_n12[i][2] for i in range(3)], prec)]
 
-    div_n22 = cf.divergence(n22, prec)
-    div_n21 = cf.divergence(n21, prec)
+    div_n22 = cf.divergence(n22, prec, der)
+    div_n21 = cf.divergence(n21, prec, der)
 
     div_n22_r = cf.scalar_times_r(div_n22, prec)
     div_n21_r = cf.scalar_times_r(div_n21, prec)
@@ -362,16 +329,10 @@ def calcGaugePertD(spinorb1, spinorb2, mra, prec):
     } 
 
     testNorm = computeTestNorm(contributions)
-    print("Test Norm D", testNorm)
-    result = calcPerturbationValues(contributions, P, prec, testNorm)
-    print("final Gauge D", result)
-    return result
+    gauge = -0.5 * calcPerturbationValues(contributions, P, prec, testNorm)
+    return gauge2
 
-#
-# gauge delta term
-#
 def calcGaugeDelta(spinorb1, spinorb2, mra, prec, gauge1):
-    print("Gauge Perturbation Delta")
     projection_operator = vp.ScalingProjector(mra, prec)
     P = vp.PoissonOperator(mra, prec)
     n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
@@ -388,5 +349,5 @@ def calcGaugeDelta(spinorb1, spinorb2, mra, prec, gauge1):
     } 
 
     testNorm = computeTestNorm(contributions)
-    gauge1 = calcPerturbationValues(contributions, P, prec, testNorm)
-    return -0.5 * gauge1
+    gauge1 = -0.5 * calcPerturbationValues(contributions, P, prec, testNorm)
+    return gauge1
