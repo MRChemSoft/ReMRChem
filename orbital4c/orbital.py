@@ -313,16 +313,17 @@ def apply_potential(factor, potential, orbital, prec):
     out_orbital = orbital4c()
     for comp in orbital.comp_dict:
         if orbital[comp].squaredNorm() > 0:
+            #out_orbital[comp] = potential * orbital[comp]
             out_orbital[comp] = cf.apply_potential(factor, potential, orbital[comp], prec)
     return out_orbital
 
-def apply_complex_potential(factor, potential, orbital, prec):
-    out_orbital = orbital4c()
-    for comp in orbital.comp_dict:
-        if orbital[comp].squaredNorm() > 0:
-            #out_orbital[comp] = potential * orbital[comp] 
-            out_orbital[comp] = cf.multiply(prec, potential, orbital[comp])
-    return out_orbital
+#def apply_complex_potential(factor, potential, orbital, prec):
+#    out_orbital = orbital4c()
+#    for comp in orbital.comp_dict:
+#        if orbital[comp].squaredNorm() > 0:
+#            #out_orbital[comp] = potential * orbital[comp] 
+#            out_orbital[comp] = cf.multiply(prec, potential, orbital[comp])
+#    return out_orbital
 
 #
 # Keep this for now to maybe enable precise addition later

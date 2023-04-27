@@ -19,7 +19,7 @@ def coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der):
     P = vp.PoissonOperator(mra, prec)
     
     while (error_norm > prec or compute_last_energy):
-        n_22 = spinorb1.overlap_density(spinorb2, prec)
+        n_22 = spinorb2.overlap_density(spinorb2, prec)
 
         # Definition of two electron operators
         B22    = P(n_22.real) * (4 * np.pi)
