@@ -11,12 +11,13 @@ import numpy.linalg as LA
 import sys, getopt
 
 
-def coulomb_gs_2e(spinorb1, spinorb2, potential, mra, prec, der, eps, E_tot_JK):
-    print('Hartree-Fock (Coulomb interaction)')
+def coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der):
+    
+    light_speed = spinorb1.light_speed
     error_norm = 1
     compute_last_energy = False
     P = vp.PoissonOperator(mra, prec)
-
+    
     while (error_norm > prec or compute_last_energy):
         n_22 = spinorb1.overlap_density(spinorb2, prec)
 
@@ -27,11 +28,17 @@ def coulomb_gs_2e(spinorb1, spinorb2, potential, mra, prec, der, eps, E_tot_JK):
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der)
         hd_11_r, hd_11_i = spinorb1.dot(hd_psi_1)
 
-        # Applying nuclear potential to spin orbit 1 and 2
-        v_psi_1 = orb.apply_potential(-1.0, potential, spinorb1, prec)
-        V_11_r, V_11_i = spinorb1.dot(v_psi_1)
+        hd_11 = complex(hd_11_r, hd_11_i)
 
-        #  Calculation of two electron terms
+        # Applying nuclear potential to spin orbit 1 and 2
+        v_psi_1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
+        V1_r, V1_i = spinorb1.dot(v_psi_1)
+
+        V1 = complex(V1_r, V1_i)
+
+        hd_V_11 = hd_11 + V1
+
+        # Calculation of two electron terms
         J2_phi1 = orb.apply_potential(1.0, B22, spinorb1, prec)
 
         JmK_phi1 = J2_phi1  # K part is zero for 2e system in GS
@@ -39,19 +46,25 @@ def coulomb_gs_2e(spinorb1, spinorb2, potential, mra, prec, der, eps, E_tot_JK):
 
         JmK = complex(JmK_r, JmK_i)
 
+        # Calculate Fij Fock matrix
         eps = hd_V_11.real
         E_tot_JK =  2*eps - JmK.real
+
+        print('Spinor Energy', eps - light_speed**2)
+        print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
 
         if(compute_last_energy):
             break
 
-        # Calculation of Helmholtz
+        V_J_K_spinorb1 = v_psi_1 + JmK_phi1
+
+        # Calculation of Helmotz
         tmp = orb.apply_helmholtz(V_J_K_spinorb1, eps, prec)
+        tmp.cropLargeSmall(prec)
         new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der)
-        new_orbital *= 0.5/light_speed**2
-        print('Norm new orbital ', np.sqrt(new_orbital.squaredNorm()))
+
         new_orbital.normalize()
-        new_orbital.cropLargeSmall(prec)       
+        new_orbital.cropLargeSmall(prec)
 
         # Compute orbital error
         delta_psi = new_orbital - spinorb1
@@ -59,10 +72,12 @@ def coulomb_gs_2e(spinorb1, spinorb2, potential, mra, prec, der, eps, E_tot_JK):
         error_norm = np.sqrt(deltasq)
         print('Orbital_Error norm', error_norm)
         spinorb1 = new_orbital
+
         if(error_norm < prec):
             compute_last_energy = True
 
-    return(spinorb1, eps, E_tot_JK)
+    return(spinorb1)
+
 
 def calcAlphaDensityVector(spinorb1, spinorb2, prec):
     alphaOrbital =  spinorb2.alpha_vector(prec)
@@ -150,7 +165,7 @@ def calcPerturbationValues(contributions, P, prec, testNorm):
         val += spr + 1j * spi
     return val
     
-def calcGaugePertA(spinorb1, spinorb2, mra, prec, der gauge2):
+def calcGaugePertA(spinorb1, spinorb2, mra, prec, der, gauge2):
     projection_operator = vp.ScalingProjector(mra, prec)
     P = vp.PoissonOperator(mra, prec)
     n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)

@@ -5,6 +5,7 @@ from scipy.special import gamma
 from orbital4c import complex_fcn as cf
 
 class orbital4c:
+    """Four components orbital."""
     mra = None
     light_speed = -1.0
     comp_dict = {'La': 0, 'Lb': 1, 'Sa': 2, 'Sb': 3}
@@ -98,7 +99,6 @@ class orbital4c:
         smallNorm = np.sqrt(self.squaredSmallNorm())
         precLarge = prec * largeNorm
         precSmall = prec * smallNorm
-        print('precisions', precLarge, precSmall)
         self['La'].crop(precLarge, True)
         self['Lb'].crop(precLarge, True)
         self['Sa'].crop(precSmall, True)
@@ -140,11 +140,10 @@ class orbital4c:
         if(nr_of_functions == 0):
             print("WARNING: No component copied!")
         
-    def init_small_components(self,prec):
+    def init_small_components(self, prec, der):
     # initalize the small components based on the kinetic balance
-    # TODO: should be optimized removing matrix operations.
-        grad_a = self['La'].gradient()
-        grad_b = self['Lb'].gradient()
+        grad_a = self['La'].gradient( der)
+        grad_b = self['Lb'].gradient(der)
         plx = np.array([grad_a[0],grad_b[0]])
         ply = np.array([grad_a[1],grad_b[1]])
         plz = np.array([grad_a[2],grad_b[2]])
@@ -164,26 +163,27 @@ class orbital4c:
         sigma_p_L *= -0.5j/orbital4c.light_speed
         self['Sa'] = sigma_p_L[0]
         self['Sb'] = sigma_p_L[1]
-        
-#    def derivative(self, dir = 0, der):
-#        orb_der = orbital4c()
-#        for comp,func in self.comp_array.items():
-#            orb_der[comp] = func.derivative(dir, der) 
-#        return orb_der
-#    
-#    def gradient(self, der):
-#        orb_grad = {}
-#        for key in self.comp_dict.keys():
-#            orb_grad[key] = self[key].gradient(der)
-#        grad = []
-#        for i in range(3):
-#            comp = orbital4c()
-#            comp.copy_components(La = orb_grad['La'][i], 
-#                          Lb = orb_grad['Lb'][i], 
-#                          Sa = orb_grad['Sa'][i], 
-#                          Sb = orb_grad['Sb'][i])
-#            grad.append(comp)
-#        return grad
+
+
+    def derivative(self, dir, der):
+        orb_der = orbital4c()
+        for comp,func in self.comp_array.items():
+            orb_der[comp] = func.derivative(dir, der) 
+        return orb_der
+    
+    def gradient(self, der):
+        orb_grad = {}
+        for key in self.comp_dict.keys():
+            orb_grad[key] = self[key].gradient(der)
+        grad = []
+        for i in range(3):
+            comp = orbital4c()
+            comp.copy_components(La = orb_grad['La'][i], 
+                          Lb = orb_grad['Lb'][i], 
+                          Sa = orb_grad['Sa'][i], 
+                          Sb = orb_grad['Sb'][i])
+            grad.append(comp)
+        return grad
     
     def complex_conj(self):
         orb_out = orbital4c()
@@ -197,7 +197,7 @@ class orbital4c:
 #        for comp in self.comp_array:
 #            temp = comp.density(prec).crop(prec)
 #            if(temp.squaredNorm() > 0):
-#                add_vector.append((1.0,temp))
+#                adensitydd_vector.append((1.0,temp))
 #        vp.advanced.add(prec, density, add_vector)
 #        return density    
 #
@@ -301,12 +301,12 @@ class orbital4c:
 #    Opsi = operator(ket)
 #    return bra.dot(Opsi)
                    
-def apply_dirac_hamiltonian(orbital, prec, shift = 0.0, der = 'ABGV'):
+def apply_dirac_hamiltonian(orbital, prec, shift, der):
     beta_phi = orbital.beta(shift)
     grad_phi = orbital.gradient(der)
-    alpx_phi = -1j * orbital4c.light_speed * grad_phi[0].alpha(0)
-    alpy_phi = -1j * orbital4c.light_speed * grad_phi[1].alpha(1)
-    alpz_phi = -1j * orbital4c.light_speed * grad_phi[2].alpha(2)
+    alpx_phi = -1j * orbital4c.light_speed * grad_phi[0].alpha(0,prec)
+    alpy_phi = -1j * orbital4c.light_speed * grad_phi[1].alpha(1,prec)
+    alpz_phi = -1j * orbital4c.light_speed * grad_phi[2].alpha(2,prec)
     return beta_phi + alpx_phi + alpy_phi + alpz_phi
 
 def apply_potential(factor, potential, orbital, prec):
@@ -320,7 +320,8 @@ def apply_complex_potential(factor, potential, orbital, prec):
     out_orbital = orbital4c()
     for comp in orbital.comp_dict:
         if orbital[comp].squaredNorm() > 0:
-            out_orbital[comp] = potential * orbital[comp] 
+            #out_orbital[comp] = potential * orbital[comp] 
+            out_orbital[comp] = cf.multiply(prec, potential, orbital[comp])
     return out_orbital
 
 #
@@ -393,7 +394,7 @@ def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
     values = one_s_alpha(x,Z,alpha,gamma_factor)
     return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
 
-def alpha_gradient(orbital, prec):
+def alpha_gradient(orbital, prec, der):
     out = orbital4c()
     grad_vec = orbital.gradient(der)
     alpha_vec = {}
