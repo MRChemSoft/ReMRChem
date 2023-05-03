@@ -2,6 +2,7 @@ from vampyr import vampyr3d as vp
 import numpy as np
 
 class complex_fcn:
+    """Complex function trees as pairs of real and imaginary trees"""
     mra = None
     def __init__(self):
         self.real = vp.FunctionTree(self.mra)
@@ -74,10 +75,10 @@ class complex_fcn:
     def __str__(self):
         return ('Real part {}\n Imag part {}'.format(self.real, self.imag))
     
-    def dot(self, other):
-        re = vp.dot(self.real, other.real) - vp.dot(self.imag, other.imag)
-        im = vp.dot(self.real, other.imag) + vp.dot(self.imag, other.real)
-        return re + 1j * im
+#    def dot(self, other):
+#        re = vp.dot(self.real, other.real) - vp.dot(self.imag, other.imag)
+#        im = vp.dot(self.real, other.imag) + vp.dot(self.imag, other.real)
+#        return re + 1j * im
       
     def gradient(self, der):
         if(der == 'ABGV'):

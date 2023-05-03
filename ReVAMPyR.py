@@ -48,8 +48,8 @@ if __name__ == '__main__':
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     parser.add_argument('-s', '--save', dest='saveOrbitals', type=str, default='No',
                         help='Save the FunctionTree for the alpha spinorbital called as Z')
-    #parser.add_argument('-r', '--read', dest='readOrbitals', type=str, default='No',
-    #                    help='Read the FunctionTree for the aplha spinorbital called as Z')
+    parser.add_argument('-r', '--read', dest='readOrbitals', type=str, default='No',
+                        help='Read the FunctionTree for the aplha spinorbital called as Z')
     args = parser.parse_args()
 
     assert args.atype != 'H', 'Please consider only atoms with more than one electron'
@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     assert args.deriv in ['PH', 'BS', 'ABGV'], 'Please, specify the type of derivative'
 
-    #assert args.readOrbitals in ['Yes', 'No'], 'Please, specify if you want (Yes) or not (No) to read the FunctionTree of spinorbital'
+    assert args.readOrbitals in ['Yes', 'No'], 'Please, specify if you want (Yes) or not (No) to read the FunctionTree of spinorbital'
     
     assert args.saveOrbitals in ['Yes', 'No'], 'Please, specify if you want (Yes) or not (No) to save the FunctionTree of spinorbital'
 
@@ -81,25 +81,10 @@ der = args.deriv
 mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order)
 prec = args.prec
 origin = [args.cx, args.cy, args.cz]
-print('call MRA DONE')
-
-################# Definecs Gaussian function ########## 
-a_coeff = 3.0
-b_coeff = np.sqrt(a_coeff/np.pi)**3
-gauss = vp.GaussFunc(b_coeff, a_coeff, origin)
-gauss_tree = vp.FunctionTree(mra)
-vp.advanced.build_grid(out=gauss_tree, inp=gauss)
-vp.advanced.project(prec=prec, out=gauss_tree, inp=gauss)
-gauss_tree.normalize()
-print('Define Gaussian Function DONE')
-
-################ Define orbital as complex function ######################
 orb.orbital4c.mra = mra
 orb.orbital4c.light_speed = light_speed
 cf.complex_fcn.mra = mra
-complexfc = cf.complex_fcn()
-complexfc.copy_fcns(real=gauss_tree)
-print('Define orbital as a complex function DONE')
+print('call MRA DONE')
 
 ################### Define V potential ######################
 if args.potential == 'point_charge':
@@ -122,60 +107,64 @@ print('Define V Potential', args.potential, Z, 'DONE')
 
 ############################# Define Spinorbitals ###################################
     
-#if args.readOrbitals == 'Y':
-#    spinorb1 = orb.orbital4c()
-#    spinorb1.read('args.atype')
-#    spinorb2 = spinorb1.ktrs()
-#    spinorb2.cropLargeSmall(prec)
-#    spinorb2.normalize()
-#elif args.readOrbitals == 'N':
-#    spinorb1 = orb.orbital4c()
-#    spinorb1.copy_components(La=complexfc)
-#    spinorb1.init_small_components(prec/10)
-#    spinorb1.cropLargeSmall(prec)
-#    spinorb1.normalize()
-#    spinorb2 = spinorb1.ktrs()
-#    spinorb2.cropLargeSmall(prec)
-#    spinorb2.normalize()
-#print('Define alpha and beta spinorbitals DONE')
-
-#############################START WITH CALCULATION###################################
-if args.coulgau == 'coulomb':
+if args.readOrbitals == 'Yes':
     spinorb1 = orb.orbital4c()
+    spinorb1.read(args.atype)
+    spinorb2 = spinorb1.ktrs()
+    spinorb2.cropLargeSmall(prec)
+    spinorb2.normalize()
+    print('Read alpha spinorbital and defined beta spinorbital using KTRS DONE')
+elif args.readOrbitals == 'No':
+    a_coeff = 3.0
+    b_coeff = np.sqrt(a_coeff/np.pi)**3
+    gauss = vp.GaussFunc(b_coeff, a_coeff, origin)
+    gauss_tree = vp.FunctionTree(mra)
+    vp.advanced.build_grid(out=gauss_tree, inp=gauss)
+    vp.advanced.project(prec=prec, out=gauss_tree, inp=gauss)
+    gauss_tree.normalize()
+    print('Define Gaussian Function DONE')
+
+    spinorb1 = orb.orbital4c()
+    complexfc = cf.complex_fcn()
+    complexfc.copy_fcns(real=gauss_tree)
     spinorb1.copy_components(La=complexfc)
     spinorb1.init_small_components(prec/10, der)
-    spinorb1.cropLargeSmall(prec)
     spinorb1.normalize()
     spinorb2 = spinorb1.ktrs()
     spinorb2.cropLargeSmall(prec)
     spinorb2.normalize()
-    print('spinor1 before', spinorb1)
-    spinorb1 = two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der)
-    print('spinor1 after', spinorb1)
+    print('Define alpha and beta spinorbitals DONE')
+
+#############################START WITH CALCULATION###################################
+if args.coulgau == 'coulomb':
+    E_tot_JK = 0
+    spinorb1 = two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, E_tot_JK)
 
 elif args.coulgau == 'gaunt':
-    two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, eps, E_tot_JK)
-    print('Spinor Energy =', eps - light_speed**2)
-    print('E_total(Dirac-Coulomb) =', E_tot_JK - (2.0 *light_speed**2))
+    E_tot_JK = 0
+    spinorb1 = two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, E_tot_JK)
+    gaunt = 0
     two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec, gaunt)
     print('Gaunt term =', gaunt)
-    print('E_total(Dirac-Coulomb-Gaunt) =', E_tot_JK - (2.0 *light_speed**2) + gaunt)
+    print('E_total(Dirac-Coulomb-Gaunt) =', E_tot_JK + gaunt - (2.0 *light_speed**2))
 
 elif args.coulgau == 'breit':
-    two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, eps, E_tot_JK)
-    print('Spinor Energy =', eps - light_speed**2)
-    print('E_total(Dirac-Coulomb) =', E_tot_JK - (2.0 *light_speed**2))
+    E_tot_JK = 0
+    spinorb1 = two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, E_tot_JK)
+    gaunt = 0
     two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec, gaunt)
     print('Magnetic term =', 0.5 * gaunt)
+    gauge1 = 0
     two_electron.calcGaugeDelta(spinorb1, spinorb2, mra, prec, gauge1)
+    gauge2 = 0
     two_electron.calcGaugePertB(spinorb1, spinorb2, mra, prec, der, gauge2)
     print('Gauge term =', gauge1 + gauge2)
-    print('E_total(Dirac-Coulomb-Breit) =', E_tot_JK - (2.0 *light_speed**2) + 0.5 * gaunt + gauge1 + gauge2)
+    print('E_total(Dirac-Coulomb-Breit) =', E_tot_JK + 0.5 * gaunt + gauge1 + gauge2 - (2.0 *light_speed**2))
 ############################# Save Spinorbitals ###################################
     
-if args.saveOrbitals == 'Y':
-    spinorb1.save('args.atype')
+if args.saveOrbitals == 'Yes':
+    spinorb1.save(args.atype)
     print('Calculation is finished saving the FunctionTree of spinorbital alpha', args.atype)
-elif args.saveOrbitals == 'N':
+elif args.saveOrbitals == 'No':
     print('Calculation is finished')
     

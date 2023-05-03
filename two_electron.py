@@ -11,14 +11,21 @@ import numpy.linalg as LA
 import sys, getopt
 
 
-def coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der):
+def coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, E_tot_JK):
     
-    light_speed = spinorb1.light_speed
+
     error_norm = 1
     compute_last_energy = False
     P = vp.PoissonOperator(mra, prec)
+    light_speed = spinorb1.light_speed
     
+    #for i in range(2):
     while (error_norm > prec or compute_last_energy):
+
+        spinorb2 = spinorb1.ktrs()
+        spinorb2.cropLargeSmall(prec)
+        spinorb2.normalize()
+
         n_22 = spinorb2.overlap_density(spinorb2, prec)
 
         # Definition of two electron operators
@@ -47,7 +54,7 @@ def coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der):
         JmK = complex(JmK_r, JmK_i)
 
         # Calculate Fij Fock matrix
-        eps = hd_V_11.real
+        eps = hd_V_11.real + JmK.real
         E_tot_JK =  2*eps - JmK.real
 
         print('Spinor Energy', eps - light_speed**2)
@@ -60,7 +67,6 @@ def coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der):
 
         # Calculation of Helmotz
         tmp = orb.apply_helmholtz(V_J_K_spinorb1, eps, prec)
-        tmp.cropLargeSmall(prec)
         new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der)
 
         new_orbital.normalize()
@@ -76,7 +82,7 @@ def coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der):
         if(error_norm < prec):
             compute_last_energy = True
 
-    return(spinorb1)
+    return(spinorb1, spinorb2, E_tot_JK)
 
 
 def calcAlphaDensityVector(spinorb1, spinorb2, prec):
@@ -93,7 +99,6 @@ def calcAlphaDensityVector(spinorb1, spinorb2, prec):
 
 def calcGauntPert(spinorb1, spinorb2, mra, prec, gaunt):
     P = vp.PoissonOperator(mra, prec)
-    alpha1 =  spinorb1.alpha_vector(prec)
     n11 = calcAlphaDensityVector(spinorb1, spinorb1, prec)
     n12 = calcAlphaDensityVector(spinorb1, spinorb2, prec)
     n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
