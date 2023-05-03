@@ -74,11 +74,6 @@ class complex_fcn:
     
     def __str__(self):
         return ('Real part {}\n Imag part {}'.format(self.real, self.imag))
-    
-#    def dot(self, other):
-#        re = vp.dot(self.real, other.real) - vp.dot(self.imag, other.imag)
-#        im = vp.dot(self.real, other.imag) + vp.dot(self.imag, other.real)
-#        return re + 1j * im
       
     def gradient(self, der):
         if(der == 'ABGV'):
@@ -99,8 +94,8 @@ class complex_fcn:
         return grad
 
     def derivative(self, dir, der):
-        if(der == 'ABGV', 0.0, 0.0):
-            D = vp.ABGVDerivative(self.mra)
+        if(der == 'ABGV'):
+            D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
         elif(der == 'PH'):
             D = vp.PHDerivative(self.mra)
         elif(der == 'BS'):
@@ -119,69 +114,6 @@ class complex_fcn:
         output.real = self.real 
         output.imag = -1.0 * self.imag
         return output
-       
-        
-#    def density(self, prec):
-#        density = vp.FunctionTree(self.mra)
-#        add_vector = []
-#        temp_r = vp.FunctionTree(self.mra)
-#        temp_r.setZero()
-#        temp_i = vp.FunctionTree(self.mra)
-#        temp_i.setZero()
-#        if(self.real.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, temp_r, 1.0, self.real, self.real)
-#        if(self.imag.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, temp_i, 1.0, self.imag, self.imag)
-#        vp.advanced.add(prec/10, density, [temp_r, temp_i])
-#        return density
-
-#
-# Other is complex conjugate
-#
-
-#    def exchange(self, other, prec):
-#        exchange = vp.FunctionTree(self.mra)
-#        add_vector = []
-#        a_ = vp.FunctionTree(self.mra)
-#        a_.setZero()
-#        b_ = vp.FunctionTree(self.mra)
-#        b_.setZero()
-#        c_ = vp.FunctionTree(other.mra)
-#        c_.setZero()
-#        d_ = vp.FunctionTree(other.mra)
-#        d_.setZero()        
-#        if(self.real.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
-#        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
-#        if(self.real.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
-#        if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
-#        vp.advanced.add(prec/10, exchange, [a_, b_, c_, d_])
-#        return exchange
-
-#    def alpha_exchange(self, other, prec):
-#        alpha_exchange = vp.FunctionTree(self.mra)
-#        add_vector = []
-#        a_ = vp.FunctionTree(self.mra)
-#        a_.setZero()
-#        b_ = vp.FunctionTree(self.mra)
-#        b_.setZero()
-#        c_ = vp.FunctionTree(other.mra)
-#        c_.setZero()
-#        d_ = vp.FunctionTree(other.mra)
-#        d_.setZero()        
-#        if(self.real.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
-#        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
-#        if(self.real.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
-#        if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
-#        vp.advanced.add(prec/10, alpha_exchange, [a_, b_])
-#        return alpha_exchange
     
     def dot(self, other, cc_first = True):
         out_real = 0
@@ -205,7 +137,6 @@ class complex_fcn:
            out_imag = out_imag + vp.dot(func_a, func_d)
         if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
            out_imag = out_imag + fbc * vp.dot(func_b, func_c)
-
         return out_real, out_imag
 
     def advanced_overlap_density(self, other, prec):
@@ -231,7 +162,6 @@ class complex_fcn:
         output = complex_fcn()
         output.real = rr + ii
         output.imag = ri + ir
-
         return output
 
 
@@ -317,4 +247,3 @@ def vector_gradient(vector, der):
     for i in range(len(vector)):
         tensor.append(vector[i].gradient(der))
     return tensor
-

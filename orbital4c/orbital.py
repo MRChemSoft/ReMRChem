@@ -191,40 +191,6 @@ class orbital4c:
             orb_out[key] = self[key].complex_conj() 
         return orb_out
 
-#    def density(self, prec):
-#        density = vp.FunctionTree(self.mra)
-#        add_vector = []
-#        for comp in self.comp_array:
-#            temp = comp.density(prec).crop(prec)
-#            if(temp.squaredNorm() > 0):
-#                adensitydd_vector.append((1.0,temp))
-#        vp.advanced.add(prec, density, add_vector)
-#        return density    
-#
-#    def exchange(self, other, prec):
-#        exchange = vp.FunctionTree(self.mra)
-#        add_vector = []
-#        for comp in self.comp_dict.keys():
-#            func_i = self[comp]
-#            func_j = other[comp]
-#            temp = func_i.exchange(func_j, prec)
-#            if(temp.squaredNorm() > 0):
-#                add_vector.append((1.0,temp))    
-#        vp.advanced.add(prec, exchange, add_vector)
-#        return exchange
-
-#    def alpha_exchange(self, other, prec):
-#        alpha_exchange = vp.FunctionTree(self.mra)
-#        add_vector = []
-#        for comp in self.comp_dict.keys():
-#            func_i = self[comp]
-#            func_j = other[comp]
-#            temp = func_i.alpha_exchange(func_j, prec)
-#            if(temp.squaredNorm() > 0):
-#                add_vector.append((1.0,temp))    
-#        vp.advanced.add(prec, alpha_exchange, add_vector)
-#        return alpha_exchange    
-
     def overlap_density(self, other, prec):
         density = cf.complex_fcn()
         add_vector_real = []
@@ -272,7 +238,6 @@ class orbital4c:
             out_orb.comp_array[idx] = coeff * tmp.comp_array[comp]
         return out_orb
 
-#Beta c**2
     def beta(self, shift):
         out_orb = orbital4c()
         beta = np.array([orbital4c.light_speed**2 + shift,
@@ -288,18 +253,10 @@ class orbital4c:
         out_imag = 0
         for comp in self.comp_dict.keys():
             factor = 1
-#            if('S' in comp) factor = c**2
             cr, ci = self[comp].dot(other[comp])
             out_real += cr
             out_imag += ci
         return out_real, out_imag
-
-#    
-## here we should consider emulating the behavior of MRChem operators
-##
-#def matrix_element(bra, operator, ket):
-#    Opsi = operator(ket)
-#    return bra.dot(Opsi)
                    
 def apply_dirac_hamiltonian(orbital, prec, shift, der):
     beta_phi = orbital.beta(shift)
@@ -316,93 +273,9 @@ def apply_potential(factor, potential, orbital, prec):
             out_orbital[comp] = cf.apply_potential(factor, potential, orbital[comp], prec)
     return out_orbital
 
-#def apply_complex_potential(factor, potential, orbital, prec):
-#    out_orbital = orbital4c()
-#    for comp in orbital.comp_dict:
-#        if orbital[comp].squaredNorm() > 0:
-#            #out_orbital[comp] = potential * orbital[comp] 
-#            out_orbital[comp] = cf.multiply(prec, potential, orbital[comp])
-#    return out_orbital
-
-#
-# Keep this for now to maybe enable precise addition later
-#
-#def add_orbitals(a, orb_a, b, orb_b, prec):
-#    out_orb = orbital4c("a_plus_b",orb_a.mra)
-#    for comp, func in out_orb.components.items():        
-#        func_a = orb_a[comp]
-#        func_b = orb_b[comp]
-#        if (func_a.squaredNorm() > 0 and func_b.squaredNorm() > 0):
-#            vp.advanced.add(prec/10, func, a, func_a, b, func_b)
-#        elif(func_a.squaredNorm() > 0):
-#            out_orb.init_function(func_a, comp)
-#            func *= a
-#        elif(func_b.squaredNorm() > 0):
-#            out_orb.init_function(func_b, comp)
-#            func *= b
-#        else:
-#            print('Warning: adding two empty trees')
-#    return out_orb
-
 def apply_helmholtz(orbital, energy, prec):
     out_orbital = orbital4c()
     for comp in orbital.comp_dict.keys():
         out_orbital[comp] = cf.apply_helmholtz(orbital[comp], energy, orbital4c.light_speed, prec)
     out_orbital.rescale(-1.0/(2*np.pi))
     return out_orbital
-
-#def init_1s_orbital(orbital,k,Z,n,alpha,origin,prec):
-#    gamma_factor = compute_gamma(k,Z,alpha)
-#    norm_const = compute_norm_const(n, gamma_factor)
-#    idx = 0
-#    for comp in orbital.comp_array:
-#        func_real = lambda x: one_s_alpha_comp([x[0]-origin[0], x[1]-origin[1], x[2]-origin[2]],
-#                                                Z, alpha, gamma_factor, norm_const, idx)
-#        func_imag = lambda x: one_s_alpha_comp([x[0]-origin[0], x[1]-origin[1], x[2]-origin[2]],
-#                                                Z, alpha, gamma_factor, norm_const, idx+1 )
-#        vp.advanced.project(prec, comp.real, func_real)
-#        vp.advanced.project(prec, comp.imag, func_imag)
-#        idx += 2
-#    orbital.normalize()
-#    return orbital
-#
-#def compute_gamma(k,Z,alpha):
-#    return np.sqrt(k**2 - Z**2 * alpha**2)
-#
-#def compute_norm_const(n, gamma_factor):
-## THIS NORMALIZATION CONSTANT IS FROM WIKIPEDIA BUT IT DOES NOT AGREE WITH Bethe&Salpeter
-## and most importantly, it is wrong :-)
-#    tmp1 = 2 * n * (n + gamma_factor)
-#    tmp2 = 1 / (gamma_factor * gamma(2 * gamma_factor))
-#    return np.sqrt(tmp2/tmp1)
-#
-#def one_s_alpha(x,Z,alpha,gamma_factor):
-#    r = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
-#    tmp1 = 1.0 + gamma_factor
-#    tmp4 = Z * alpha
-#    u = x/r
-#    lar =   tmp1
-#    sai =   tmp4 * u[2]
-#    sbr = - tmp4 * u[1]
-#    sbi =   tmp4 * u[0]
-#    return lar, 0, 0, 0, 0, sai, sbr, sbi
-#
-#def one_s_alpha_comp(x,Z,alpha,gamma_factor,norm_const,comp):
-#    r = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
-#    tmp2 = r ** (gamma_factor - 1)
-#    tmp3 = np.exp(-Z*r)
-#    values = one_s_alpha(x,Z,alpha,gamma_factor)
-#    return values[comp] * tmp2 * tmp3 * norm_const / np.sqrt(2*np.pi)
-#
-#def alpha_gradient(orbital, prec, der):
-#    out = orbital4c()
-#    grad_vec = orbital.gradient(der)
-#    alpha_vec = {}
-#    for i in range(3):
-#        alpha_vec[i] = grad_vec[i].alpha(i, prec)
-#    out = alpha_vec[0] + alpha_vec[1] + alpha_vec[2]
-#    return out
-#
-
-
-

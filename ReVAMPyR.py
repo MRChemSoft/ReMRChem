@@ -8,7 +8,6 @@ from scipy.linalg import eig, inv
 from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
 from vampyr import vampyr3d as vp
-from vampyr import vampyr1d as vp1
 
 import argparse
 import numpy as np
@@ -28,7 +27,7 @@ if __name__ == '__main__':
                         help='put the type of derivative')
     parser.add_argument('-z', '--charge', dest='charge', type=float, default=2.0,
                         help='put the atom charge')
-    parser.add_argument('-b', '--box', dest='box', type=int, default=30,
+    parser.add_argument('-b', '--box', dest='box', type=int, default=60,
                         help='put the box dimension')
     parser.add_argument('-cx', '--center_x', dest='cx', type=float, default=0.1,
                         help='position of nucleus in x')
@@ -138,28 +137,28 @@ elif args.readOrbitals == 'No':
 #############################START WITH CALCULATION###################################
 if args.coulgau == 'coulomb':
     E_tot_JK = 0
-    spinorb1 = two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, E_tot_JK)
+    spinorb1, spinorb2, E_tot_JK = two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, E_tot_JK)
 
 elif args.coulgau == 'gaunt':
     E_tot_JK = 0
-    spinorb1 = two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, E_tot_JK)
+    spinorb1, spinorb2, E_tot_JK = two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, E_tot_JK)
     gaunt = 0
-    two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec, gaunt)
+    gaunt = two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec, gaunt)
     print('Gaunt term =', gaunt)
-    print('E_total(Dirac-Coulomb-Gaunt) =', E_tot_JK + gaunt - (2.0 *light_speed**2))
+    print('E_total(Dirac-Coulomb-Gaunt) =', E_tot_JK - gaunt - (2.0 *light_speed**2))
 
 elif args.coulgau == 'breit':
     E_tot_JK = 0
-    spinorb1 = two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, E_tot_JK)
+    spinorb1, spinorb2, E_tot_JK = two_electron.coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, E_tot_JK)
     gaunt = 0
-    two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec, gaunt)
+    gaunt = two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec, gaunt)
     print('Magnetic term =', 0.5 * gaunt)
     gauge1 = 0
-    two_electron.calcGaugeDelta(spinorb1, spinorb2, mra, prec, gauge1)
+    gauge1 = two_electron.calcGaugeDelta(spinorb1, spinorb2, mra, prec, gauge1)
     gauge2 = 0
-    two_electron.calcGaugePertB(spinorb1, spinorb2, mra, prec, der, gauge2)
-    print('Gauge term =', gauge1 + gauge2)
-    print('E_total(Dirac-Coulomb-Breit) =', E_tot_JK + 0.5 * gaunt + gauge1 + gauge2 - (2.0 *light_speed**2))
+    gauge2 = two_electron.calcGaugePertB(spinorb1, spinorb2, mra, prec, der, gauge2)
+    print('Gauge =', gauge1 + gauge2)
+    print('E_total(Dirac-Coulomb-Breit) =', E_tot_JK - 0.5 * gaunt - gauge1 - gauge2 - (2.0 *light_speed**2))
 ############################# Save Spinorbitals ###################################
     
 if args.saveOrbitals == 'Yes':
@@ -167,4 +166,3 @@ if args.saveOrbitals == 'Yes':
     print('Calculation is finished saving the FunctionTree of spinorbital alpha', args.atype)
 elif args.saveOrbitals == 'No':
     print('Calculation is finished')
-    

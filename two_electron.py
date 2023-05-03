@@ -58,7 +58,7 @@ def coulomb_gs_2e(spinorb1, spinorb2, V_tree, mra, prec, der, E_tot_JK):
         E_tot_JK =  2*eps - JmK.real
 
         print('Spinor Energy', eps - light_speed**2)
-        print('E_total(Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
+        print('E_total(Dirac-Coulomb) approximiation', E_tot_JK - (2.0 *light_speed**2))
 
         if(compute_last_energy):
             break
@@ -143,8 +143,8 @@ def calcGauntPert(spinorb1, spinorb2, mra, prec, gaunt):
         EK.append(n21[i].dot(pot, False))
         EKt += EK[i][0] + 1j * EK[i][1]
 
-    gaunt = -1.0 * (EJt - EKt)
-    return gaunt
+    gaunt = EJt - EKt
+    return gaunt.real
 
 def computeTestNorm(contributions):
     val = 0
@@ -166,7 +166,7 @@ def calcPerturbationValues(contributions, P, prec, testNorm):
         threshold = 0.00001 * prec * testNorm / normDensity
         potential = (cf.apply_poisson(auxDensity, auxDensity.mra, P, prec, thresholdNorm = threshold, factor = sign))
         spr, spi = density.dot(potential, conjugate)
-        print(spr, spi)
+        #print(spr, spi)
         val += spr + 1j * spi
     return val
     
@@ -212,7 +212,7 @@ def calcGaugePertA(spinorb1, spinorb2, mra, prec, der, gauge2):
 
     testNorm = computeTestNorm(contributions)
     gauge2 = -0.5 * calcPerturbationValues(contributions, P, prec, testNorm)
-    return gauge2
+    return gauge2.real
 
 def calcGaugePertB(spinorb1, spinorb2, mra, prec, der, gauge2):
     projection_operator = vp.ScalingProjector(mra, prec)
@@ -244,7 +244,7 @@ def calcGaugePertB(spinorb1, spinorb2, mra, prec, der, gauge2):
 
     testNorm = computeTestNorm(contributions)
     gauge2 = -0.5 * calcPerturbationValues(contributions, P, prec, testNorm)
-    return gauge2 
+    return gauge2.real 
 
 def calcGaugePertC(spinorb1, spinorb2, mra, prec, der, gauge2):
     print("Gauge Perturbation Version Sun 2022")
@@ -302,7 +302,7 @@ def calcGaugePertC(spinorb1, spinorb2, mra, prec, der, gauge2):
 
     testNorm = computeTestNorm(contributions)
     gauge2 = -0.5 * calcPerturbationValues(contributions, P, prec, testNorm)
-    return gauge2
+    return gauge2.real
 
 def calcGaugePertD(spinorb1, spinorb2, mra, prec, der, gauge2):
     projection_operator = vp.ScalingProjector(mra, prec)
@@ -350,7 +350,7 @@ def calcGaugePertD(spinorb1, spinorb2, mra, prec, der, gauge2):
 
     testNorm = computeTestNorm(contributions)
     gauge = -0.5 * calcPerturbationValues(contributions, P, prec, testNorm)
-    return gauge2
+    return gauge2.real
 
 def calcGaugeDelta(spinorb1, spinorb2, mra, prec, gauge1):
     projection_operator = vp.ScalingProjector(mra, prec)
@@ -369,5 +369,5 @@ def calcGaugeDelta(spinorb1, spinorb2, mra, prec, gauge1):
     } 
 
     testNorm = computeTestNorm(contributions)
-    gauge1 = -0.5 * calcPerturbationValues(contributions, P, prec, testNorm)
-    return gauge1
+    gauge1 = 0.5 * calcPerturbationValues(contributions, P, prec, testNorm)
+    return gauge1.real
