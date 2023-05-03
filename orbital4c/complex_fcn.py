@@ -65,11 +65,17 @@ class complex_fcn:
         output.real = self.real * np.real(other) - self.imag * np.imag(other)
         output.imag = self.real * np.imag(other) + self.imag * np.real(other)
         return output
-        
+
+    def __mul__(self, other):
+        output = complex_fcn()
+        output.real = self.real * other.real - self.imag * other.imag
+        output.imag = self.real * other.imag + self.imag * other.real
+        return output
+    
     def __str__(self):
         return ('Real part {}\n Imag part {}'.format(self.real, self.imag))
-    
-    def gradient(self, der = 'ABGV'):
+      
+    def gradient(self, der):
         if(der == 'ABGV'):
             D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
         elif(der == 'PH'):
@@ -87,7 +93,7 @@ class complex_fcn:
             grad.append(comp)
         return grad
 
-    def derivative(self, dir = 0, der = 'ABGV'):
+    def derivative(self, dir, der):
         if(der == 'ABGV'):
             D = vp.ABGVDerivative(self.mra, 0.0, 0.0)
         elif(der == 'PH'):
@@ -108,69 +114,6 @@ class complex_fcn:
         output.real = self.real 
         output.imag = -1.0 * self.imag
         return output
-       
-        
-    def density(self, prec):
-        density = vp.FunctionTree(self.mra)
-        add_vector = []
-        temp_r = vp.FunctionTree(self.mra)
-        temp_r.setZero()
-        temp_i = vp.FunctionTree(self.mra)
-        temp_i.setZero()
-        if(self.real.squaredNorm() > 0):
-            vp.advanced.multiply(prec, temp_r, 1.0, self.real, self.real)
-        if(self.imag.squaredNorm() > 0):
-            vp.advanced.multiply(prec, temp_i, 1.0, self.imag, self.imag)
-        vp.advanced.add(prec/10, density, [temp_r, temp_i])
-        return density
-
-#
-# Other is complex conjugate
-#
-
-#    def exchange(self, other, prec):
-#        exchange = vp.FunctionTree(self.mra)
-#        add_vector = []
-#        a_ = vp.FunctionTree(self.mra)
-#        a_.setZero()
-#        b_ = vp.FunctionTree(self.mra)
-#        b_.setZero()
-#        c_ = vp.FunctionTree(other.mra)
-#        c_.setZero()
-#        d_ = vp.FunctionTree(other.mra)
-#        d_.setZero()        
-#        if(self.real.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
-#        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
-#        if(self.real.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
-#        if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-#            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
-#        vp.advanced.add(prec/10, exchange, [a_, b_, c_, d_])
-#        return exchange
-
-    def alpha_exchange(self, other, prec):
-        alpha_exchange = vp.FunctionTree(self.mra)
-        add_vector = []
-        a_ = vp.FunctionTree(self.mra)
-        a_.setZero()
-        b_ = vp.FunctionTree(self.mra)
-        b_.setZero()
-        c_ = vp.FunctionTree(other.mra)
-        c_.setZero()
-        d_ = vp.FunctionTree(other.mra)
-        d_.setZero()        
-        if(self.real.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-            vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
-        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-            vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
-        if(self.real.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-            vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
-        if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
-        vp.advanced.add(prec/10, alpha_exchange, [a_, b_])
-        return alpha_exchange
     
     def dot(self, other, cc_first = True):
         out_real = 0
@@ -194,7 +137,6 @@ class complex_fcn:
            out_imag = out_imag + vp.dot(func_a, func_d)
         if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
            out_imag = out_imag + fbc * vp.dot(func_b, func_c)
-
         return out_real, out_imag
 
     def advanced_overlap_density(self, other, prec):
@@ -220,13 +162,9 @@ class complex_fcn:
         output = complex_fcn()
         output.real = rr + ii
         output.imag = ri + ir
-
         return output
 
 
-
-
-    #Not too happy about this design. Potential is only a real FunctionTree...
 def apply_potential(factor, potential, func, prec):
     output = complex_fcn()
     vp.advanced.multiply(prec, output.real, factor, potential, func.real)
@@ -265,11 +203,11 @@ def multiply(prec, lhs, rhs):
     vp.advanced.multiply(prec, ii, 1.0, lhs.imag, rhs.imag, -1, True)
     output = complex_fcn()
     output.real = rr - ii
-    output.imag = ri + ri
+    output.imag = ri + ir
     output.crop(prec)
     return output
 
-def divergence(vector, prec, der = "BS"):
+def divergence(vector, prec, der):
     out = complex_fcn()
     der_vec = {}
     for i in range(3):
@@ -304,9 +242,8 @@ def vector_tensor_r(vector, prec):
         tensor.append(scalar_times_r(vector[i], prec))
     return tensor
 
-def vector_gradient(vector, der = "BS"):
+def vector_gradient(vector, der):
     tensor = []
     for i in range(len(vector)):
         tensor.append(vector[i].gradient(der))
     return tensor
-
