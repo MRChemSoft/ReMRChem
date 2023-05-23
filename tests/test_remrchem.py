@@ -52,6 +52,7 @@ spinor_H.init_small_components(prec/10)
 spinor_H.normalize()
 
 def test_spinor():
+    print("test_spinor")
     val = spinor_H.comp_array[0].real([0.0, 0.0, 0.0])
     assert val == pytest.approx(0.593789254406578)
 
