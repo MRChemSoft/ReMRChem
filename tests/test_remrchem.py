@@ -151,4 +151,36 @@ def test_gradient():
     assert val_y == pytest.approx(0.2216243967934017)
     assert val_z == pytest.approx(0.33215761430082913)
 
+def test_commplex_conj():
+    spinorb1 = orb.orbital4c()
+    comp1 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree())
+    spinorb1.copy_components(Lb = comp1)
+    spinorb1.init_small_components(prec/10)
+    spinorb2 = spinorb1.complex_conj()
+
+    val1 = []
+    val1.append(spinorb1.comp_array[0].real([0.0, 0.0, 0.0]))
+    val1.append(spinorb1.comp_array[0].imag([0.0, 0.0, 0.0]))
+    val1.append(spinorb1.comp_array[1].real([0.0, 0.0, 0.0]))
+    val1.append(spinorb1.comp_array[1].imag([0.0, 0.0, 0.0]))
+    val1.append(spinorb1.comp_array[2].real([0.0, 0.0, 0.0]))
+    val1.append(spinorb1.comp_array[2].imag([0.0, 0.0, 0.0]))
+    val1.append(spinorb1.comp_array[3].real([0.0, 0.0, 0.0]))
+    val1.append(spinorb1.comp_array[3].imag([0.0, 0.0, 0.0]))
     
+    val2 = []
+    val2.append(spinorb2.comp_array[0].real([0.0, 0.0, 0.0]))
+    val2.append(spinorb2.comp_array[0].imag([0.0, 0.0, 0.0]))
+    val2.append(spinorb2.comp_array[1].real([0.0, 0.0, 0.0]))
+    val2.append(spinorb2.comp_array[1].imag([0.0, 0.0, 0.0]))
+    val2.append(spinorb2.comp_array[2].real([0.0, 0.0, 0.0]))
+    val2.append(spinorb2.comp_array[2].imag([0.0, 0.0, 0.0]))
+    val2.append(spinorb2.comp_array[3].real([0.0, 0.0, 0.0]))
+    val2.append(spinorb2.comp_array[3].imag([0.0, 0.0, 0.0]))
+    
+    for i in range(4):
+        assert val1[2*i] == pytest.approx(val2[2*i])
+        assert val1[2*i+1] == pytest.approx(-val2[2*i+1])
+        print(val1[2*i], val2[2*i], val1[2*i+1], val2[2*i+1])
+
