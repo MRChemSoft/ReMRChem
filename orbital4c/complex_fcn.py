@@ -66,6 +66,12 @@ class complex_fcn:
         output.imag = self.real * np.imag(other) + self.imag * np.real(other)
         return output
         
+    def __mul__(self, other):
+        output = complex_fcn()
+        output.real = self.real * np.real(other) - self.imag * np.imag(other)
+        output.imag = self.real * np.imag(other) + self.imag * np.real(other)
+        return output
+        
     def __str__(self):
         return ('Real part {}\n Imag part {}'.format(self.real, self.imag))
     
