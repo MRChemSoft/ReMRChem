@@ -168,8 +168,8 @@ class orbital4c:
         
     def derivative(self, dir = 0, der = 'ABGV'):
         orb_der = orbital4c()
-        for comp,func in self.comp_array.items():
-            orb_der[comp] = func.derivative(dir, der) 
+        for key in self.comp_dict.keys():
+            orb_der[key] = self[key].derivative(dir, der) 
         return orb_der
     
     def gradient(self, der = 'ABGV'):
