@@ -15,8 +15,7 @@ orb.orbital4c.light_speed = c
 orb.orbital4c.mra = mra
 cf.complex_fcn.mra = mra
 
-def test_spinor():
-    print("test_spinor")
+def make_gauss_tree():
     origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
     a_coeff = 3.0
     b_coeff = np.sqrt(a_coeff/np.pi)**3
@@ -25,9 +24,13 @@ def test_spinor():
     vp.advanced.build_grid(out=gauss_tree, inp=gauss)
     vp.advanced.project(prec=prec, out=gauss_tree, inp=gauss)
     gauss_tree.normalize()
+    return gauss_tree;
+
+def test_spinor():
+    print("test_spinor")
     spinor_H = orb.orbital4c()
     La_comp = cf.complex_fcn()
-    La_comp.copy_fcns(real = gauss_tree)
+    La_comp.copy_fcns(real = make_gauss_tree())
     spinor_H.copy_components(La = La_comp)
     spinor_H.init_small_components(prec/10)
     spinor_H.normalize()
@@ -47,8 +50,22 @@ def test_spinor():
 #   assert val1 == pytest.approx(1.3767534073967547)
 #    assert val2 == pytest.approx(-0.012619848367561309)
 
-#def test_mul():
-#    print("test_mul")
-#    spinorb1 = orb.orbital4c()
+def test_mul():
+    print("test_mul")
+    spinorb1 = orb.orbital4c()
+    La_comp = cf.complex_fcn()
+    La_comp.copy_fcns(real = make_gauss_tree())
+    spinorb1.copy_components(La = La_comp)
+    spinorb1.init_small_components(prec/10)
+    spinorb1.normalize()
+    spinorb1 *= 2.0
+    n1 = spinorb1.squaredNorm()
+    spinorb1 = spinorb1 * 2.0
+    n2 = spinorb1.squaredNorm()
+    spinorb1 = 2.0 * spinorb1
+    n3 = spinorb1.squaredNorm()
+    print(n1,n2,n3)
+    assert n1 == pytest.approx(4.0)
+    assert n2 == pytest.approx(16.0)
+    assert n3 == pytest.approx(64.0)
 
-    
