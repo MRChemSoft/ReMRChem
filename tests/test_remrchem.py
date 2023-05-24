@@ -69,3 +69,46 @@ def test_mul():
     assert n2 == pytest.approx(16.0)
     assert n3 == pytest.approx(64.0)
 
+def test_normalize():
+    print("test_normalize")
+    spinorb1 = orb.orbital4c()
+
+    comp1 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree())
+    comp2 = cf.complex_fcn()
+    comp2.copy_fcns(real = make_gauss_tree())
+
+    spinorb1.copy_components(La = comp1, Sb = comp2)
+    spinorb1.init_small_components(prec/10)
+    spinorb1.normalize()
+    n1 = spinorb1.squaredNorm()
+    assert n1 == pytest.approx(1.0)
+
+def test_init_small():
+    print("test_init_small")
+    spinorb1 = orb.orbital4c()
+
+    comp1 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree())
+    spinorb1.copy_components(Lb = comp1)
+    spinorb1.init_small_components(prec/10)
+
+    val1 = spinorb1.comp_array[0].real([0.0, 0.0, 0.0])
+    val2 = spinorb1.comp_array[0].imag([0.0, 0.0, 0.0])
+    val3 = spinorb1.comp_array[1].real([0.0, 0.0, 0.0])
+    val4 = spinorb1.comp_array[1].imag([0.0, 0.0, 0.0])
+    val5 = spinorb1.comp_array[2].real([0.0, 0.0, 0.0])
+    val6 = spinorb1.comp_array[2].imag([0.0, 0.0, 0.0])
+    val7 = spinorb1.comp_array[3].real([0.0, 0.0, 0.0])
+    val8 = spinorb1.comp_array[3].imag([0.0, 0.0, 0.0])
+
+    assert val1 == pytest.approx(0.0)
+    assert val2 == pytest.approx(0.0)                  
+    assert val3 == pytest.approx(0.5938013445576377)    
+    assert val4 == pytest.approx(0.0)                   
+    assert val5 == pytest.approx(-0.0008088481634795703)
+    assert val6 == pytest.approx(-0.0004053688109512743)
+    assert val7 == pytest.approx(0.0)                   
+    assert val8 == pytest.approx(0.0012122540667913475) 
+
+
