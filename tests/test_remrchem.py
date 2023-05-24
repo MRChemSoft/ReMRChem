@@ -111,4 +111,44 @@ def test_init_small():
     assert val7 == pytest.approx(0.0)                   
     assert val8 == pytest.approx(0.0012122540667913475) 
 
+def test_orb_der():
+    spinorb1 = orb.orbital4c()
+    comp1 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree())
+    spinorb1.copy_components(Lb = comp1)
+    spinorb1.init_small_components(prec/10)
 
+    spinorb_x = spinorb1.derivative(0,'ABGV')
+    spinorb_y = spinorb1.derivative(1,'PH')
+    spinorb_z = spinorb1.derivative(2,'BS')
+
+    val_x = spinorb_x.comp_array[1].real([0.0, 0.0, 0.0])
+    val_y = spinorb_y.comp_array[1].real([0.0, 0.0, 0.0])
+    val_z = spinorb_z.comp_array[1].real([0.0, 0.0, 0.0])
+
+    print(val_x, val_y, val_z)
+
+    assert val_x == pytest.approx(0.11107105420064928)
+    assert val_y == pytest.approx(0.2215088864001861)
+    assert val_z == pytest.approx(0.3324683072038884)
+    
+def test_gradient():
+    spinorb1 = orb.orbital4c()
+    comp1 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree())
+    spinorb1.copy_components(Lb = comp1)
+    spinorb1.init_small_components(prec/10)
+
+    grad1 = spinorb1.gradient('ABGV')
+
+    val_x = grad1[0].comp_array[1].real([0.0, 0.0, 0.0])
+    val_y = grad1[1].comp_array[1].real([0.0, 0.0, 0.0])
+    val_z = grad1[2].comp_array[1].real([0.0, 0.0, 0.0])
+
+    print(val_x, val_y, val_z)
+
+    assert val_x == pytest.approx(0.11107105420064928)
+    assert val_y == pytest.approx(0.2216243967934017)
+    assert val_z == pytest.approx(0.33215761430082913)
+
+    
