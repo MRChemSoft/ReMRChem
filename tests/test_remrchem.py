@@ -47,8 +47,13 @@ def test_read():
     assert val1 == pytest.approx(1.3767534073967547)
     assert val2 == pytest.approx(-0.012619848367561309)
 
-if __name__ == '__main__':
-    test_spinor()
-    test_read()
+#def test_mul():
+#    print("test_mul")
+#    spinorb1 = orb.orbital4c()
+    
+
+#if __name__ == '__main__':
+#    test_spinor()
+#    test_read()
 
     
