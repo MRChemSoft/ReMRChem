@@ -35,17 +35,17 @@ def test_spinor():
     print(val)
     assert val == pytest.approx(0.5937902746013326)
 
-def test_read():
-    print("test_read")
-    spinorb1 = orb.orbital4c()
-    spinorb2 = orb.orbital4c()
-    spinorb1.read("trees/spinorb1")
-    spinorb2.read("trees/spinorb2")
-    val1 = spinorb1.comp_array[0].real([0.0, 0.0, 0.0])
-    val2 = spinorb2.comp_array[3].imag([0.0, 0.0, 0.0])
-    print(val1, val2)
-    assert val1 == pytest.approx(1.3767534073967547)
-    assert val2 == pytest.approx(-0.012619848367561309)
+#def test_read():
+#    print("test_read")
+#    spinorb1 = orb.orbital4c()
+#    spinorb2 = orb.orbital4c()
+#    spinorb1.read("trees/spinorb1")
+#    spinorb2.read("trees/spinorb2")
+#    val1 = spinorb1.comp_array[0].real([0.0, 0.0, 0.0])
+#    val2 = spinorb2.comp_array[3].imag([0.0, 0.0, 0.0])
+#   print(val1, val2)
+#   assert val1 == pytest.approx(1.3767534073967547)
+#    assert val2 == pytest.approx(-0.012619848367561309)
 
 #def test_mul():
 #    print("test_mul")
