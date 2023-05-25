@@ -219,3 +219,25 @@ def test_dot():
     assert ival == pytest.approx(-0.41650020718445097)
     print(rval, ival)
     
+def test_overlap_density():    
+    comp1 = cf.complex_fcn()
+    comp2 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree(a=1.3, b=100, o=[0.1, 0.2, 0.1]),
+                    imag = make_gauss_tree(a=1.0, b=200, o=[0.1, 0.2, 0.2]))
+    comp2.copy_fcns(real = make_gauss_tree(a=1.0, b=90),
+                    imag = make_gauss_tree(a=1.0, b=200))
+
+    spinorb1 = orb.orbital4c()
+    spinorb1.copy_components(La = comp1, Lb=comp1)
+    spinorb1.init_small_components(prec/10)
+
+    spinorb2 = orb.orbital4c()
+    spinorb2.copy_components(La = comp2, Lb = comp1)
+    spinorb2.init_small_components(prec/10)
+
+    overlap = spinorb1.overlap_density(spinorb2, prec)
+    val = overlap([0.0, 0.0, 0.0])
+    assert np.real(val) == pytest.approx(0.0006138637025866606)
+    assert np.imag(val) == pytest.approx(0.0005440086610743796)
+    print(np.real(val), np.imag(val))
+    
