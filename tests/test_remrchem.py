@@ -211,7 +211,6 @@ def test_dot():
     rval, ival = spinorb1.dot(spinorb2)
     assert rval == pytest.approx(2.5307429558268524)
     assert ival == pytest.approx(-0.41650020718445097)
-    print(rval, ival)
     
 def test_overlap_density():    
     comp1 = cf.complex_fcn()
