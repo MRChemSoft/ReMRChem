@@ -1,6 +1,6 @@
 from vampyr import vampyr3d as vp
 from orbital4c import orbital as orb
-from orbital4c import NuclearPotential as nucpot
+from orbital4c import nuclear_potential as nucpot
 from orbital4c import complex_fcn as cf
 import numpy as np
 from scipy.special import legendre, laguerre, erf, gamma

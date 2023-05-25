@@ -40,6 +40,9 @@ class orbital4c:
         output.comp_array = self.comp_array - other.comp_array
         return output
 
+    def __call__(self, position):
+        return [x(position) for x in self.comp_array]
+
     def save(self, name):
         self.comp_array[0].save(f"{name}_Large_alpha")
         self.comp_array[1].save(f"{name}_Large_beta")
@@ -168,8 +171,8 @@ class orbital4c:
         
     def derivative(self, dir = 0, der = 'ABGV'):
         orb_der = orbital4c()
-        for comp,func in self.comp_array.items():
-            orb_der[comp] = func.derivative(dir, der) 
+        for key in self.comp_dict:
+            orb_der[key] = self[key].derivative(dir, der) 
         return orb_der
     
     def gradient(self, der = 'ABGV'):
@@ -202,29 +205,29 @@ class orbital4c:
         vp.advanced.add(prec, density, add_vector)
         return density    
 
-    def exchange(self, other, prec):
-        exchange = vp.FunctionTree(self.mra)
-        add_vector = []
-        for comp in self.comp_dict.keys():
-            func_i = self[comp]
-            func_j = other[comp]
-            temp = func_i.exchange(func_j, prec)
-            if(temp.squaredNorm() > 0):
-                add_vector.append((1.0,temp))    
-        vp.advanced.add(prec, exchange, add_vector)
-        return exchange
-
-    def alpha_exchange(self, other, prec):
-        alpha_exchange = vp.FunctionTree(self.mra)
-        add_vector = []
-        for comp in self.comp_dict.keys():
-            func_i = self[comp]
-            func_j = other[comp]
-            temp = func_i.alpha_exchange(func_j, prec)
-            if(temp.squaredNorm() > 0):
-                add_vector.append((1.0,temp))    
-        vp.advanced.add(prec, alpha_exchange, add_vector)
-        return alpha_exchange    
+#    def exchange(self, other, prec):
+#        exchange = vp.FunctionTree(self.mra)
+#        add_vector = []
+#        for comp in self.comp_dict.keys():
+#            func_i = self[comp]
+#            func_j = other[comp]
+#            temp = func_i.exchange(func_j, prec)
+#            if(temp.squaredNorm() > 0):
+#                add_vector.append((1.0,temp))    
+#        vp.advanced.add(prec, exchange, add_vector)
+#        return exchange
+#
+#    def alpha_exchange(self, other, prec):
+#        alpha_exchange = vp.FunctionTree(self.mra)
+#        add_vector = []
+#        for comp in self.comp_dict.keys():
+#            func_i = self[comp]
+#            func_j = other[comp]
+#            temp = func_i.alpha_exchange(func_j, prec)
+#            if(temp.squaredNorm() > 0):
+#                add_vector.append((1.0,temp))    
+#        vp.advanced.add(prec, alpha_exchange, add_vector)
+#        return alpha_exchange    
 
     def overlap_density(self, other, prec):
         density = cf.complex_fcn()
@@ -303,16 +306,16 @@ class orbital4c:
 #    
 # here we should consider emulating the behavior of MRChem operators
 #
-def matrix_element(bra, operator, ket):
-    Opsi = operator(ket)
-    return bra.dot(Opsi)
+#def matrix_element(bra, operator, ket):
+#    Opsi = operator(ket)
+#    return bra.dot(Opsi)
                    
 def apply_dirac_hamiltonian(orbital, prec, shift = 0.0, der = 'ABGV'):
     beta_phi = orbital.beta(shift)
     grad_phi = orbital.gradient(der)
-    alpx_phi = -1j * orbital4c.light_speed * grad_phi[0].alpha(0)
-    alpy_phi = -1j * orbital4c.light_speed * grad_phi[1].alpha(1)
-    alpz_phi = -1j * orbital4c.light_speed * grad_phi[2].alpha(2)
+    alpx_phi = -1j * orbital4c.light_speed * grad_phi[0].alpha(0, prec)
+    alpy_phi = -1j * orbital4c.light_speed * grad_phi[1].alpha(1, prec)
+    alpz_phi = -1j * orbital4c.light_speed * grad_phi[2].alpha(2, prec)
     return beta_phi + alpx_phi + alpy_phi + alpz_phi
 
 def apply_potential(factor, potential, orbital, prec):

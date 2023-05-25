@@ -48,6 +48,11 @@ class complex_fcn:
         self.real.crop(prec, abs)
         self.imag.crop(prec, abs)
 
+    def __call__(self, position):
+        rval = self.real(position)
+        ival = self.imag(position)
+        return rval + 1j * ival
+
     def __add__(self, other):
         output = complex_fcn()
         output.real = self.real + other.real
@@ -61,6 +66,12 @@ class complex_fcn:
         return output
 
     def __rmul__(self, other):
+        output = complex_fcn()
+        output.real = self.real * np.real(other) - self.imag * np.imag(other)
+        output.imag = self.real * np.imag(other) + self.imag * np.real(other)
+        return output
+        
+    def __mul__(self, other):
         output = complex_fcn()
         output.real = self.real * np.real(other) - self.imag * np.imag(other)
         output.imag = self.real * np.imag(other) + self.imag * np.real(other)
@@ -149,28 +160,28 @@ class complex_fcn:
 #            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
 #        vp.advanced.add(prec/10, exchange, [a_, b_, c_, d_])
 #        return exchange
-
-    def alpha_exchange(self, other, prec):
-        alpha_exchange = vp.FunctionTree(self.mra)
-        add_vector = []
-        a_ = vp.FunctionTree(self.mra)
-        a_.setZero()
-        b_ = vp.FunctionTree(self.mra)
-        b_.setZero()
-        c_ = vp.FunctionTree(other.mra)
-        c_.setZero()
-        d_ = vp.FunctionTree(other.mra)
-        d_.setZero()        
-        if(self.real.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-            vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
-        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-            vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
-        if(self.real.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
-            vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
-        if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
-            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
-        vp.advanced.add(prec/10, alpha_exchange, [a_, b_])
-        return alpha_exchange
+#
+#    def alpha_exchange(self, other, prec):
+#        alpha_exchange = vp.FunctionTree(self.mra)
+#        add_vector = []
+#        a_ = vp.FunctionTree(self.mra)
+#        a_.setZero()
+#        b_ = vp.FunctionTree(self.mra)
+#        b_.setZero()
+#        c_ = vp.FunctionTree(other.mra)
+#        c_.setZero()
+#        d_ = vp.FunctionTree(other.mra)
+#        d_.setZero()        
+#        if(self.real.squaredNorm() > 0 and other.real.squaredNorm() > 0):
+#            vp.advanced.multiply(prec, a_, 1.0, self.real, other.real)
+#        if(self.imag.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
+#            vp.advanced.multiply(prec, b_, 1.0, self.imag, other.imag)
+#        if(self.real.squaredNorm() > 0 and other.imag.squaredNorm() > 0):
+#            vp.advanced.multiply(prec, c_, 1.0, self.real, other.imag)
+#        if(self.imag.squaredNorm() > 0 and other.real.squaredNorm() > 0):
+#            vp.advanced.multiply(prec, d_, -1.0, self.imag, other.real)        
+#        vp.advanced.add(prec/10, alpha_exchange, [a_, b_])
+#        return alpha_exchange
     
     def dot(self, other, cc_first = True):
         out_real = 0
