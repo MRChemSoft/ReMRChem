@@ -233,7 +233,7 @@ def test_overlap_density():
     assert np.real(val) == pytest.approx(0.0006138637025866606)
     assert np.imag(val) == pytest.approx(0.0005440086610743796)
     
-def test_alhpa():
+def test_alpha():
     comp1 = cf.complex_fcn()
     comp2 = cf.complex_fcn()
     comp1.copy_fcns(real = make_gauss_tree(a=1.3, b=100, o=[0.1, 0.2, 0.1]),
