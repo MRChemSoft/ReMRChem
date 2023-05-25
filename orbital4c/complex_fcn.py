@@ -48,6 +48,11 @@ class complex_fcn:
         self.real.crop(prec, abs)
         self.imag.crop(prec, abs)
 
+    def __call__(self, position):
+        rval = self.real(position)
+        ival = self.imag(position)
+        return rval + 1j * ival
+
     def __add__(self, other):
         output = complex_fcn()
         output.real = self.real + other.real

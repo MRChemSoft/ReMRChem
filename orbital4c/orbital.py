@@ -40,6 +40,13 @@ class orbital4c:
         output.comp_array = self.comp_array - other.comp_array
         return output
 
+    def __call__(self, position):
+        result = []
+        for i in range(4):
+            val = self.comp_array[i](position)
+            result.append(val)
+        return result
+
     def save(self, name):
         self.comp_array[0].save(f"{name}_Large_alpha")
         self.comp_array[1].save(f"{name}_Large_beta")
