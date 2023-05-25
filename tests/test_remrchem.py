@@ -189,7 +189,6 @@ def test_density():
     dens = spinorb1.density(prec)
 
     val = dens([0.0, 0.0, 0.0])
-    print(val)
     
     assert val == pytest.approx(0.3526038291701747)
 
