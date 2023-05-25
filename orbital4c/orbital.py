@@ -41,11 +41,7 @@ class orbital4c:
         return output
 
     def __call__(self, position):
-        result = []
-        for i in range(4):
-            val = self.comp_array[i](position)
-            result.append(val)
-        return result
+        return [x(position) for x in self.comp_array]
 
     def save(self, name):
         self.comp_array[0].save(f"{name}_Large_alpha")
