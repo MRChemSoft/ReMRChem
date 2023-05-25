@@ -25,18 +25,21 @@ def coulomb_HFYGB(position, center, charge, precision):
     value = uHFYGB(distance/factor)
     return charge * value / factor
 
-def homogeneus_charge_sphere(position, center, charge, atom):
+def get_param_homogeneous_charge_sphere(atom):
     fileObj = open("./orbital4c/param_V.txt", "r")
+    RMS = ""
     for line in fileObj:
         if not line.startswith("#"):
             line = line.strip().split()
-            if len(line) == 4:
+            if len(line) == 3:
                if line[0] == atom:
                    RMS = line[1]
             else:
                print("Data file not correclty formatted! Please check it!")
     fileObj.close()
-    RMS = float(RMS)
+    return float(RMS)
+
+def homogeneus_charge_sphere(position, center, charge, RMS):
     RMS2 = RMS**2.0
     d2 = ((position[0] - center[0]) ** 2 +
           (position[1] - center[1]) ** 2 +
