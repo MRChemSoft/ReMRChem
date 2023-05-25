@@ -63,7 +63,6 @@ def test_mul():
     n2 = spinorb1.squaredNorm()
     spinorb1 = 2.0 * spinorb1
     n3 = spinorb1.squaredNorm()
-    print(n1,n2,n3)
     assert n1 == pytest.approx(4.0)
     assert n2 == pytest.approx(16.0)
     assert n3 == pytest.approx(64.0)
