@@ -26,7 +26,7 @@ def make_gauss_tree(a = 3.0, b = 0, o = [0.1, 0.2, 0.3]):
     vp.advanced.build_grid(out=gauss_tree, inp=gauss)
     vp.advanced.project(prec=prec, out=gauss_tree, inp=gauss)
     gauss_tree.normalize()
-    return gauss_tree;
+    return gauss_tree
 
 def test_spinor():
     print("test_spinor")
