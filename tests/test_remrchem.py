@@ -233,7 +233,6 @@ def test_overlap_density():
     val = overlap([0.0, 0.0, 0.0])
     assert np.real(val) == pytest.approx(0.0006138637025866606)
     assert np.imag(val) == pytest.approx(0.0005440086610743796)
-    print(np.real(val), np.imag(val))
     
 def test_alhpa():
     comp1 = cf.complex_fcn()
