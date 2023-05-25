@@ -82,7 +82,6 @@ def test_normalize():
     assert n1 == pytest.approx(1.0)
 
 def test_init_small():
-    print("test_init_small")
     spinorb1 = orb.orbital4c()
 
     comp1 = cf.complex_fcn()
