@@ -178,7 +178,6 @@ def test_commplex_conj():
     for i in range(4):
         assert val1[2*i] == pytest.approx(val2[2*i])
         assert val1[2*i+1] == pytest.approx(-val2[2*i+1])
-        print(val1[2*i], val2[2*i], val1[2*i+1], val2[2*i+1])
 
 def test_density():
     spinorb1 = orb.orbital4c()
