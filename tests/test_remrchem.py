@@ -122,8 +122,6 @@ def test_orb_der():
     val_y = spinorb_y.comp_array[1].real([0.0, 0.0, 0.0])
     val_z = spinorb_z.comp_array[1].real([0.0, 0.0, 0.0])
 
-    print(val_x, val_y, val_z)
-
     assert val_x == pytest.approx(0.11107105420064928)
     assert val_y == pytest.approx(0.2215088864001861)
     assert val_z == pytest.approx(0.3324683072038884)
@@ -140,8 +138,6 @@ def test_gradient():
     val_x = grad1[0].comp_array[1].real([0.0, 0.0, 0.0])
     val_y = grad1[1].comp_array[1].real([0.0, 0.0, 0.0])
     val_z = grad1[2].comp_array[1].real([0.0, 0.0, 0.0])
-
-    print(val_x, val_y, val_z)
 
     assert val_x == pytest.approx(0.11107105420064928)
     assert val_y == pytest.approx(0.2216243967934017)
@@ -327,7 +323,6 @@ def test_dirac_hamiltonian():
            (-156.41340549020896 +   1.9381892940766117j)]
 
     val = spinorb2([0.0, 0.0, 0.0])
-#    print(val)
 
     assert val == pytest.approx(ref)
 
@@ -350,7 +345,6 @@ def test_helmholtz():
            (-9.142891378936467e-07 - 1.275274465630999e-10j)]
 
     val = spinorb2([0.0, 0.0, 0.0])
-#    print(val)
 
     assert val == pytest.approx(ref)
 
@@ -380,7 +374,6 @@ def test_potential():
            (  2.1593264201323197 + 2.5033498645473497e-05j)]
 
     val = spinorb2([0.0, 0.0, 0.0])
-#    print(val)
 
     assert val == pytest.approx(ref)
 
@@ -413,7 +406,6 @@ def test_complex_potential():
            (  4441816.090120285 +      55.99966995055429j)]
 
     val = spinorb2([0.0, 0.0, 0.0])
-#    print(val)
 
     assert val == pytest.approx(ref)
 
