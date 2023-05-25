@@ -6,6 +6,8 @@ import pytest
 from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
 from scipy.constants import hbar
+from orbital4c import nuclear_potential as nucpot
+
 
 c = 137   # NOT A GOOD WAY. MUST BE FIXED!!!
 
@@ -362,3 +364,69 @@ def test_helmholtz():
 #    print(val)
 
     assert val == pytest.approx(ref)
+
+def test_potential():
+    comp1 = cf.complex_fcn()
+    comp2 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree(a=1.3, b=100, o=[0.1, 0.2, 0.1]),
+                    imag = make_gauss_tree(a=1.0, b=200, o=[0.1, 0.2, 0.2]))
+    comp2.copy_fcns(real = make_gauss_tree(a=1.0, b=90),
+                    imag = make_gauss_tree(a=1.0, b=200))
+
+    spinorb1 = orb.orbital4c()
+    spinorb1.copy_components(La = comp1, Lb=comp1)
+    spinorb1.init_small_components(prec/10)
+
+    Z = 1
+    origin = [0.0, 0.0, 0.0]
+    Peps = vp.ScalingProjector(mra, prec/10)
+    f = lambda x: nucpot.coulomb_HFYGB(x, origin, Z, prec)
+    V_tree = Peps(f)
+
+    spinorb2 = orb.apply_potential(1.0, V_tree, spinorb1, prec)
+
+    ref = [( 14.787758416216949  + 0.0002419106108011777j),
+           ( 14.787758416216949  + 0.0002419106108011777j),
+           ( -2.1592751577438762 - 2.1586264932674926j),
+           (  2.1593264201323197 + 2.5033498645473497e-05j)]
+
+    val = spinorb2([0.0, 0.0, 0.0])
+#    print(val)
+
+    assert val == pytest.approx(ref)
+
+def test_complex_potential():
+    comp1 = cf.complex_fcn()
+    comp2 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree(a=1.3, b=100, o=[0.1, 0.2, 0.1]),
+                    imag = make_gauss_tree(a=1.0, b=200, o=[0.1, 0.2, 0.2]))
+    comp2.copy_fcns(real = make_gauss_tree(a=1.0, b=90),
+                    imag = make_gauss_tree(a=1.0, b=200))
+
+    spinorb1 = orb.orbital4c()
+    spinorb1.copy_components(La = comp1, Lb=comp1)
+    spinorb1.init_small_components(prec/10)
+
+    radius = nucpot.get_param_homogeneous_charge_sphere("Ne")
+    Peps = vp.ScalingProjector(mra, prec/10)
+    f = lambda x: nucpot.point_charge(x, [0.0, 0.0, 0.0], 1)
+    g = lambda x: nucpot.homogeneus_charge_sphere(x, [0.1, 0.1, 0.1], 2, radius)
+
+    potential = cf.complex_fcn()
+    potential.real = Peps(f)
+    potential.imag = Peps(g)
+
+    spinorb2 = orb.apply_complex_potential(1.0, potential, spinorb1, prec)
+
+    ref = [( 30418384.270450525 +     358.58475214030517j),
+           ( 30418384.270450525 +     358.58475214030517j),
+           ( -4441710.637901596 - 4440412.880598812j),
+           (  4441816.090120285 +      55.99966995055429j)]
+
+    val = spinorb2([0.0, 0.0, 0.0])
+#    print(val)
+
+    assert val == pytest.approx(ref)
+
+
+    
