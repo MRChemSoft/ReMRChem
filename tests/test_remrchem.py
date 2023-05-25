@@ -15,11 +15,11 @@ orb.orbital4c.light_speed = c
 orb.orbital4c.mra = mra
 cf.complex_fcn.mra = mra
 
-def make_gauss_tree():
-    origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
-    a_coeff = 3.0
-    b_coeff = np.sqrt(a_coeff/np.pi)**3
-    gauss = vp.GaussFunc(b_coeff, a_coeff, origin)
+def make_gauss_tree(a = 3.0, b = 0, o = [0.1, 0.2, 0.3]):
+    a = 3.0
+    if (b == 0):
+        b = np.sqrt(a/np.pi)**3
+    gauss = vp.GaussFunc(b, a, o)
     gauss_tree = vp.FunctionTree(mra)
     vp.advanced.build_grid(out=gauss_tree, inp=gauss)
     vp.advanced.project(prec=prec, out=gauss_tree, inp=gauss)
@@ -184,3 +184,38 @@ def test_commplex_conj():
         assert val1[2*i+1] == pytest.approx(-val2[2*i+1])
         print(val1[2*i], val2[2*i], val1[2*i+1], val2[2*i+1])
 
+def test_density():
+    spinorb1 = orb.orbital4c()
+    comp1 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree())
+    spinorb1.copy_components(Lb = comp1)
+    spinorb1.init_small_components(prec/10)
+
+    dens = spinorb1.density(prec)
+
+    val = dens([0.0, 0.0, 0.0])
+    print(val)
+    
+    assert val == pytest.approx(0.3526038291701747)
+
+def test_dot():    
+    comp1 = cf.complex_fcn()
+    comp2 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree(a=1.3, b=100, o=[0.1, 0.2, 0.1]),
+                    imag = make_gauss_tree(a=1.0, b=200, o=[0.1, 0.2, 0.2]))
+    comp2.copy_fcns(real = make_gauss_tree(a=1.0, b=90),
+                    imag = make_gauss_tree(a=1.0, b=200))
+
+    spinorb1 = orb.orbital4c()
+    spinorb1.copy_components(La = comp1, Lb=comp1)
+    spinorb1.init_small_components(prec/10)
+
+    spinorb2 = orb.orbital4c()
+    spinorb2.copy_components(La = comp2, Lb = comp1)
+    spinorb2.init_small_components(prec/10)
+
+    rval, ival = spinorb1.dot(spinorb2)
+    assert rval == pytest.approx(2.5307429558268524)
+    assert ival == pytest.approx(-0.41650020718445097)
+    print(rval, ival)
+    
