@@ -171,7 +171,7 @@ class orbital4c:
         
     def derivative(self, dir = 0, der = 'ABGV'):
         orb_der = orbital4c()
-        for key in self.comp_dict.keys():
+        for key in self.comp_dict:
             orb_der[key] = self[key].derivative(dir, der) 
         return orb_der
     
