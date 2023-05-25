@@ -316,3 +316,49 @@ def test_beta():
     val = spinorb2([0.0, 0.0, 0.0])
 
     assert val == pytest.approx(ref)
+
+def test_dirac_hamiltonian():
+    comp1 = cf.complex_fcn()
+    comp2 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree(a=1.3, b=100, o=[0.1, 0.2, 0.1]),
+                    imag = make_gauss_tree(a=1.0, b=200, o=[0.1, 0.2, 0.2]))
+    comp2.copy_fcns(real = make_gauss_tree(a=1.0, b=90),
+                    imag = make_gauss_tree(a=1.0, b=200))
+
+    spinorb1 = orb.orbital4c()
+    spinorb1.copy_components(La = comp1, Lb=comp1)
+    spinorb1.init_small_components(prec/10)
+    spinorb2 = orb.apply_dirac_hamiltonian(spinorb1, prec, shift = 0.0, der = 'ABGV')
+
+    ref = [(1037.4502661754984  -  22.342943384772816j),
+           (1037.4382651830165  +  22.37666158042346j),
+           (149.39508249498584  - 154.86998194884805j),
+           (-156.41340549020896 +   1.9381892940766117j)]
+
+    val = spinorb2([0.0, 0.0, 0.0])
+#    print(val)
+
+    assert val == pytest.approx(ref)
+
+def test_helmholtz():
+    comp1 = cf.complex_fcn()
+    comp2 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree(a=1.3, b=100, o=[0.1, 0.2, 0.1]),
+                    imag = make_gauss_tree(a=1.0, b=200, o=[0.1, 0.2, 0.2]))
+    comp2.copy_fcns(real = make_gauss_tree(a=1.0, b=90),
+                    imag = make_gauss_tree(a=1.0, b=200))
+
+    spinorb1 = orb.orbital4c()
+    spinorb1.copy_components(La = comp1, Lb=comp1)
+    spinorb1.init_small_components(prec/10)
+    spinorb2 = orb.apply_helmholtz(spinorb1, -1.0, prec)
+
+    ref = [(-6.293490117272163e-06 - 8.965435259478884e-09j),
+           (-6.293490117272163e-06 - 8.965435259478884e-09j),
+           ( 9.143310240291369e-07 + 9.208886070849977e-07j),
+           (-9.142891378936467e-07 - 1.275274465630999e-10j)]
+
+    val = spinorb2([0.0, 0.0, 0.0])
+#    print(val)
+
+    assert val == pytest.approx(ref)
