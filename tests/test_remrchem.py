@@ -68,7 +68,6 @@ def test_mul():
     assert n3 == pytest.approx(64.0)
 
 def test_normalize():
-    print("test_normalize")
     spinorb1 = orb.orbital4c()
 
     comp1 = cf.complex_fcn()
