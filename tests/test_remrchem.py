@@ -51,7 +51,6 @@ def test_spinor():
 #    assert val2 == pytest.approx(-0.012619848367561309)
 
 def test_mul():
-    print("test_mul")
     spinorb1 = orb.orbital4c()
     La_comp = cf.complex_fcn()
     La_comp.copy_fcns(real = make_gauss_tree())
