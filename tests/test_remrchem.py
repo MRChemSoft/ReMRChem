@@ -29,7 +29,6 @@ def make_gauss_tree(a = 3.0, b = 0, o = [0.1, 0.2, 0.3]):
     return gauss_tree
 
 def test_spinor():
-    print("test_spinor")
     spinor_H = orb.orbital4c()
     La_comp = cf.complex_fcn()
     La_comp.copy_fcns(real = make_gauss_tree())
