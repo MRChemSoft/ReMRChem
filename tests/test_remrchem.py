@@ -260,10 +260,9 @@ def test_alhpa():
                  (0.05586501146881823    + 6.573755692841616e-07j),
                  (-0.05586501146881823   - 6.573755692841616e-07j)]]
 
-    alphaval = []
     for i in range(3):
-        alphaval.append(alphaorb[i]([0.0, 0.0, 0.0]))
-        assert alphaval[i] == pytest.approx(alpharef[i])
+        alphaval = alphaorb[i]([0.0, 0.0, 0.0])
+        assert alphaval == pytest.approx(alpharef[i])
 
 def test_ktrf():
     comp1 = cf.complex_fcn()
