@@ -202,29 +202,29 @@ class orbital4c:
         vp.advanced.add(prec, density, add_vector)
         return density    
 
-    def exchange(self, other, prec):
-        exchange = vp.FunctionTree(self.mra)
-        add_vector = []
-        for comp in self.comp_dict.keys():
-            func_i = self[comp]
-            func_j = other[comp]
-            temp = func_i.exchange(func_j, prec)
-            if(temp.squaredNorm() > 0):
-                add_vector.append((1.0,temp))    
-        vp.advanced.add(prec, exchange, add_vector)
-        return exchange
-
-    def alpha_exchange(self, other, prec):
-        alpha_exchange = vp.FunctionTree(self.mra)
-        add_vector = []
-        for comp in self.comp_dict.keys():
-            func_i = self[comp]
-            func_j = other[comp]
-            temp = func_i.alpha_exchange(func_j, prec)
-            if(temp.squaredNorm() > 0):
-                add_vector.append((1.0,temp))    
-        vp.advanced.add(prec, alpha_exchange, add_vector)
-        return alpha_exchange    
+#    def exchange(self, other, prec):
+#        exchange = vp.FunctionTree(self.mra)
+#        add_vector = []
+#        for comp in self.comp_dict.keys():
+#            func_i = self[comp]
+#            func_j = other[comp]
+#            temp = func_i.exchange(func_j, prec)
+#            if(temp.squaredNorm() > 0):
+#                add_vector.append((1.0,temp))    
+#        vp.advanced.add(prec, exchange, add_vector)
+#        return exchange
+#
+#    def alpha_exchange(self, other, prec):
+#        alpha_exchange = vp.FunctionTree(self.mra)
+#        add_vector = []
+#        for comp in self.comp_dict.keys():
+#            func_i = self[comp]
+#            func_j = other[comp]
+#            temp = func_i.alpha_exchange(func_j, prec)
+#            if(temp.squaredNorm() > 0):
+#                add_vector.append((1.0,temp))    
+#        vp.advanced.add(prec, alpha_exchange, add_vector)
+#        return alpha_exchange    
 
     def overlap_density(self, other, prec):
         density = cf.complex_fcn()
