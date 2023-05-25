@@ -241,3 +241,78 @@ def test_overlap_density():
     assert np.imag(val) == pytest.approx(0.0005440086610743796)
     print(np.real(val), np.imag(val))
     
+def test_alhpa():
+    comp1 = cf.complex_fcn()
+    comp2 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree(a=1.3, b=100, o=[0.1, 0.2, 0.1]),
+                    imag = make_gauss_tree(a=1.0, b=200, o=[0.1, 0.2, 0.2]))
+    comp2.copy_fcns(real = make_gauss_tree(a=1.0, b=90),
+                    imag = make_gauss_tree(a=1.0, b=200))
+
+    spinorb1 = orb.orbital4c()
+    spinorb1.copy_components(La = comp1, Lb=comp1)
+    spinorb1.init_small_components(prec/10)
+    alphaorb = spinorb1.alpha_vector(prec)
+
+    alpharef = [[(-8.79837474224956e-05  + 5.16840633678686e-05j),
+                 (-9.888532586901115e-05 - 0.008155058903998369j),
+                 (0.05586501146881823    + 6.573755692841616e-07j),
+                 (0.05586501146881823    + 6.573755692841616e-07j)],
+                [(5.16840633678686e-05   + 8.79837474224956e-05j),
+                 (0.008155058903998369   - 9.888532586901115e-05j),
+                 (6.573755692841616e-07  - 0.05586501146881823j),
+                 (-6.573755692841616e-07 + 0.05586501146881823j)],
+                [(-9.888532586901115e-05 - 0.008155058903998369j),
+                 (8.79837474224956e-05   - 5.16840633678686e-05j),
+                 (0.05586501146881823    + 6.573755692841616e-07j),
+                 (-0.05586501146881823   - 6.573755692841616e-07j)]]
+
+    alphaval = []
+    for i in range(3):
+        alphaval.append(alphaorb[i]([0.0, 0.0, 0.0]))
+        assert alphaval[i] == pytest.approx(alpharef[i])
+
+def test_ktrf():
+    comp1 = cf.complex_fcn()
+    comp2 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree(a=1.3, b=100, o=[0.1, 0.2, 0.1]),
+                    imag = make_gauss_tree(a=1.0, b=200, o=[0.1, 0.2, 0.2]))
+    comp2.copy_fcns(real = make_gauss_tree(a=1.0, b=90),
+                    imag = make_gauss_tree(a=1.0, b=200))
+
+    spinorb1 = orb.orbital4c()
+    spinorb1.copy_components(La = comp1, Lb=comp1)
+    spinorb1.init_small_components(prec/10)
+
+    spinorb2 = spinorb1.ktrs()
+
+    ref = [(-0.05586501146881823  + 6.573755692775872e-07j),
+           (0.05586501146881823   - 6.573755692775872e-07j),
+           (-0.008157636079677332 + 1.0267337790164823e-07j),
+           (-0.008157442583912674 + 0.008155058903998369j)]
+    
+    val = spinorb2([0.0, 0.0, 0.0])
+    
+    assert val == pytest.approx(ref)
+    
+def test_beta():
+    comp1 = cf.complex_fcn()
+    comp2 = cf.complex_fcn()
+    comp1.copy_fcns(real = make_gauss_tree(a=1.3, b=100, o=[0.1, 0.2, 0.1]),
+                    imag = make_gauss_tree(a=1.0, b=200, o=[0.1, 0.2, 0.2]))
+    comp2.copy_fcns(real = make_gauss_tree(a=1.0, b=90),
+                    imag = make_gauss_tree(a=1.0, b=200))
+
+    spinorb1 = orb.orbital4c()
+    spinorb1.copy_components(La = comp1, Lb=comp1)
+    spinorb1.init_small_components(prec/10)
+
+    spinorb2 = spinorb1.beta(-10000)
+
+    ref = [( 489.88028557006885 +   0.005764526367003977j),
+           ( 489.88028557006885 +   0.005764526367003977j),
+           ( 234.6814656965828  + 234.61288960912916j),
+           (-234.68703237623416 -   0.0029538104088736587j)]
+    val = spinorb2([0.0, 0.0, 0.0])
+
+    assert val == pytest.approx(ref)
