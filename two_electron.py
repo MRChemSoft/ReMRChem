@@ -157,10 +157,11 @@ def calcPerturbationValues(contributions, P, prec, testNorm):
         auxDensity = contributions["potential"][i]
         normDensity = np.sqrt(density.squaredNorm())
         normAuxDensity = np.sqrt(auxDensity.squaredNorm())
-        threshold = 0.00001 * prec * testNorm / normDensity
-        potential = (cf.apply_poisson(auxDensity, auxDensity.mra, P, prec, thresholdNorm = threshold, factor = sign))
-        spr, spi = density.dot(potential, conjugate)
-        val += spr + 1j * spi
+        if(normDensity > 0):
+            threshold = 0.00001 * prec * testNorm / normDensity
+            potential = (cf.apply_poisson(auxDensity, auxDensity.mra, P, prec, thresholdNorm = threshold, factor = sign))
+            spr, spi = density.dot(potential, conjugate)
+            val += spr + 1j * spi
     return val
     
 #
