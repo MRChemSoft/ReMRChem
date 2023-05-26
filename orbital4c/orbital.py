@@ -440,6 +440,5 @@ def calc_dirac_mu(energy, light_speed):
     return np.sqrt((light_speed**4-energy**2)/light_speed**2)
 
 def calc_non_rel_mu(energy, light_speed):
-    val2 = 2 * energy
-    return np.sqrt(-val2)
+    return np.sqrt(-2.0 * energy)
     
