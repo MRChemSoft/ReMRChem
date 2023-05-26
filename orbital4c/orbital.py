@@ -411,6 +411,5 @@ def alpha_gradient(orbital, prec):
     out = alpha_vec[0] + alpha_vec[1] + alpha_vec[2]
     return out
 
-
-
-
+def calc_dirac_mu(energy, light_speed):
+    return np.sqrt((light_speed**4-energy**2)/light_speed**2)

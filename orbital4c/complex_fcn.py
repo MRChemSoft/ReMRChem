@@ -244,9 +244,8 @@ def apply_potential(factor, potential, func, prec):
     vp.advanced.multiply(prec, output.imag, factor, potential, func.imag)
     return output
 
-def apply_helmholtz(func, energy, light_speed, prec):
+def apply_helmholtz(func, mu, light_speed, prec):
     out_func = complex_fcn()
-    mu = np.sqrt((light_speed**4-energy**2)/light_speed**2)
     H = vp.HelmholtzOperator(func.mra, mu, prec)
     if(func.real.squaredNorm() > 0):
         vp.advanced.apply(prec, out_func.real, H, func.real)
