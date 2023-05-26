@@ -245,7 +245,7 @@ class orbital4c:
         vp.advanced.add(prec, density.imag, add_vector_imag)
         return density
 
-    def alpha(self,direction, prec):
+    def alpha(self, direction, prec):
         out_orb = orbital4c()
         alpha_order = np.array([[3, 2, 1, 0],
                                 [3, 2, 1, 0],
@@ -262,6 +262,21 @@ class orbital4c:
             out_orb.comp_array[idx].crop(prec)
         return out_orb
 
+    def alpha_p(self, prec, der = "ABGV"):
+        out_orb = orbital4c()
+        orb_grad = self.gradient(der)
+        apx = orb_grad[0].alpha(0, prec)
+        apy = orb_grad[1].alpha(1, prec)
+        apz = orb_grad[2].alpha(2, prec)
+        return -1j * (apx + apy + apz)
+
+    def classicT(self, der = 'ABGV'):
+        orb_grad = self.gradient(der)
+        val = 0
+        for i in range(3):
+            val += 0.5 * orb_grad[i].squaredNorm()
+        return val
+    
     def alpha_vector(self, prec):
         return [self.alpha(0, prec), self.alpha(1, prec), self.alpha(2, prec)]
     
@@ -288,6 +303,16 @@ class orbital4c:
                          orbital4c.light_speed**2 + shift,
                         -orbital4c.light_speed**2 + shift,
                         -orbital4c.light_speed**2 + shift])
+        for idx in range(4):
+            out_orb.comp_array[idx] = beta[idx] * self.comp_array[idx]
+        return out_orb
+    
+    def beta2(self):
+        out_orb = orbital4c()
+        beta = np.array([1.0,
+                         1.0,
+                        -1.0,
+                        -1.0])
         for idx in range(4):
             out_orb.comp_array[idx] = beta[idx] * self.comp_array[idx]
         return out_orb
@@ -413,3 +438,7 @@ def alpha_gradient(orbital, prec):
 
 def calc_dirac_mu(energy, light_speed):
     return np.sqrt((light_speed**4-energy**2)/light_speed**2)
+
+def calc_non_rel_mu(energy):
+    return np.sqrt(-2.0 * energy)
+    
