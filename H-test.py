@@ -15,7 +15,7 @@ def analytic_1s(light_speed, n, k, Z):
     tmp3 = 1 + tmp2**2
     return light_speed**2 / np.sqrt(tmp3)
 
-light_speed = 137.035999084
+light_speed = 137.03599913900001
 alpha = 1/light_speed
 k = -1
 l = 0
@@ -30,7 +30,6 @@ print('Exact Energy',energy_1s - light_speed**2, flush = True)
 mra = vp.MultiResolutionAnalysis(box=[-100,100], order=6)
 prec = 1.0e-4
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
-#origin = [0.0, 0.0, 0.0]
 
 orb.orbital4c.light_speed = light_speed
 orb.orbital4c.mra = mra
@@ -51,14 +50,13 @@ spinor_H.copy_components(La = La_comp)
 spinor_H.init_small_components(prec/10)
 spinor_H.normalize()
 
-Peps = vp.ScalingProjector(mra,prec)
-print("before", origin, Z, prec)
-#f = lambda x: nucpot.point_charge(x, origin, Z)
+Peps = vp.ScalingProjector(mra, prec)
 f = lambda x: nucpot.coulomb_HFYGB(x, origin, Z, prec)
-#f = lambda x: nucpot.homogeneus_charge_sphere(x, origin, Z, atom)
 V_tree = Peps(f)
 
-default_der = 'PH'
+print('V', V_tree)
+
+default_der = 'BS'
 
 orbital_error = 1
 #while orbital_error > prec:
