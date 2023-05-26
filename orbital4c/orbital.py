@@ -352,10 +352,10 @@ def apply_complex_potential(factor, potential, orbital, prec):
 #            print('Warning: adding two empty trees')
 #    return out_orb
 
-def apply_helmholtz(orbital, energy, prec):
+def apply_helmholtz(orbital, mu, prec):
     out_orbital = orbital4c()
     for comp in orbital.comp_dict.keys():
-        out_orbital[comp] = cf.apply_helmholtz(orbital[comp], energy, orbital4c.light_speed, prec)
+        out_orbital[comp] = cf.apply_helmholtz(orbital[comp], mu, orbital4c.light_speed, prec)
     out_orbital.rescale(-1.0/(2*np.pi))
     return out_orbital
 
@@ -411,6 +411,5 @@ def alpha_gradient(orbital, prec):
     out = alpha_vec[0] + alpha_vec[1] + alpha_vec[2]
     return out
 
-
-
-
+def calc_dirac_mu(energy, light_speed):
+    return np.sqrt((light_speed**4-energy**2)/light_speed**2)
