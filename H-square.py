@@ -75,7 +75,7 @@ for idx in range(10):
     cke = spinor_H.classicT()
     cpe,imag = spinor_H.dot(RHS)
     print('classic', cke,cpe,cpe+cke)
-    mu = orb.calc_non_rel_mu(cke+cpe, light_speed)
+    mu = orb.calc_non_rel_mu(cke+cpe)
     print("mu", mu)
     new_orbital = orb.apply_helmholtz(RHS, mu, prec)
     new_orbital.normalize()
