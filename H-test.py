@@ -27,8 +27,8 @@ atom = "H"
 energy_1s = analytic_1s(light_speed, n, k, Z)
 print('Exact Energy',energy_1s - light_speed**2, flush = True)
 
-mra = vp.MultiResolutionAnalysis(box=[-200,200], order=6)
-prec = 1.0e-3
+mra = vp.MultiResolutionAnalysis(box=[-100,100], order=6)
+prec = 1.0e-4
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 #origin = [0.0, 0.0, 0.0]
 

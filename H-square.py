@@ -27,8 +27,8 @@ atom = "H"
 energy_1s = analytic_1s(light_speed, n, k, Z)
 print('Exact Energy',energy_1s - light_speed**2, flush = True)
 
-mra = vp.MultiResolutionAnalysis(box=[-200,200], order=6)
-prec = 1.0e-3
+mra = vp.MultiResolutionAnalysis(box=[-100,100], order=6)
+prec = 1.0e-4
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 #origin = [0.0, 0.0, 0.0]
 
@@ -63,19 +63,19 @@ default_der = 'ABGV'
 orbital_error = 1
 mc2 = light_speed * light_speed
 #while orbital_error > prec:
-for idx in range(15):
+for idx in range(10):
     v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec) 
     vv_psi = orb.apply_potential(-0.5/mc2, V_tree, v_psi, prec)
     beta_v_psi = v_psi.beta2()
-    apV_psi = v_psi.alpha_p('ABGV')
-    ap_psi = spinor_H.alpha_p('ABGV')
+    apV_psi = v_psi.alpha_p(prec, 'ABGV')
+    ap_psi = spinor_H.alpha_p(prec, 'ABGV')
     Vap_psi = orb.apply_potential(-1.0, V_tree, ap_psi, prec)
     anticom = apV_psi + Vap_psi
     RHS = beta_v_psi + vv_psi + anticom * (0.5/light_speed)
     cke = spinor_H.classicT()
     cpe,imag = spinor_H.dot(RHS)
     print('classic', cke,cpe,cpe+cke)
-    mu = orb.calc_dirac_sq_mu(cke+cpe, light_speed)
+    mu = orb.calc_non_rel_mu(cke+cpe, light_speed)
     print("mu", mu)
     new_orbital = orb.apply_helmholtz(RHS, mu, prec)
     new_orbital.normalize()
@@ -93,7 +93,7 @@ cke = spinor_H.classicT()
 beta_v_psi = v_psi.beta2()
 beta_pot,imag = beta_v_psi.dot(spinor_H)
 pot_sq, imag = v_psi.dot(v_psi)
-ap_psi = spinor_H.alpha_p('ABGV')
+ap_psi = spinor_H.alpha_p(prec, 'ABGV')
 anticom, imag = ap_psi.dot(v_psi)
 energy_kutzelnigg = cke + beta_pot + pot_sq/(2*mc2) + anticom/light_speed
 
