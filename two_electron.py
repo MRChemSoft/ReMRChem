@@ -75,7 +75,8 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
         V_J_K_spinorb1 = v_psi_1 + JmK_phi1
 
         # Calculation of Helmholtz
-        tmp = orb.apply_helmholtz(V_J_K_spinorb1, eps, prec)
+        mu = calc_dirac_mu(eps, light_speed)
+        tmp = orb.apply_helmholtz(V_J_K_spinorb1, mu, prec)
         new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der)
         new_orbital *= 0.5/light_speed**2
         print('Norm new orbital ', np.sqrt(new_orbital.squaredNorm()))

@@ -337,7 +337,9 @@ def test_helmholtz():
     spinorb1 = orb.orbital4c()
     spinorb1.copy_components(La = comp1, Lb=comp1)
     spinorb1.init_small_components(prec/10)
-    spinorb2 = orb.apply_helmholtz(spinorb1, -1.0, prec)
+
+    mu = orb.calc_dirac_mu(-1.0, spinorb1.light_speed)
+    spinorb2 = orb.apply_helmholtz(spinorb1, mu, prec)
 
     ref = [(-6.293490117272163e-06 - 8.965435259478884e-09j),
            (-6.293490117272163e-06 - 8.965435259478884e-09j),

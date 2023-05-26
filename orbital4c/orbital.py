@@ -352,10 +352,10 @@ def apply_complex_potential(factor, potential, orbital, prec):
 #            print('Warning: adding two empty trees')
 #    return out_orb
 
-def apply_helmholtz(orbital, energy, prec):
+def apply_helmholtz(orbital, mu, prec):
     out_orbital = orbital4c()
     for comp in orbital.comp_dict.keys():
-        out_orbital[comp] = cf.apply_helmholtz(orbital[comp], energy, orbital4c.light_speed, prec)
+        out_orbital[comp] = cf.apply_helmholtz(orbital[comp], mu, orbital4c.light_speed, prec)
     out_orbital.rescale(-1.0/(2*np.pi))
     return out_orbital
 
