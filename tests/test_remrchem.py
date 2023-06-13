@@ -204,9 +204,9 @@ def test_dot():
     spinorb2.copy_components(La = comp2, Lb = comp1)
     spinorb2.init_small_components(prec/10)
 
-    rval, ival = spinorb1.dot(spinorb2)
-    assert rval == pytest.approx(2.5307429558268524)
-    assert ival == pytest.approx(-0.41650020718445097)
+    val = spinorb1.dot(spinorb2)
+    assert val.real == pytest.approx(2.5307429558268524)
+    assert val.imag == pytest.approx(-0.41650020718445097)
     
 def test_overlap_density():    
     comp1 = cf.complex_fcn()

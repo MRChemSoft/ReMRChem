@@ -206,7 +206,7 @@ class complex_fcn:
         if(func_b.squaredNorm() > 0 and func_c.squaredNorm() > 0):
            out_imag = out_imag + fbc * vp.dot(func_b, func_c)
 
-        return out_real, out_imag
+        return out_real + 1j * out_imag
 
     def advanced_overlap_density(self, other, prec):
         func_a = self.real

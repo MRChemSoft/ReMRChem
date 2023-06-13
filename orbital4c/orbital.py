@@ -318,23 +318,14 @@ class orbital4c:
         return out_orb
     
     def dot(self, other):
-        out_real = 0
-        out_imag = 0
+        result = 0
         for comp in self.comp_dict.keys():
             factor = 1
 #            if('S' in comp) factor = c**2
-            cr, ci = self[comp].dot(other[comp])
-            out_real += cr
-            out_imag += ci
-        return out_real, out_imag
+            component = self[comp].dot(other[comp])
+            result += component
+        return result
 
-#    
-# here we should consider emulating the behavior of MRChem operators
-#
-#def matrix_element(bra, operator, ket):
-#    Opsi = operator(ket)
-#    return bra.dot(Opsi)
-                   
 def apply_dirac_hamiltonian(orbital, prec, shift = 0.0, der = 'ABGV'):
     beta_phi = orbital.beta(shift)
     grad_phi = orbital.gradient(der)

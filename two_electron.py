@@ -26,15 +26,11 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
 
         # Definiton of Dirac Hamiltonian for spinorbit 1 that due to TRS is equal spinorbit 2
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der)
-        hd_11_r, hd_11_i = spinorb1.dot(hd_psi_1)
-
-        hd_11 = complex(hd_11_r, hd_11_i)
+        hd_11 = spinorb1.dot(hd_psi_1)
 
         # Applying nuclear potential to spin orbit 1 and 2
         v_psi_1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
-        V1_r, V1_i = spinorb1.dot(v_psi_1)
-
-        V1 = complex(V1_r, V1_i)
+        V1 = spinorb1.dot(v_psi_1)
 
         hd_V_11 = hd_11 + V1
 
@@ -42,9 +38,7 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
         J2_phi1 = orb.apply_potential(1.0, B22, spinorb1, prec)
 
         JmK_phi1 = J2_phi1  # K part is zero for 2e system in GS
-        JmK_r, JmK_i = spinorb1.dot(JmK_phi1)
-
-        JmK = complex(JmK_r, JmK_i)
+        JmK = spinorb1.dot(JmK_phi1)
 
         # Calculate Fij Fock matrix
         eps = hd_V_11.real + JmK.real
@@ -130,12 +124,12 @@ def calcGauntPert(spinorb1, spinorb2, mra, prec):
         threshold = 0.0001 * prec * val / norm22[i]
         pot = cf.apply_poisson(n11[i], n11[i].mra, P, prec, thresholdNorm = threshold, factor = 1)
         EJ.append(n22[i].dot(pot, False))
-        EJt += EJ[i][0] + 1j * EJ[i][1]
+        EJt += EJ[i]
 
         threshold = 0.0001 * prec * val / norm21[i]
         pot = (cf.apply_poisson(n12[i], n12[i].mra, P, prec, thresholdNorm = threshold, factor = 1))
         EK.append(n21[i].dot(pot, False))
-        EKt += EK[i][0] + 1j * EK[i][1]
+        EKt += EK[i]
 
     gaunt = EJt - EKt
     return gaunt.real
