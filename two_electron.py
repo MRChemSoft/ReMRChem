@@ -1,5 +1,6 @@
 from orbital4c import complex_fcn as cf
-from orbital4c import orbital as orb 
+from orbital4c import orbital as orb
+from orbitla4c import operators as oper
 from scipy.constants import hbar
 from scipy.linalg import eig, inv
 from scipy.special import legendre, laguerre, erf, gamma
@@ -67,6 +68,27 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
         if(error_norm < prec):
             compute_last_energy = True
     return(spinorb1, spinorb2, E_tot_JK)
+
+#def coulomb_gs(potential, spinors, mra, prec, der = 'ABGV'):
+#    print("Dirac Hartree Fock iteration")
+#    error_norm = 1
+#    n_spinors = len(spinors)
+#    while (error_norm > prec):
+#        J = operators.CoulombDirectOperator(mra, prec, spinors)
+#        K = operators.CoulombExchangeOperator(mra, prec, spinors)
+#        F = np.zeros((n_spinors, n_spinors))
+#        for i in range(n_spinors):
+#            si = spinors[i]
+#            Jsi = J(spinor)
+#            Ksi = K(spinor)
+#            Vsi = orbital.apply_potential(-1.0, potential, si, prec)
+#            Dsi = orbital.apply_dirac_hamiltonian(si, prec, shift = 0, der = 'ABGV')
+#            RHS = Vsi + Jsi - Ksi
+#            for j in range(i, n_spinors) in spinors:
+#                sj = spinors[j]
+#                F[j][i] = sj.dot(RHS + Ds)
+#                F[i][j]  = F[j][]
+#    
 
 def calcAlphaDensityVector(spinorb1, spinorb2, prec):
     alphaOrbital =  spinorb2.alpha_vector(prec)

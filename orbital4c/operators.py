@@ -46,42 +46,75 @@ class SpinorbGenerator():
         phi.normalize()
         return phi
 
-class CoulombDirectOperator():
+class Operator():
     def __init__(self, mra, prec, Psi):
         self.mra = mra
         self.prec = prec
         self.Psi = Psi
+
+    def matrix(self):
+        n_orbitals = len(self.Psi)
+        mat = np.zeros((n_orbitals, n_orbitals))
+        for i in range(n_orbitals):
+            si = self.Psi[i]
+            Osi = self(si)
+            for j in range(i+1):
+                sj = self.Psi[j]
+                val = sj.dot(Osi)
+                print(i,j,val)
+#                mat[j][i] = sj.dot(Osi)
+                if (i != j):
+                    mat[i][j] = np.conjugate(mat[j][i]) 
+        return mat
+
+class CoulombDirectOperator(Operator):
+    def __init__(self, mra, prec, Psi):
+        super().__init__(mra, prec, Psi)
         self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
         self.potential = None
         self.setup()
 
     def setup(self):
-        rho = self.Psi[0].density(self.prec)
-        for i in range(1, len(self.Psi)):
+        rho = vp.FunctionTree(self.mra)
+        rho.setZero()
+        for i in range(0, len(self.Psi)):
             rho += self.Psi[i].density(self.prec)
         rho.crop(self.prec)
         self.potential = (4.0*np.pi)*self.poisson(rho).crop(self.prec)
 
-    def __call__(self, Phi):
-        return self.potential * Phi
+    def __call__(self, phi):
+        return orb.apply_potential(1.0, self.potential, phi, self.prec)
 
-
-class CoulombExchangeOperator():
+class CoulombExchangeOperator(Operator):
     def __init__(self, mra, prec, Psi):
-        self.mra = mra
-        self.prec = prec
-        self.Psi = Psi
-        self.poisson = vp.PoissonOperator(mra=mra, prec=self.prec)
+        super().__init__(mra, prec, Psi)
+        self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
         self.potential = None
 
+    def __call__(self, phi):
+        output = orbital4c()
+        for i in range(0, len(self.Psi)):
+            V_ij = complex_fcn()
+            overlap_density = self.Psi[i].exchange(phi, self.prec)
+            V_ji.real = self.poisson(overlap_density.real)
+            V_ji.imag = self.poisson(overlap_density.imag)
+            tmp = orb.apply_complex_potential(1.0, V_ij, Psi[i])
+            output += temp                 
+        output *= 4.0 * np.pi
+        output.crop(prec)
+        return output
 
-    def __call__(self, Phi):
-        V_j0 = self.poisson(self.Psi[0].exchange(Phi, self.prec))
-        self.potential = (V_j0 * self.Psi[0])
-        for i in range(1, len(self.Psi)):
-            V_ji = self.poisson(self.Psi[i].exchange(Phi, self.prec))
-            self.potential += (V_ji * self.Psi[i])
-        self.potential *= 4.0*np.pi
-        return self.potential
+class FockOperator(Operator):
+    def __init__(self, mra, prec, Psi, operators, factors, der = "ABGV"):
+        super().__init__(mra, prec, Psi)
+        self.der = der
+        self.operators = operators
+        self.factors = factors
 
+    def __call__(self, phi):
+        Fphi = orb.apply_dirac_hamiltonian(phi, self.prec, self.der)
+        for i in range(len(self.operators)):
+            Fphi += self.factors[i] * self.operators[i].phi
+        Fphi.crop(prec)
+        return Fphi
 
