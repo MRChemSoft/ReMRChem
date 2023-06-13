@@ -52,14 +52,14 @@ class Operator():
         self.prec = prec
         self.Psi = Psi
 
-    def matrix(self):
-        n_orbitals = len(self.Psi)
+    def matrix(self, Phi):
+        n_orbitals = len(Phi)
         mat = np.zeros((n_orbitals, n_orbitals), complex)
         for i in range(n_orbitals):
-            si = self.Psi[i]
+            si = Phi[i]
             Osi = self(si)
             for j in range(i+1):
-                sj = self.Psi[j]
+                sj = Phi[j]
                 val = sj.dot(Osi)
                 print(i,j,val)
                 mat[j][i] = val
@@ -104,6 +104,19 @@ class CoulombExchangeOperator(Operator):
         output.crop(self.prec)
         return output
 
+class PotentialOperator(Operator):
+    def __init__(self, mra, prec, potential, real = True):
+        super().__init__(mra, prec, [])
+        self.potential = potential
+        self.real = real
+
+    def __call__(self, phi):
+        if(self.real):
+            result = orb.apply_potential(1.0, self.potential, phi, self.prec)
+        else:
+             result = orb.apply_complex_potential(1.0, self.potential, phi, self.prec)
+        return result
+        
 class FockOperator(Operator):
     def __init__(self, mra, prec, Psi, operators, factors, der = "ABGV"):
         super().__init__(mra, prec, Psi)

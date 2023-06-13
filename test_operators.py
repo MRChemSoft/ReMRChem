@@ -79,7 +79,7 @@ if __name__ == '__main__':
     cf.complex_fcn.mra = mra
     print('call MRA DONE')
     
-    computeNuclearPotential = False
+    computeNuclearPotential = True
     readOrbitals = False
     runCoulomb = False
     saveOrbitals = False
@@ -137,10 +137,13 @@ if __name__ == '__main__':
 
     Jop = oper.CoulombDirectOperator(mra, prec, [spinorb1, spinorb2])
     Kop = oper.CoulombExchangeOperator(mra, prec, [spinorb1, spinorb2])
-    Fop = oper.FockOperator(mra, prec, [spinorb1, spinorb2], [Jop, Kop], [1.0, -1.0])
-    Jmat = Jop.matrix()
-    Kmat = Kop.matrix()
-    Fmat = Fop.matrix()
+    Vop = oper.PotentialOperator(mra, prec, V_tree)
+    Fop = oper.FockOperator(mra, prec, [spinorb1, spinorb2], [Jop, Kop, Vop], [1.0, -1.0, -1.0])
+    Jmat = Jop.matrix([spinorb1, spinorb2])
+    Kmat = Kop.matrix([spinorb1, spinorb2])
+    Vmat = Vop.matrix([spinorb1, spinorb2])
+    Fmat = Fop.matrix([spinorb1, spinorb2])
     print(Jmat)
     print(Kmat)
+    print(Vmat)
     print(Fmat)
