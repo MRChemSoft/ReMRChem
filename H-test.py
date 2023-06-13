@@ -64,7 +64,7 @@ for idx in range(10):
     hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = default_der)
     v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec) 
     add_psi = hd_psi + v_psi
-    energy, imag = spinor_H.dot(add_psi)
+    energy = (spinor_H.dot(add_psi)).real
     print('Energy',energy-light_speed**2,imag)
     #tmp = orb.apply_dirac_hamiltonian(v_psi, prec, energy)
     mu = orb.calc_dirac_mu(energy, light_speed)
@@ -75,14 +75,14 @@ for idx in range(10):
     new_orbital.crop(prec/10)
     new_orbital.normalize()
     delta_psi = new_orbital - spinor_H
-    orbital_error, imag = delta_psi.dot(delta_psi)
+    orbital_error = (delta_psi.dot(delta_psi)).real
     print('Error',orbital_error, imag, flush = True)
     spinor_H = new_orbital
     
 hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = default_der)
 v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec)
 add_psi = hd_psi + v_psi
-energy, imag = spinor_H.dot(add_psi)
+energy = (spinor_H.dot(add_psi)).real
 print('Final Energy',energy - light_speed**2)
 
 #exact_orbital = orb.orbital4c()
@@ -94,6 +94,6 @@ energy_1s = analytic_1s(light_speed, n, k, Z)
 #hd_psi = orb.apply_dirac_hamiltonian(exact_orbital, prec)
 #v_psi = orb.apply_potential(-1.0, V_tree, exact_orbital, prec)
 #add_psi = hd_psi + v_psi
-#energy, imag = exact_orbital.dot(add_psi)
+#energy = (exact_orbital.dot(add_psi)).real
 print('Exact Energy',energy_1s - light_speed**2)
 print('Difference',energy_1s - energy)

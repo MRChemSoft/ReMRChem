@@ -73,28 +73,28 @@ for idx in range(10):
     anticom = apV_psi + Vap_psi
     RHS = beta_v_psi + vv_psi + anticom * (0.5/light_speed)
     cke = spinor_H.classicT()
-    cpe,imag = spinor_H.dot(RHS)
+    cpe = (spinor_H.dot(RHS)).real
     print('classic', cke,cpe,cpe+cke)
     mu = orb.calc_non_rel_mu(cke+cpe)
     print("mu", mu)
     new_orbital = orb.apply_helmholtz(RHS, mu, prec)
     new_orbital.normalize()
     delta_psi = new_orbital - spinor_H
-    orbital_error, imag = delta_psi.dot(delta_psi)
+    orbital_error = (delta_psi.dot(delta_psi)).real
     print('Error',orbital_error, imag, flush = True)
     spinor_H = new_orbital
     
 hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = default_der)
 v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec)
 add_psi = hd_psi + v_psi
-energy, imag = spinor_H.dot(add_psi)
+energy = (spinor_H.dot(add_psi)).real
 
 cke = spinor_H.classicT()
 beta_v_psi = v_psi.beta2()
-beta_pot,imag = beta_v_psi.dot(spinor_H)
-pot_sq, imag = v_psi.dot(v_psi)
+beta_pot = (beta_v_psi.dot(spinor_H)).real
+pot_sq  = (v_psi.dot(v_psi)).real
 ap_psi = spinor_H.alpha_p(prec, 'ABGV')
-anticom, imag = ap_psi.dot(v_psi)
+anticom = (ap_psi.dot(v_psi)).real
 energy_kutzelnigg = cke + beta_pot + pot_sq/(2*mc2) + anticom/light_speed
 
 print('Kutzelnigg',cke, beta_pot, pot_sq/(2*mc2), anticom/light_speed, energy_kutzelnigg)
@@ -111,7 +111,7 @@ energy_1s = analytic_1s(light_speed, n, k, Z)
 #hd_psi = orb.apply_dirac_hamiltonian(exact_orbital, prec)
 #v_psi = orb.apply_potential(-1.0, V_tree, exact_orbital, prec)
 #add_psi = hd_psi + v_psi
-#energy, imag = exact_orbital.dot(add_psi)
+#energy = (exact_orbital.dot(add_psi)).real
 print('Exact Energy',energy_1s - light_speed**2)
 print('Difference 1',energy_1s - energy)
 print('Difference 2',energy_1s - energy_kutzelnigg - light_speed**2)
