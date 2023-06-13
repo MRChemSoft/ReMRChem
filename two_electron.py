@@ -1,6 +1,6 @@
 from orbital4c import complex_fcn as cf
 from orbital4c import orbital as orb
-from orbitla4c import operators as oper
+from orbital4c import operators as oper
 from scipy.constants import hbar
 from scipy.linalg import eig, inv
 from scipy.special import legendre, laguerre, erf, gamma

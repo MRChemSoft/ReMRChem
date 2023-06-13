@@ -54,7 +54,7 @@ class Operator():
 
     def matrix(self):
         n_orbitals = len(self.Psi)
-        mat = np.zeros((n_orbitals, n_orbitals))
+        mat = np.zeros((n_orbitals, n_orbitals), complex)
         for i in range(n_orbitals):
             si = self.Psi[i]
             Osi = self(si)
@@ -62,7 +62,7 @@ class Operator():
                 sj = self.Psi[j]
                 val = sj.dot(Osi)
                 print(i,j,val)
-#                mat[j][i] = sj.dot(Osi)
+                mat[j][i] = val
                 if (i != j):
                     mat[i][j] = np.conjugate(mat[j][i]) 
         return mat
@@ -92,16 +92,16 @@ class CoulombExchangeOperator(Operator):
         self.potential = None
 
     def __call__(self, phi):
-        output = orbital4c()
+        output = orb.orbital4c()
         for i in range(0, len(self.Psi)):
-            V_ij = complex_fcn()
-            overlap_density = self.Psi[i].exchange(phi, self.prec)
-            V_ji.real = self.poisson(overlap_density.real)
-            V_ji.imag = self.poisson(overlap_density.imag)
-            tmp = orb.apply_complex_potential(1.0, V_ij, Psi[i])
-            output += temp                 
+            V_ij = cf.complex_fcn()
+            overlap_density = self.Psi[i].overlap_density(phi, self.prec)
+            V_ij.real = self.poisson(overlap_density.real)
+            V_ij.imag = self.poisson(overlap_density.imag)
+            tmp = orb.apply_complex_potential(1.0, V_ij, self.Psi[i], self.prec)
+            output += tmp                 
         output *= 4.0 * np.pi
-        output.crop(prec)
+        output.crop(self.prec)
         return output
 
 class FockOperator(Operator):
@@ -112,9 +112,9 @@ class FockOperator(Operator):
         self.factors = factors
 
     def __call__(self, phi):
-        Fphi = orb.apply_dirac_hamiltonian(phi, self.prec, self.der)
+        Fphi = orb.apply_dirac_hamiltonian(phi, self.prec, shift = 0.0, der = self.der)
         for i in range(len(self.operators)):
-            Fphi += self.factors[i] * self.operators[i].phi
-        Fphi.crop(prec)
+            Fphi += self.factors[i] * self.operators[i](phi)
+        Fphi.crop(self.prec)
         return Fphi
 

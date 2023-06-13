@@ -135,6 +135,12 @@ if __name__ == '__main__':
 
     length = 2 * args.box
 
-    CD = oper.CoulombDirectOperator(mra, prec, [spinorb1, spinorb2])
-    mat = CD.matrix()
-    print(mat)
+    Jop = oper.CoulombDirectOperator(mra, prec, [spinorb1, spinorb2])
+    Kop = oper.CoulombExchangeOperator(mra, prec, [spinorb1, spinorb2])
+    Fop = oper.FockOperator(mra, prec, [spinorb1, spinorb2], [Jop, Kop], [1.0, -1.0])
+    Jmat = Jop.matrix()
+    Kmat = Kop.matrix()
+    Fmat = Fop.matrix()
+    print(Jmat)
+    print(Kmat)
+    print(Fmat)
