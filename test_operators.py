@@ -138,12 +138,27 @@ if __name__ == '__main__':
     Jop = oper.CoulombDirectOperator(mra, prec, [spinorb1, spinorb2])
     Kop = oper.CoulombExchangeOperator(mra, prec, [spinorb1, spinorb2])
     Vop = oper.PotentialOperator(mra, prec, V_tree)
-    Fop = oper.FockOperator(mra, prec, [spinorb1, spinorb2], [Jop, Kop, Vop], [1.0, -1.0, -1.0])
-    Jmat = Jop.matrix([spinorb1, spinorb2])
-    Kmat = Kop.matrix([spinorb1, spinorb2])
-    Vmat = Vop.matrix([spinorb1, spinorb2])
+    Fop = oper.FockOperator(mra, prec, [Jop, Kop, Vop], [1.0, -1.0, -1.0])
+    Dop = oper.FockOperator(mra, prec, [], [])
+
     Fmat = Fop.matrix([spinorb1, spinorb2])
-    print(Jmat)
-    print(Kmat)
-    print(Vmat)
+    print("Fmat")
     print(Fmat)
+    
+    Jmat = Jop.matrix([spinorb1, spinorb2])
+    print("Jmat")
+    print(Jmat)
+
+    Kmat = Kop.matrix([spinorb1, spinorb2])
+    print("Kmat")
+    print(Kmat)
+
+    Vmat = Vop.matrix([spinorb1, spinorb2])
+    print("Vmat")
+    print(Vmat)
+
+    Dmat = Dop.matrix([spinorb1, spinorb2])
+    print("Dmat")
+    print(Dmat)
+
+    print(Jmat - Kmat + Dmat - Vmat)

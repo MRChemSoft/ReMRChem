@@ -10,13 +10,35 @@ import numpy.linalg as LA
 import sys, getopt
 
 
+def coulomb_gs_gen(spinors, potential, mra, prec, der = 'ABGV'):
+    print('Hartree-Fock (Coulomb interaction) Generic 2e')
+    error_norm = 1.0
+    compute_last_energy = False
+    P = vp.PoissonOperator(mra, prec)
+    light_speed = spinorb1.light_speed
+#    while (error_norm > prec or compute_last_energy):
+    for i in range(1):
+        Jop = oper.CoulombDirectOperator(mra, prec, spinors)
+        Kop = oper.CoulombExchangeOperator(mra, prec, spinors)
+        Vop = oper.PotentialOperator(mra, prec, potential)
+        Dop = oper.FockOperator(mra, prec, [], []) # "empty" fock operator
+        Jmat = Jop.matrix(spinors)
+        Kmat = Jop.matrix(spinors)
+        Vmat = Jop.matrix(spinors)
+        Dmat = Jop.matrix(spinors)
+        Fmat = Dmat + Vmat + Jmat - Kmat
+        print(Fmat)
+    return
+
+
 def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
     print('Hartree-Fock (Coulomb interaction)')
     error_norm = 1
     compute_last_energy = False
     P = vp.PoissonOperator(mra, prec)
     light_speed = spinorb1.light_speed
-    while (error_norm > prec or compute_last_energy):
+    for i in range(1):
+#    while (error_norm > prec or compute_last_energy):
         spinorb2 = spinorb1.ktrs()
         spinorb2.cropLargeSmall(prec)
         spinorb2.normalize()
@@ -30,7 +52,7 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
         hd_11 = spinorb1.dot(hd_psi_1)
 
         # Applying nuclear potential to spin orbit 1 and 2
-        v_psi_1 = orb.apply_potential(-1.0, V_tree, spinorb1, prec)
+        v_psi_1 = orb.apply_potential(-1.0, potential, spinorb1, prec)
         V1 = spinorb1.dot(v_psi_1)
 
         hd_V_11 = hd_11 + V1

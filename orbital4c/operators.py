@@ -61,7 +61,6 @@ class Operator():
             for j in range(i+1):
                 sj = Phi[j]
                 val = sj.dot(Osi)
-                print(i,j,val)
                 mat[j][i] = val
                 if (i != j):
                     mat[i][j] = np.conjugate(mat[j][i]) 
@@ -118,8 +117,8 @@ class PotentialOperator(Operator):
         return result
         
 class FockOperator(Operator):
-    def __init__(self, mra, prec, Psi, operators, factors, der = "ABGV"):
-        super().__init__(mra, prec, Psi)
+    def __init__(self, mra, prec, operators, factors, der = "ABGV"):
+        super().__init__(mra, prec, [])
         self.der = der
         self.operators = operators
         self.factors = factors
