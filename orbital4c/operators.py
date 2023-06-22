@@ -75,21 +75,12 @@ class CoulombDirectOperator(Operator):
 
     def setup(self):
         rho = vp.FunctionTree(self.mra)
-        rho.setZero()
         rholist = []
         for i in range(0, len(self.Psi)):
             dens = self.Psi[i].overlap_density(self.Psi[i], self.prec)
-            print("density i = ", i)
-            print(dens)
-            rho += dens.real
-            rholist.append(dens.real)
-        #rho.crop(self.prec)
-        n = rholist[0] + rholist[1]
-        print("this is rho")
-        print(rho)
-        print("this is n")
-        print(n)
-        self.potential = (4.0*np.pi) * self.poisson(n).crop(self.prec)
+            rholist.append((1.0, dens.real))
+        vp.advanced.add(self.prec, rho, rholist)
+        self.potential = (4.0*np.pi) * self.poisson(rho).crop(self.prec)
 
     def __call__(self, phi):
         complex_pot = cf.complex_fcn()
@@ -104,16 +95,17 @@ class CoulombExchangeOperator(Operator):
         self.potential = None
 
     def __call__(self, phi):
-        output = orb.orbital4c()
+        Kij_array = []
+        coeff_array = []
         for i in range(0, len(self.Psi)):
             V_ij = cf.complex_fcn()
             overlap_density = self.Psi[i].overlap_density(phi, self.prec)
-            print("overlap_density j = ", i)
-            print(overlap_density)
             V_ij.real = self.poisson(overlap_density.real).crop(self.prec)
             V_ij.imag = self.poisson(overlap_density.imag).crop(self.prec)
             tmp = orb.apply_complex_potential(1.0, V_ij, self.Psi[i], self.prec)
-            output += tmp                 
+            Kij_array.append(tmp)
+            coeff_array.append(1.0)
+        output = orb.add_vector(Kij_array, coeff_array, self.prec) 
         output *= 4.0 * np.pi
         output.crop(self.prec)
         return output

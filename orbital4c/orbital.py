@@ -370,6 +370,16 @@ def apply_complex_potential(factor, potential, orbital, prec):
 #            print('Warning: adding two empty trees')
 #    return out_orb
 
+def add_vector(orbital_array, coeff_array, prec):
+    output = orbital4c()
+    for comp in output.comp_dict:
+        func_array = []
+        for orbital in orbital_array:
+            func_array.append(orbital[comp])
+        output[comp] = cf.add_vector(func_array, coeff_array, prec)
+    return output
+        
+
 def apply_helmholtz(orbital, mu, prec):
     out_orbital = orbital4c()
     for comp in orbital.comp_dict.keys():

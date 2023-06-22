@@ -320,3 +320,17 @@ def vector_gradient(vector, der = "BS"):
         tensor.append(vector[i].gradient(der))
     return tensor
 
+# Note: some thresholding of the contributions should be considered here.
+def add_vector(func_array, coeff_array, prec):
+    output = complex_fcn()
+    real_array = []
+    imag_array = []
+    for i in range(len(func_array)):
+        real_array.append(( coeff_array[i].real, func_array[i].real))
+        real_array.append((-coeff_array[i].imag, func_array[i].imag))
+        imag_array.append(( coeff_array[i].real, func_array[i].imag))
+        imag_array.append(( coeff_array[i].imag, func_array[i].real))
+    vp.advanced.add(prec, output.real, real_array)
+    vp.advanced.add(prec, output.imag, imag_array)
+    return output
+

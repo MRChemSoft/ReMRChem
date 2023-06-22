@@ -39,9 +39,9 @@ if __name__ == '__main__':
                         help='position of nucleus in z')
     parser.add_argument('-l', '--light_speed', dest='lux_speed', type=float, default=137.03599913900001,
                         help='light of speed')
-    parser.add_argument('-o', '--order', dest='order', type=int, default=8,
+    parser.add_argument('-o', '--order', dest='order', type=int, default=6,
                         help='put the order of Polinomial')
-    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-6,
+    parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-4,
                         help='put the precision')
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
@@ -156,23 +156,22 @@ if __name__ == '__main__':
 
     Jop = oper.CoulombDirectOperator(mra, prec, [spinorb1, spinorb2])
     Jmat = Jop.matrix([spinorb1, spinorb2])
-#    Kop = oper.CoulombExchangeOperator(mra, prec, [spinorb1, spinorb2])
-#    Kmat = Kop.matrix([spinorb1, spinorb2])
+    Kop = oper.CoulombExchangeOperator(mra, prec, [spinorb1, spinorb2])
+    Kmat = Kop.matrix([spinorb1, spinorb2])
     print("Jmat")
     print(Jmat)
     
     P = vp.PoissonOperator(mra, prec)
     n11 = spinorb1.overlap_density(spinorb1, prec)
     n22 = spinorb2.overlap_density(spinorb2, prec)
-    print("density outside")
-    n = n11 + n22
-    print ("rho outside")
-    print(n.real)
-    pot    = P(n.real) * (4 * np.pi)
-    J2_phi1 = orb.apply_potential(1.0, pot, spinorb1, prec)
-    Jval = spinorb1.dot(J2_phi1)
-    print(Jval)
-    
-#    print("Kmat")
-#    print(Kmat)
+    print("Kmat")
+    print(Kmat)
+#    print("density outside")
+#    n = n11 + n22
+#    print ("rho outside")
+#    print(n.real)
+#    pot    = P(n.real) * (4 * np.pi)
+#    J2_phi1 = orb.apply_potential(1.0, pot, spinorb1, prec)
+#    Jval = spinorb1.dot(J2_phi1)
+#    print(Jval)
     #print(Jmat - Kmat + Dmat - Vmat)
