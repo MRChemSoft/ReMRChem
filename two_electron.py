@@ -15,19 +15,28 @@ def coulomb_gs_gen(spinors, potential, mra, prec, der = 'ABGV'):
     error_norm = 1.0
     compute_last_energy = False
     P = vp.PoissonOperator(mra, prec)
-    light_speed = spinorb1.light_speed
-#    while (error_norm > prec or compute_last_energy):
+    light_speed = spinors[0].light_speed
+    # while (error_norm > prec or compute_last_energy):
     for i in range(1):
         Jop = oper.CoulombDirectOperator(mra, prec, spinors)
         Kop = oper.CoulombExchangeOperator(mra, prec, spinors)
-        Vop = oper.PotentialOperator(mra, prec, potential)
+        # Vop = oper.PotentialOperator(mra, prec, potential)
         Dop = oper.FockOperator(mra, prec, [], []) # "empty" fock operator
         Jmat = Jop.matrix(spinors)
-        Kmat = Jop.matrix(spinors)
-        Vmat = Jop.matrix(spinors)
-        Dmat = Jop.matrix(spinors)
-        Fmat = Dmat + Vmat + Jmat - Kmat
-        print(Fmat)
+        Kmat = Kop.matrix(spinors)
+        # Vmat = Vop.matrix(spinors)
+        Dmat = Dop.matrix(spinors)
+        # Fmat = Dmat + Vmat + Jmat - Kmat
+        print("Dmat")
+        print(Dmat)
+        print("Jmat/2")
+        print(Jmat/2)
+        print("Kmat")
+        print(Kmat)
+        print("Jmat-Kmat")
+        print(Jmat - Kmat)
+#        print(Vmat)
+#        print(Fmat[0][0]-light_speed**2)
     return
 
 
@@ -50,7 +59,7 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
         # Definiton of Dirac Hamiltonian for spinorbit 1 that due to TRS is equal spinorbit 2
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der)
         hd_11 = spinorb1.dot(hd_psi_1)
-
+        print("hd_11", hd_11)
         # Applying nuclear potential to spin orbit 1 and 2
         v_psi_1 = orb.apply_potential(-1.0, potential, spinorb1, prec)
         V1 = spinorb1.dot(v_psi_1)
@@ -64,6 +73,7 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
         JmK = spinorb1.dot(JmK_phi1)
 
         # Calculate Fij Fock matrix
+        print("J contribution", JmK.real)
         eps = hd_V_11.real + JmK.real
         E_tot_JK =  2*eps - JmK.real
 
@@ -74,7 +84,7 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
 
         V_J_K_spinorb1 = v_psi_1 + JmK_phi1
 
-        mu = calc_dirac_mu(eps, light_speed)
+        mu = orb.calc_dirac_mu(eps, light_speed)
         tmp = orb.apply_helmholtz(V_J_K_spinorb1, mu, prec)
         new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der)
         new_orbital *= 0.5/light_speed**2
@@ -89,7 +99,7 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
         spinorb1 = new_orbital
         if(error_norm < prec):
             compute_last_energy = True
-    return(spinorb1, spinorb2, E_tot_JK)
+    return(spinorb1, spinorb2)
 
 #def coulomb_gs(potential, spinors, mra, prec, der = 'ABGV'):
 #    print("Dirac Hartree Fock iteration")

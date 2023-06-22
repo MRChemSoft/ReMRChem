@@ -80,7 +80,7 @@ if __name__ == '__main__':
     
     computeNuclearPotential = True
     readOrbitals            = False
-    runCoulomb              = True
+    runCoulomb              = False
     runCoulombGen           = True
     saveOrbitals            = False 
     runGaunt                = False 
@@ -134,12 +134,12 @@ if __name__ == '__main__':
 
     length = 2 * args.box
 
-    if runCoulomb:
-        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)
-
     if runCoulombGen:
-        two_electron.coulomb_gs_2e([spinorb1, spinorb2], V_tree, mra, prec)
+        two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec)
     
+    if runCoulomb:
+        two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)
+
     if runGaunt:
         two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)
     

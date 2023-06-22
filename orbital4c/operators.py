@@ -76,13 +76,26 @@ class CoulombDirectOperator(Operator):
     def setup(self):
         rho = vp.FunctionTree(self.mra)
         rho.setZero()
+        rholist = []
         for i in range(0, len(self.Psi)):
-            rho += self.Psi[i].density(self.prec)
-        rho.crop(self.prec)
-        self.potential = (4.0*np.pi)*self.poisson(rho).crop(self.prec)
+            dens = self.Psi[i].overlap_density(self.Psi[i], self.prec)
+            print("density i = ", i)
+            print(dens)
+            rho += dens.real
+            rholist.append(dens.real)
+        #rho.crop(self.prec)
+        n = rholist[0] + rholist[1]
+        print("this is rho")
+        print(rho)
+        print("this is n")
+        print(n)
+        self.potential = (4.0*np.pi) * self.poisson(n).crop(self.prec)
 
     def __call__(self, phi):
-        return orb.apply_potential(1.0, self.potential, phi, self.prec)
+        complex_pot = cf.complex_fcn()
+        complex_pot.real = self.potential
+        complex_pot.imag.setZero()
+        return orb.apply_complex_potential(1.0, complex_pot, phi, self.prec)
 
 class CoulombExchangeOperator(Operator):
     def __init__(self, mra, prec, Psi):
@@ -95,8 +108,10 @@ class CoulombExchangeOperator(Operator):
         for i in range(0, len(self.Psi)):
             V_ij = cf.complex_fcn()
             overlap_density = self.Psi[i].overlap_density(phi, self.prec)
-            V_ij.real = self.poisson(overlap_density.real)
-            V_ij.imag = self.poisson(overlap_density.imag)
+            print("overlap_density j = ", i)
+            print(overlap_density)
+            V_ij.real = self.poisson(overlap_density.real).crop(self.prec)
+            V_ij.imag = self.poisson(overlap_density.imag).crop(self.prec)
             tmp = orb.apply_complex_potential(1.0, V_ij, self.Psi[i], self.prec)
             output += tmp                 
         output *= 4.0 * np.pi
