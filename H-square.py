@@ -27,7 +27,7 @@ atom = "H"
 energy_1s = analytic_1s(light_speed, n, k, Z)
 print('Exact Energy',energy_1s - light_speed**2, flush = True)
 
-mra = vp.MultiResolutionAnalysis(box=[-100,100], order=6)
+mra = vp.MultiResolutionAnalysis(box=[-30,30], order=6)
 prec = 1.0e-4
 origin = [0.1, 0.2, 0.3]  # origin moved to avoid placing the nuclar charge on a node
 #origin = [0.0, 0.0, 0.0]
@@ -58,7 +58,7 @@ f = lambda x: nucpot.coulomb_HFYGB(x, origin, Z, prec)
 #f = lambda x: nucpot.homogeneus_charge_sphere(x, origin, Z, atom)
 V_tree = Peps(f)
 
-default_der = 'ABGV'
+default_der = 'BS'
 
 orbital_error = 1
 mc2 = light_speed * light_speed
@@ -67,8 +67,8 @@ for idx in range(10):
     v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec) 
     vv_psi = orb.apply_potential(-0.5/mc2, V_tree, v_psi, prec)
     beta_v_psi = v_psi.beta2()
-    apV_psi = v_psi.alpha_p(prec, 'ABGV')
-    ap_psi = spinor_H.alpha_p(prec, 'ABGV')
+    apV_psi = v_psi.alpha_p(prec, 'BS')
+    ap_psi = spinor_H.alpha_p(prec, 'BS')
     Vap_psi = orb.apply_potential(-1.0, V_tree, ap_psi, prec)
     anticom = apV_psi + Vap_psi
     RHS = beta_v_psi + vv_psi + anticom * (0.5/light_speed)
