@@ -62,8 +62,8 @@ default_der = 'BS'
 
 orbital_error = 1
 mc2 = light_speed * light_speed
-#while orbital_error > prec:
-for idx in range(10):
+while orbital_error > prec:
+#for idx in range(10):
     v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec) 
     vv_psi = orb.apply_potential(-0.5/mc2, V_tree, v_psi, prec)
     beta_v_psi = v_psi.beta2()
