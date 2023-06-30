@@ -7,6 +7,22 @@ from scipy.special import legendre, laguerre, erf, gamma
 from scipy.special import gamma
 from scipy.constants import hbar
 
+import argparse
+import numpy as np
+import numpy.linalg as LA
+import sys, getopt
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
+    parser.add_argument('-a', '--atype', dest='atype', type=str, default='H',
+                        help='put the atom type')
+    parser.add_argument('-v', '--potential', dest='potential', type=str, default='point_charge',
+                        help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
+    args = parser.parse_args()
+
+    assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
+
 def analytic_1s(light_speed, n, k, Z):
     alpha = 1/light_speed
     gamma = orb.compute_gamma(k,Z,alpha)
