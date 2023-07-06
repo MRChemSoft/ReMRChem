@@ -17,28 +17,61 @@ def coulomb_gs_gen(spinors, potential, mra, prec, der = 'ABGV'):
     P = vp.PoissonOperator(mra, prec)
     light_speed = spinors[0].light_speed
     # while (error_norm > prec or compute_last_energy):
-    for i in range(1):
+    Jop = oper.CoulombDirectOperator(mra, prec, spinors)
+    Kop = oper.CoulombExchangeOperator(mra, prec, spinors)
+    Vop = oper.PotentialOperator(mra, prec, potential)
+    Dop = oper.FockOperator(mra, prec, [], []) # "empty" fock operator
+    Jmat = Jop.matrix(spinors)
+    Kmat = Kop.matrix(spinors)
+    Vmat = Vop.matrix(spinors)
+    Dmat = Dop.matrix(spinors)
+    Fmat = Dmat - Vmat + Jmat - Kmat
+    for i in range(5):
+        new_spinors = []
+        # for j in range(len(spinors)):   # limited to two spinors linked by KTRS for now
+        # print("j iter ", j)
+        print("Applying J")
+        Jpsi = Jop(spinors[0])
+        print("Applying K")
+        Kpsi = Kop(spinors[0])
+        print("Applying V")
+        Vpsi = Vop(spinors[0])
+        for k in range(len(spinors)):
+            print("k iter ", k)
+            orbital_array = []
+            coeff_array = []
+            if(k != 0):
+                orbital_array.append(spinors[k])
+                coeff_array.append(Fmat[0][k])
+        Fijpsij = orb.add_vector(orbital_array, coeff_array, prec)
+        RHS = Jpsi - Kpsi - Vpsi - Fijpsij
+        mu = orb.calc_dirac_mu(Fmat[0][0].real, light_speed)
+        tmp = orb.apply_helmholtz(RHS, mu, prec)
+
+        new_spinor = orb.apply_dirac_hamiltonian(tmp, prec, Fmat[0][0].real, der)
+        new_spinor *= 0.5/light_speed**2
+        new_spinor.normalize()
+        new_spinor.cropLargeSmall(prec)
+        new_spinors.append(new_spinor)
+        new_spinors.append(new_spinor.ktrs())
+        spinors = new_spinors
+
         Jop = oper.CoulombDirectOperator(mra, prec, spinors)
         Kop = oper.CoulombExchangeOperator(mra, prec, spinors)
-        # Vop = oper.PotentialOperator(mra, prec, potential)
+        Vop = oper.PotentialOperator(mra, prec, potential)
         Dop = oper.FockOperator(mra, prec, [], []) # "empty" fock operator
+        print("Compute Jmat")
         Jmat = Jop.matrix(spinors)
+        print("Compute Kmat")
         Kmat = Kop.matrix(spinors)
-        # Vmat = Vop.matrix(spinors)
+        print("Compute Vmat")
+        Vmat = Vop.matrix(spinors)
+        print("Compute Dmat")
         Dmat = Dop.matrix(spinors)
-        # Fmat = Dmat + Vmat + Jmat - Kmat
-        print("Dmat")
-        print(Dmat)
-        print("Jmat/2")
-        print(Jmat/2)
-        print("Kmat")
-        print(Kmat)
-        print("Jmat-Kmat")
-        print(Jmat - Kmat)
-#        print(Vmat)
-#        print(Fmat[0][0]-light_speed**2)
+        Fmat = Dmat - Vmat + Jmat - Kmat
+        print(Fmat)
+        print(Fmat[0][0] - light_speed ** 2)
     return
-
 
 def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
     print('Hartree-Fock (Coulomb interaction)')
@@ -46,12 +79,9 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
     compute_last_energy = False
     P = vp.PoissonOperator(mra, prec)
     light_speed = spinorb1.light_speed
-    for i in range(1):
+    for i in range(5):
 #    while (error_norm > prec or compute_last_energy):
-        spinorb2 = spinorb1.ktrs()
-        spinorb2.cropLargeSmall(prec)
-        spinorb2.normalize()
-        n_22 = spinorb2.overlap_density(spinorb2, prec)
+        n_22 = spinorb1.overlap_density(spinorb1, prec)
 
         # Definition of two electron operators
         B22    = P(n_22.real) * (4 * np.pi)
@@ -97,6 +127,7 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
         error_norm = np.sqrt(deltasq)
         print('Orbital_Error norm', error_norm)
         spinorb1 = new_orbital
+        spinorb2 = spinorb1.ktrs()
         if(error_norm < prec):
             compute_last_energy = True
     return(spinorb1, spinorb2)

@@ -16,7 +16,7 @@ class SpinorbGenerator():
         self.complexfc = None
 
         if self.guessorb == 'slater':
-            print('cazzo')
+            print("Slater-type not yet implemented")
         elif guessorb == 'gaussian':
 ################################   DEFINE GAUSSIAN FUNCTION AS GUESS  ################################
             a_coeff = 3.0

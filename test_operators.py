@@ -174,4 +174,3 @@ if __name__ == '__main__':
 #    J2_phi1 = orb.apply_potential(1.0, pot, spinorb1, prec)
 #    Jval = spinorb1.dot(J2_phi1)
 #    print(Jval)
-    #print(Jmat - Kmat + Dmat - Vmat)
