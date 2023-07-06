@@ -9,7 +9,10 @@ import numpy as np
 import numpy.linalg as LA
 import sys, getopt
 
-
+#
+# Generic coulomb Dirac HF solver. Now works for 2e connected by KTRS.
+# It should be easy to extend it to more complicated cases
+#
 def coulomb_gs_gen(spinors, potential, mra, prec, der = 'ABGV'):
     print('Hartree-Fock (Coulomb interaction) Generic 2e')
     error_norm = 1.0
@@ -45,6 +48,84 @@ def coulomb_gs_gen(spinors, potential, mra, prec, der = 'ABGV'):
                 coeff_array.append(Fmat[0][k])
         Fijpsij = orb.add_vector(orbital_array, coeff_array, prec)
         RHS = Jpsi - Kpsi - Vpsi - Fijpsij
+        mu = orb.calc_dirac_mu(Fmat[0][0].real, light_speed)
+        tmp = orb.apply_helmholtz(RHS, mu, prec)
+
+        new_spinor = orb.apply_dirac_hamiltonian(tmp, prec, Fmat[0][0].real, der)
+        new_spinor *= 0.5/light_speed**2
+        new_spinor.normalize()
+        new_spinor.cropLargeSmall(prec)
+        new_spinors.append(new_spinor)
+        new_spinors.append(new_spinor.ktrs())
+        spinors = new_spinors
+
+        Jop = oper.CoulombDirectOperator(mra, prec, spinors)
+        Kop = oper.CoulombExchangeOperator(mra, prec, spinors)
+        Vop = oper.PotentialOperator(mra, prec, potential)
+        Dop = oper.FockOperator(mra, prec, [], []) # "empty" fock operator
+        print("Compute Jmat")
+        Jmat = Jop.matrix(spinors)
+        print("Compute Kmat")
+        Kmat = Kop.matrix(spinors)
+        print("Compute Vmat")
+        Vmat = Vop.matrix(spinors)
+        print("Compute Dmat")
+        Dmat = Dop.matrix(spinors)
+        Fmat = Dmat - Vmat + Jmat - Kmat
+        print(Fmat)
+        print(Fmat[0][0] - light_speed ** 2)
+    return
+
+def coulomb_gs_gen_D2(spinors, potential, mra, prec, der = 'ABGV'):
+    print('Hartree-Fock (Coulomb interaction) Generic 2e D2')
+    error_norm = 1.0
+    compute_last_energy = False
+    P = vp.PoissonOperator(mra, prec)
+    light_speed = spinors[0].light_speed
+    # while (error_norm > prec or compute_last_energy):
+    Jop = oper.CoulombDirectOperator(mra, prec, spinors)
+    Kop = oper.CoulombExchangeOperator(mra, prec, spinors)
+    Vop = oper.PotentialOperator(mra, prec, potential)
+    Dop = oper.FockOperator(mra, prec, [], []) # "empty" fock operator
+    Jmat = Jop.matrix(spinors)
+    Kmat = Kop.matrix(spinors)
+    Vmat = Vop.matrix(spinors)
+    Dmat = Dop.matrix(spinors)
+    Fmat = Dmat - Vmat + Jmat - Kmat
+    Fmat2 = Fmat @ Fmat
+    for i in range(1):
+        new_spinors = []
+        print("Applying J")
+        Jpsi = Jop(spinors[0])
+        print("Applying K")
+        Kpsi = Kop(spinors[0])
+        print("Applying V")
+        Vpsi = Vop(spinors[0])
+        
+        VT_psi = Jpsi - Kpsi - Vpsi
+        ap_VT_psi = VT_psi.alpha_p()
+        beta_VT_psi = VT_psi.beta2()
+        ap_psi = spinors[0].alpha_p()
+        VT_ap_psi = Jop(ap_psi) - Kop(ap_psi) - Vop(ap_psi)
+        VT_VT_psi = Jop(VT_psi) - Kop(VT_psi) - Vop(VT_psi)
+        anticom = VT_ap_psi + ap_VT_psi
+        anticom *= 1.0 / (2.0 * light_speed)
+        VT_VT_psi *= 1.0 / (2.0 * light_speed**2)
+
+        
+        
+        anticom = ap_Vpsi + Vop(
+        betaVpsi = Vpsi.beta2()
+        V2psi = Jop(Vtpsi) - Kop(Vtpsi) - Vop(Vtpsi)
+        for k in range(len(spinors)):
+            print("k iter ", k)
+            orbital_array = []
+            coeff_array = []
+            if(k != 0):
+                orbital_array.append(spinors[k])
+                coeff_array.append(F2mat[0][k])
+        Fijpsij = orb.add_vector(orbital_array, coeff_array, prec)
+        RHS = beta_VT_psi + anticom + VT_VT_psi - Fijpsij
         mu = orb.calc_dirac_mu(Fmat[0][0].real, light_speed)
         tmp = orb.apply_helmholtz(RHS, mu, prec)
 
