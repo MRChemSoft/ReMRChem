@@ -79,10 +79,11 @@ if __name__ == '__main__':
     print('call MRA DONE')
     
     computeNuclearPotential = True
-    readOrbitals            = False
-    runCoulomb              = False
-    runCoulombGen           = True
-    saveOrbitals            = False 
+    readOrbitals            = True
+    runCoulomb              = True
+    runCoulombGen           = False
+    runKutzelnigg           = False
+    saveOrbitals            = False
     runGaunt                = False 
     runGaugeA               = False 
     runGaugeB               = False 
@@ -130,15 +131,19 @@ if __name__ == '__main__':
         spinorb1.copy_components(La=complexfc)
         spinorb1.init_small_components(prec/10)
         spinorb1.normalize()
-        spinorb2 = spinorb1.ktrs() #does this go out of scope?
+        spinorb1.cropLargeSmall(prec)
+        spinorb2 = spinorb1.ktrs(prec) #does this go out of scope?
 
     length = 2 * args.box
 
     if runCoulombGen:
-        two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec)
+        spinorb1, spinorb2 = two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec)
     
+    if runKutzelnigg:
+        spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, 'ABGV')
+
     if runCoulomb:
-        two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)
+        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)
 
     if runGaunt:
         two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)

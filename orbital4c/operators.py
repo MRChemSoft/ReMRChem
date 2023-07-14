@@ -52,7 +52,7 @@ class Operator():
         self.prec = prec
         self.Psi = Psi
 
-    def matrix(self, Phi):
+    def matrix_true(self, Phi):
         n_orbitals = len(Phi)
         mat = np.zeros((n_orbitals, n_orbitals), complex)
         for i in range(n_orbitals):
@@ -66,6 +66,18 @@ class Operator():
                     mat[i][j] = np.conjugate(mat[j][i]) 
         return mat
 
+    def matrix(self, Phi):
+        n_orbitals = len(Phi)
+        mat = np.zeros((n_orbitals, n_orbitals), complex)
+        si = Phi[0]
+        Osi = self(si)
+        sj = Phi[0]
+        val = sj.dot(Osi)
+        mat[0][0] = val
+        mat[1][1] = val
+        return mat
+
+    
 class CoulombDirectOperator(Operator):
     def __init__(self, mra, prec, Psi):
         super().__init__(mra, prec, Psi)
@@ -86,7 +98,9 @@ class CoulombDirectOperator(Operator):
         complex_pot = cf.complex_fcn()
         complex_pot.real = self.potential
         complex_pot.imag.setZero()
-        return orb.apply_complex_potential(1.0, complex_pot, phi, self.prec)
+        out = orb.apply_complex_potential(1.0, complex_pot, phi, self.prec)
+        out.cropLargeSmall(self.prec)
+        return out
 
 class CoulombExchangeOperator(Operator):
     def __init__(self, mra, prec, Psi):
@@ -107,7 +121,7 @@ class CoulombExchangeOperator(Operator):
             coeff_array.append(1.0)
         output = orb.add_vector(Kij_array, coeff_array, self.prec) 
         output *= 4.0 * np.pi
-        output.crop(self.prec)
+        output.cropLargeSmall(self.prec)
         return output
 
 class PotentialOperator(Operator):
@@ -121,6 +135,7 @@ class PotentialOperator(Operator):
             result = orb.apply_potential(1.0, self.potential, phi, self.prec)
         else:
              result = orb.apply_complex_potential(1.0, self.potential, phi, self.prec)
+        result.cropLargeSmall(self.prec)
         return result
         
 class FockOperator(Operator):
@@ -134,6 +149,6 @@ class FockOperator(Operator):
         Fphi = orb.apply_dirac_hamiltonian(phi, self.prec, shift = 0.0, der = self.der)
         for i in range(len(self.operators)):
             Fphi += self.factors[i] * self.operators[i](phi)
-        Fphi.crop(self.prec)
+        Fphi.cropLargeSmall(self.prec)
         return Fphi
 

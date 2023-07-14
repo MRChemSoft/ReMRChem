@@ -271,7 +271,7 @@ def test_ktrf():
     spinorb1.copy_components(La = comp1, Lb=comp1)
     spinorb1.init_small_components(prec/10)
 
-    spinorb2 = spinorb1.ktrs()
+    spinorb2 = spinorb1.ktrs(prec)
 
     ref = [(-0.05586501146881823  + 6.573755692775872e-07j),
            (0.05586501146881823   - 6.573755692775872e-07j),

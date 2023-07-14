@@ -101,8 +101,8 @@ class orbital4c:
         largeNorm = np.sqrt(self.squaredLargeNorm())
         smallNorm = np.sqrt(self.squaredSmallNorm())
         precLarge = prec * largeNorm
-        precSmall = prec * smallNorm
-        print('precisions', precLarge, precSmall)
+        precSmall = prec * largeNorm
+#        print('precisions', precLarge, precSmall)
         self['La'].crop(precLarge, True)
         self['Lb'].crop(precLarge, True)
         self['Sa'].crop(precSmall, True)
@@ -268,7 +268,9 @@ class orbital4c:
         apx = orb_grad[0].alpha(0, prec)
         apy = orb_grad[1].alpha(1, prec)
         apz = orb_grad[2].alpha(2, prec)
-        return -1j * (apx + apy + apz)
+        result = -1j * (apx + apy + apz)
+        result.cropLargeSmall(prec)
+        return result
 
     def classicT(self, der = 'ABGV'):
         orb_grad = self.gradient(der)
@@ -280,7 +282,7 @@ class orbital4c:
     def alpha_vector(self, prec):
         return [self.alpha(0, prec), self.alpha(1, prec), self.alpha(2, prec)]
     
-    def ktrs(self):   #Kramers´ Time Reversal Symmetry
+    def ktrs(self, prec):   #Kramers´ Time Reversal Symmetry
         out_orb = orbital4c()
         tmp = self.complex_conj()
         ktrs_order = np.array([1, 0, 3, 2])
@@ -289,6 +291,7 @@ class orbital4c:
             coeff = ktrs_coeff[idx]
             comp = ktrs_order[idx]
             out_orb.comp_array[idx] = coeff * tmp.comp_array[comp]
+        out_orb.cropLargeSmall(prec)
         return out_orb
 
 #Beta c**2
@@ -439,6 +442,11 @@ def alpha_gradient(orbital, prec):
 
 def calc_dirac_mu(energy, light_speed):
     return np.sqrt((light_speed**4-energy**2)/light_speed**2)
+
+def calc_kutzelnigg_mu(energy_sq, light_speed):
+    c2 = light_speed**2
+    val = energy_sq/c2 - c2
+    return np.sqrt(-val)
 
 def calc_non_rel_mu(energy):
     return np.sqrt(-2.0 * energy)

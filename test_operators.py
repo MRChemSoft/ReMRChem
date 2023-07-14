@@ -131,7 +131,7 @@ if __name__ == '__main__':
         spinorb1.copy_components(La=complexfc)
         spinorb1.init_small_components(prec/10)
         spinorb1.normalize()
-        spinorb2 = spinorb1.ktrs() #does this go out of scope?
+        spinorb2 = spinorb1.ktrs(prec) #does this go out of scope?
 
     length = 2 * args.box
 
