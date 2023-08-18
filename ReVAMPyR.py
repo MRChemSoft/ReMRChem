@@ -108,8 +108,7 @@ print('Define V Potential', args.potential, Z, 'DONE')
 if args.readOrbitals == 'Yes':
     spinorb1 = orb.orbital4c()
     spinorb1.read(args.atype)
-    spinorb2 = spinorb1.ktrs()
-    spinorb2.cropLargeSmall(prec)
+    spinorb2 = spinorb1.ktrs(prec)
     spinorb2.normalize()
     print('Read alpha spinorbital and defined beta spinorbital using KTRS DONE')
 elif args.readOrbitals == 'No':
@@ -128,8 +127,7 @@ elif args.readOrbitals == 'No':
     spinorb1.copy_components(La=complexfc)
     spinorb1.init_small_components(prec/10, der)
     spinorb1.normalize()
-    spinorb2 = spinorb1.ktrs()
-    spinorb2.cropLargeSmall(prec)
+    spinorb2 = spinorb1.ktrs(prec)
     spinorb2.normalize()
     print('Define alpha and beta spinorbitals DONE')
 

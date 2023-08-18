@@ -69,7 +69,7 @@ if __name__ == '__main__':
     Z = args.charge
     atom = args.atype
     ################# Call MRA #######################
-    mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order)
+    mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order, max_depth = 30)
     prec = args.prec
     origin = [args.cx, args.cy, args.cz]
     
@@ -80,9 +80,10 @@ if __name__ == '__main__':
     
     computeNuclearPotential = True
     readOrbitals            = True
-    runCoulomb              = True
+    runCoulomb              = False
     runCoulombGen           = False
     runKutzelnigg           = False
+    runKutzSimple           = True
     saveOrbitals            = False
     runGaunt                = False 
     runGaugeA               = False 
@@ -141,6 +142,9 @@ if __name__ == '__main__':
     
     if runKutzelnigg:
         spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, 'ABGV')
+
+    if runKutzSimple:
+        spinorb1, spinorb2 = two_electron.coulomb_2e_D2_J([spinorb1, spinorb2], V_tree, mra, prec, der = 'ABGV')
 
     if runCoulomb:
         spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)

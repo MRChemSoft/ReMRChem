@@ -77,14 +77,14 @@ def coulomb_gs_gen(spinors, potential, mra, prec, der = 'ABGV'):
     return spinors[0], spinors[1]
 
 def coulomb_2e_D2(spinors, potential, mra, prec, der = 'ABGV'):
-    print('Hartree-Fock (Coulomb interaction) Generic 2e D2')
+    print('Hartree-Fock (Coulomb interaction) 2e D2')
     error_norm = 1.0
     compute_last_energy = False
     P = vp.PoissonOperator(mra, prec)
     light_speed = spinors[0].light_speed
     # while (error_norm > prec or compute_last_energy):
     Jop = oper.CoulombDirectOperator(mra, prec, spinors)
-    Kop = oper.CoulombExchangeOperator(mra, prec, spinors)
+#    Kop = oper.CoulombExchangeOperator(mra, prec, spinors)
     Vop = oper.PotentialOperator(mra, prec, potential)
     Dop = oper.FockOperator(mra, prec, [], []) # "empty" fock operator
     Jmat = Jop.matrix(spinors)
@@ -95,6 +95,7 @@ def coulomb_2e_D2(spinors, potential, mra, prec, der = 'ABGV'):
     F2mat = Fmat @ Fmat
     print("F2mat")
     print(F2mat)
+    c2 = light_speed**2
 #    for i in range(5):
     while(error_norm > prec):
         new_spinors = []
@@ -116,7 +117,7 @@ def coulomb_2e_D2(spinors, potential, mra, prec, der = 'ABGV'):
         VT_VT_psi = 0.5 * Jop(VT_psi) - Vop(VT_psi)
         anticom = VT_ap_psi + ap_VT_psi
         anticom *= 1.0 / (2.0 * light_speed)
-        VT_VT_psi *= 1.0 / (2.0 * light_speed**2)
+        VT_VT_psi *= 1.0 / (2.0 * c2)
 
 #        for k in range(len(spinors)):
 #            print("k iter ", k)
@@ -127,11 +128,27 @@ def coulomb_2e_D2(spinors, potential, mra, prec, der = 'ABGV'):
 #                coeff_array.append(F2mat[0][k])
 #        Fijpsij = orb.add_vector(orbital_array, coeff_array, prec)
 #        RHS = beta_VT_psi + anticom + VT_VT_psi - Fijpsij
+        anticom.cropLargeSmall(prec)
+        beta_VT_psi.cropLargeSmall(prec)
+        VT_VT_psi.cropLargeSmall(prec)
+        print("anticom")
+        print(anticom)
+        print("beta_VT_psi")
+        print(beta_VT_psi)
+        print("VT_VT_psi")
+        print(VT_VT_psi)
         RHS = beta_VT_psi + anticom + VT_VT_psi
         RHS.cropLargeSmall(prec)
         print("RHS")
         print(RHS)
-        mu = orb.calc_kutzelnigg_mu(F2mat[0][0], light_speed)
+
+        cke = spinors[0].classicT()
+        cpe = (spinors[0].dot(RHS)).real
+        print("Classic-like energies: ", cke, cpe, cke + cpe)
+        print("Orbital energy: ", c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2)))
+        mu = orb.calc_non_rel_mu(cke+cpe)
+
+#        mu = orb.calc_kutzelnigg_mu(F2mat[0][0], light_speed)
         print("this is mu: ", mu)
         new_spinor = orb.apply_helmholtz(RHS, mu, prec)
         print("normalization")
@@ -169,6 +186,45 @@ def coulomb_2e_D2(spinors, potential, mra, prec, der = 'ABGV'):
         print("orbital energy: ", Fmat[0][0] - light_speed ** 2)
         total_energy = 2.0 * Fmat[0][0] - Jmat[0][0] - 2 * light_speed ** 2
         print("total energy: ", total_energy)
+    return spinors[0], spinors[1]
+
+def coulomb_2e_D2_J(spinors, potential, mra, prec, der = 'ABGV'):
+    print('Hartree-Fock (Coulomb interaction) 2e D2 J only')
+    error_norm = 1.0
+    compute_last_energy = False
+    P = vp.PoissonOperator(mra, prec)
+    light_speed = spinors[0].light_speed
+    c2 = light_speed**2
+    Vop = oper.PotentialOperator(mra, prec, potential)
+    while(error_norm > prec):
+        Jop = oper.CoulombDirectOperator(mra, prec, spinors)
+        RHS = build_RHS_D2(Jop, Vop, spinors[0], prec, light_speed)
+        cke = spinors[0].classicT()
+        cpe = (spinors[0].dot(RHS)).real
+        print("Classic-like energies: ", cke, cpe, cke + cpe)
+        print("Orbital energy: ", c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2)))
+        mu = orb.calc_non_rel_mu(cke+cpe)
+        new_spinor = orb.apply_helmholtz(RHS, mu, prec)
+        print("============= Spinor before Helmholtz =============")
+        print(spinors[0])
+        print("============= RHS before Helmholtz    =============")
+        print(RHS)
+        print("============= New spinor before crop  =============")
+        print(new_spinor)
+        new_spinor.cropLargeSmall(prec)
+        new_spinor.normalize()
+        delta_psi = new_spinor - spinors[0]
+        deltasq = delta_psi.squaredNorm()
+        error_norm = np.sqrt(deltasq)
+        print('Orbital_Error norm', error_norm)
+        spinors[0] = new_spinor
+        spinors[1] = new_spinor.ktrs(prec)
+    Jop = oper.CoulombDirectOperator(mra, prec, spinors)
+    RHS = build_RHS_D2(Jop, Vop, spinors[0], prec, light_speed)
+    cke = spinors[0].classicT()
+    cpe = (spinors[0].dot(RHS)).real
+    print("Final classic-like energies: ", cke, cpe, cke + cpe)
+    print("Final orbital energy: ", c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2)))
     return spinors[0], spinors[1]
 
 def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
@@ -216,6 +272,12 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
         tmp = orb.apply_helmholtz(V_J_K_spinorb1, mu, prec)
         new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der)
         new_orbital *= 0.5/light_speed**2
+        print("============= Spinor before Helmholtz =============")
+        print(spinorb1)
+        print("============= RHS before Helmholtz    =============")
+        print(V_J_K_spinorb1)
+        print("============= New spinor before crop  =============")
+        print(new_orbital)
         new_orbital.normalize()
         new_orbital.cropLargeSmall(prec)       
 
@@ -568,3 +630,28 @@ def calcGaugeDelta(spinorb1, spinorb2, mra, prec):
     result = calcPerturbationValues(contributions, P, prec, testNorm)
     print("final Gauge Delta", result)
     return 0.5 * result.real
+
+
+def build_RHS_D2(Jop, Vop, spinor, prec, light_speed):
+    c2 = light_speed**2
+    Jpsi = Jop(spinor)
+    Vpsi = Vop(spinor)
+    VT_psi = 0.5 * Jpsi - Vpsi
+
+    beta_VT_psi = VT_psi.beta2()
+    beta_VT_psi.cropLargeSmall(prec)
+
+    ap_VT_psi = VT_psi.alpha_p(prec)
+    ap_psi = spinor.alpha_p(prec)
+    VT_ap_psi = 0.5 * Jop(ap_psi) - Vop(ap_psi)
+    anticom = VT_ap_psi + ap_VT_psi
+    anticom *= 1.0 / (2.0 * light_speed
+    anticom.cropLargeSmall(prec)
+
+    VT_VT_psi = 0.5 * Jop(VT_psi) - Vop(VT_psi)
+    VT_VT_psi *= 1.0 / (2.0 * c2)
+    VT_VT_psi.cropLargeSmall(prec)
+
+    RHS = beta_VT_psi + anticom + VT_VT_psi
+    RHS.cropLargeSmall(prec)
+    return RHS 
