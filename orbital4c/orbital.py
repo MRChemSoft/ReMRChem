@@ -290,8 +290,7 @@ class orbital4c:
         for idx in range(4):
             coeff = ktrs_coeff[idx]
             comp = ktrs_order[idx]
-            out_orb.comp_array[idx] = coeff * tmp.comp_array[comp]
-        out_orb.cropLargeSmall(prec)
+            out_orb.comp_array[idx] = tmp.comp_array[comp].real_mul(coeff)
         return out_orb
 
 #Beta c**2

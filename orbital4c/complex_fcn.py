@@ -65,6 +65,12 @@ class complex_fcn:
         output.imag = self.imag - other.imag
         return output
 
+    def real_mul(self, coeff):
+        output = complex_fcn()
+        output.real = self.real * coeff
+        output.imag = self.imag * coeff
+        return output
+
     def __rmul__(self, other):
         output = complex_fcn()
         output.real = self.real * np.real(other) - self.imag * np.imag(other)
