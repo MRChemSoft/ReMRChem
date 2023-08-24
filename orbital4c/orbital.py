@@ -101,8 +101,8 @@ class orbital4c:
         largeNorm = np.sqrt(self.squaredLargeNorm())
         smallNorm = np.sqrt(self.squaredSmallNorm())
         precLarge = prec * largeNorm
-        precSmall = prec * smallNorm
-        print('precisions', precLarge, precSmall)
+        precSmall = prec * largeNorm
+#        print('precisions', precLarge, precSmall)
         self['La'].crop(precLarge, True)
         self['Lb'].crop(precLarge, True)
         self['Sa'].crop(precSmall, True)
@@ -268,7 +268,9 @@ class orbital4c:
         apx = orb_grad[0].alpha(0, prec)
         apy = orb_grad[1].alpha(1, prec)
         apz = orb_grad[2].alpha(2, prec)
-        return -1j * (apx + apy + apz)
+        result = -1j * (apx + apy + apz)
+        result.cropLargeSmall(prec)
+        return result
 
     def classicT(self, der = 'ABGV'):
         orb_grad = self.gradient(der)
@@ -280,7 +282,7 @@ class orbital4c:
     def alpha_vector(self, prec):
         return [self.alpha(0, prec), self.alpha(1, prec), self.alpha(2, prec)]
     
-    def ktrs(self):   #Kramers´ Time Reversal Symmetry
+    def ktrs(self, prec):   #Kramers´ Time Reversal Symmetry
         out_orb = orbital4c()
         tmp = self.complex_conj()
         ktrs_order = np.array([1, 0, 3, 2])
@@ -288,7 +290,7 @@ class orbital4c:
         for idx in range(4):
             coeff = ktrs_coeff[idx]
             comp = ktrs_order[idx]
-            out_orb.comp_array[idx] = coeff * tmp.comp_array[comp]
+            out_orb.comp_array[idx] = tmp.comp_array[comp].real_mul(coeff)
         return out_orb
 
 #Beta c**2
@@ -368,6 +370,16 @@ def apply_complex_potential(factor, potential, orbital, prec):
 #            print('Warning: adding two empty trees')
 #    return out_orb
 
+def add_vector(orbital_array, coeff_array, prec):
+    output = orbital4c()
+    for comp in output.comp_dict:
+        func_array = []
+        for orbital in orbital_array:
+            func_array.append(orbital[comp])
+        output[comp] = cf.add_vector(func_array, coeff_array, prec)
+    return output
+        
+
 def apply_helmholtz(orbital, mu, prec):
     out_orbital = orbital4c()
     for comp in orbital.comp_dict.keys():
@@ -429,6 +441,11 @@ def alpha_gradient(orbital, prec):
 
 def calc_dirac_mu(energy, light_speed):
     return np.sqrt((light_speed**4-energy**2)/light_speed**2)
+
+def calc_kutzelnigg_mu(energy_sq, light_speed):
+    c2 = light_speed**2
+    val = energy_sq/c2 - c2
+    return np.sqrt(-val)
 
 def calc_non_rel_mu(energy):
     return np.sqrt(-2.0 * energy)

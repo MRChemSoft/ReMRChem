@@ -1,6 +1,7 @@
 ########## Define Enviroment #################
 from orbital4c import complex_fcn as cf
-from orbital4c import orbital as orb 
+from orbital4c import orbital as orb
+from orbital4c import operators as oper
 from orbital4c import nuclear_potential as nucpot
 from orbital4c import r3m as r3m
 from scipy.constants import hbar
@@ -69,7 +70,7 @@ if __name__ == '__main__':
     Z = args.charge
     atom = args.atype
     ################# Call MRA #######################
-    mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order, max_depth = 30)
+    mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order)
     prec = args.prec
     origin = [args.cx, args.cy, args.cz]
     
@@ -78,20 +79,18 @@ if __name__ == '__main__':
     cf.complex_fcn.mra = mra
     print('call MRA DONE')
     
-    computeNuclearPotential = True
-    readOrbitals            = True
-    runCoulomb              = False
-    runCoulombGen           = False
-    runKutzelnigg           = False
-    runKutzSimple           = True
-    saveOrbitals            = False
-    runGaunt                = False 
-    runGaugeA               = False 
-    runGaugeB               = False 
-    runGaugeC               = False 
-    runGaugeD               = False 
-    runGaugeDelta           = False 
+    computeNuclearPotential = False
+    readOrbitals = False
+    runCoulomb = False
+    saveOrbitals = False
+    runGaunt = True
+    runGaugeA = True
+    runGaugeB = True
+    runGaugeC = True
+    runGaugeD = True
+    runGaugeDelta = True
     default_der = args.deriv
+    
     ################### Define V potential ######################
     if(computeNuclearPotential):
         if args.potential == 'point_charge':
@@ -132,42 +131,46 @@ if __name__ == '__main__':
         spinorb1.copy_components(La=complexfc)
         spinorb1.init_small_components(prec/10)
         spinorb1.normalize()
-        spinorb1.cropLargeSmall(prec)
         spinorb2 = spinorb1.ktrs(prec) #does this go out of scope?
 
     length = 2 * args.box
 
-    if runCoulombGen:
-        spinorb1, spinorb2 = two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec)
+#    Vop = oper.PotentialOperator(mra, prec, V_tree)
+#    Fop = oper.FockOperator(mra, prec, [Jop, Kop, Vop], [1.0, -1.0, -1.0])
+#    Dop = oper.FockOperator(mra, prec, [], [])
+
+#    Fmat = Fop.matrix([spinorb1, spinorb2])
+#    print("Fmat")
+#    print(Fmat)
     
-    if runKutzelnigg:
-        spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, 'ABGV')
 
-    if runKutzSimple:
-        spinorb1, spinorb2 = two_electron.coulomb_2e_D2_J([spinorb1, spinorb2], V_tree, mra, prec, der = 'ABGV')
+#    print("Kmat")
 
-    if runCoulomb:
-        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)
+#    Vmat = Vop.matrix([spinorb1, spinorb2])
+#    print("Vmat")
+#    print(Vmat)
 
-    if runGaunt:
-        two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)
+#    Dmat = Dop.matrix([spinorb1, spinorb2])
+#    print("Dmat")
+#    print(Dmat)
+
+    Jop = oper.CoulombDirectOperator(mra, prec, [spinorb1, spinorb2])
+    Jmat = Jop.matrix([spinorb1, spinorb2])
+    Kop = oper.CoulombExchangeOperator(mra, prec, [spinorb1, spinorb2])
+    Kmat = Kop.matrix([spinorb1, spinorb2])
+    print("Jmat")
+    print(Jmat)
     
-    if runGaugeA:
-        two_electron.calcGaugePertA(spinorb1, spinorb2, mra, prec)
-
-    if runGaugeB:
-        two_electron.calcGaugePertB(spinorb1, spinorb2, mra, prec)
-
-    if runGaugeC:
-        two_electron.calcGaugePertC(spinorb1, spinorb2, mra, prec)
-        
-    if runGaugeD:
-        two_electron.calcGaugePertD(spinorb1, spinorb2, mra, prec)
-        
-    if runGaugeDelta:
-        two_electron.calcGaugeDelta(spinorb1, spinorb2, mra, prec)
-        
-    if saveOrbitals:
-        spinorb1.save("spinorb1")
-        spinorb2.save("spinorb2")
-    
+    P = vp.PoissonOperator(mra, prec)
+    n11 = spinorb1.overlap_density(spinorb1, prec)
+    n22 = spinorb2.overlap_density(spinorb2, prec)
+    print("Kmat")
+    print(Kmat)
+#    print("density outside")
+#    n = n11 + n22
+#    print ("rho outside")
+#    print(n.real)
+#    pot    = P(n.real) * (4 * np.pi)
+#    J2_phi1 = orb.apply_potential(1.0, pot, spinorb1, prec)
+#    Jval = spinorb1.dot(J2_phi1)
+#    print(Jval)

@@ -65,6 +65,18 @@ class complex_fcn:
         output.imag = self.imag - other.imag
         return output
 
+    def real_mul(self, coeff):
+        output = complex_fcn()
+        output.real = self.real * coeff
+        output.imag = self.imag * coeff
+        return output
+
+    def imag_mul(self, coeff):
+        output = complex_fcn()
+        output.real = self.imag * (-1.0 * coeff)
+        output.imag = self.real * coeff
+        return output
+
     def __rmul__(self, other):
         output = complex_fcn()
         output.real = self.real * np.real(other) - self.imag * np.imag(other)
@@ -247,9 +259,9 @@ def apply_potential(factor, potential, func, prec):
 def apply_helmholtz(func, mu, light_speed, prec):
     out_func = complex_fcn()
     H = vp.HelmholtzOperator(func.mra, mu, prec)
-    if(func.real.squaredNorm() > 0):
+    if(func.real.squaredNorm() > 1e-12):
         vp.advanced.apply(prec, out_func.real, H, func.real)
-    if(func.imag.squaredNorm() > 0):
+    if(func.imag.squaredNorm() > 1e-12):
         vp.advanced.apply(prec, out_func.imag, H, func.imag)
     return out_func
 
@@ -319,4 +331,18 @@ def vector_gradient(vector, der = "BS"):
     for i in range(len(vector)):
         tensor.append(vector[i].gradient(der))
     return tensor
+
+# Note: some thresholding of the contributions should be considered here.
+def add_vector(func_array, coeff_array, prec):
+    output = complex_fcn()
+    real_array = []
+    imag_array = []
+    for i in range(len(func_array)):
+        real_array.append(( coeff_array[i].real, func_array[i].real))
+        real_array.append((-coeff_array[i].imag, func_array[i].imag))
+        imag_array.append(( coeff_array[i].real, func_array[i].imag))
+        imag_array.append(( coeff_array[i].imag, func_array[i].real))
+    vp.advanced.add(prec, output.real, real_array)
+    vp.advanced.add(prec, output.imag, imag_array)
+    return output
 
