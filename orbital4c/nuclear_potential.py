@@ -51,7 +51,7 @@ def homogeneus_charge_sphere(position, center, charge, RMS):
           factor = 3.0 - (distance**2.0)/(R0**2.0) 
     else:
           prec = charge / distance
-          factor = 1.0  
+          factor = 1.0
     return prec * factor
 
 
@@ -60,7 +60,7 @@ def gaussian(position, center, charge, atom):
     for line in fileObj:
         if not line.startswith("#"):
             line = line.strip().split()
-            if len(line) == 4:
+            if len(line) == 3:
                if line[0] == atom:
                   epsilon = line[2]
             else:
@@ -71,6 +71,6 @@ def gaussian(position, center, charge, atom):
           (position[1] - center[1]) ** 2 +
           (position[2] - center[2]) ** 2)
     distance = np.sqrt(d2)
-    prec = charge / distance 
+    prec = charge / distance
     u = erf(np.sqrt(epsilon) * distance)
     return prec * u
