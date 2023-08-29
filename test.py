@@ -22,20 +22,20 @@ importlib.reload(orb)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
-    parser.add_argument('-a', '--atype', dest='atype', type=str, default='He',
-                        help='put the atom type')
+    #parser.add_argument('-a', '--atype', dest='atype', type=str, default='He',
+    #                    help='put the atom type')
     parser.add_argument('-d', '--derivative', dest='deriv', type=str, default='ABGV',
                         help='put the type of derivative')
-    parser.add_argument('-z', '--charge', dest='charge', type=float, default=2.0,
-                        help='put the atom charge')
+    #parser.add_argument('-z', '--charge', dest='charge', type=float, default=2.0,
+    #                    help='put the atom charge')
     parser.add_argument('-b', '--box', dest='box', type=int, default=60,
                         help='put the box dimension')
-    parser.add_argument('-cx', '--center_x', dest='cx', type=float, default=0.0,
-                        help='position of nucleus in x')
-    parser.add_argument('-cy', '--center_y', dest='cy', type=float, default=0.0,
-                        help='position of nucleus in y')
-    parser.add_argument('-cz', '--center_z', dest='cz', type=float, default=0.0,
-                        help='position of nucleus in z')
+    #parser.add_argument('-cx', '--center_x', dest='cx', type=float, default=0.0,
+    #                    help='position of nucleus in x')
+    #parser.add_argument('-cy', '--center_y', dest='cy', type=float, default=0.0,
+    #                    help='position of nucleus in y')
+    #parser.add_argument('-cz', '--center_z', dest='cz', type=float, default=0.0,
+    #                    help='position of nucleus in z')
     parser.add_argument('-l', '--light_speed', dest='lux_speed', type=float, default=137.03599913900001,
                         help='light of speed')
     parser.add_argument('-o', '--order', dest='order', type=int, default=6,
@@ -48,9 +48,9 @@ if __name__ == '__main__':
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     args = parser.parse_args()
 
-    assert args.atype != 'H', 'Please consider only atoms with more than one electron'
+    #assert args.atype != 'H', 'Please consider only atoms with more than one electron'
 
-    assert args.charge > 1.0, 'Please consider only atoms with more than one electron'
+    #assert args.charge > 1.0, 'Please consider only atoms with more than one electron'
 
     assert args.coulgau in ['coulomb', 'gaunt', 'gaunt-test'], 'Please, specify coulgau in a rigth way: coulomb or gaunt'
 
@@ -66,18 +66,46 @@ if __name__ == '__main__':
     l = 0
     n = 1
     m = 0.5
-    Z = args.charge
-    atom = args.atype
+    
+    def read_file_with_named_lists(atomlist):
+        atom_lists = {}
+    
+        with open(atomlist, 'r') as file:
+            for line in file:
+                terms = line.strip().split()
+                atom = terms[0]
+                origin = terms[1:]  
+                origin = [float(element) for element in origin]   
+    
+                if atom in atom_lists:
+                    # Append an identifier to make the key unique
+                    identifier = len(atom_lists[atom]) + 1
+                    unique_key = f"{atom}_{identifier}"
+                    atom_lists[unique_key] = origin
+                else:
+                    atom_lists[atom] = origin
+    
+        return atom_lists 
+    
+    def get_original_list_name(key):
+        return key.split('_')[0]
+    
+    atomlist = './atom_list.txt'  # Replace with the actual file name
+    coordinates = read_file_with_named_lists(atomlist)
+
+    #origin = [args.cx, args.cy, args.cz]
+    #Z = args.charge
+    #atom = args.atype
     ################# Call MRA #######################
     mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order, max_depth = 30)
     prec = args.prec
-    origin = [args.cx, args.cy, args.cz]
-    
     orb.orbital4c.mra = mra
     orb.orbital4c.light_speed = light_speed
     cf.complex_fcn.mra = mra
+    default_der = args.deriv
     print('call MRA DONE')
-    
+
+    ################## Jobs ##########################
     computeNuclearPotential = True
     readOrbitals            = True
     runCoulomb              = False
@@ -90,26 +118,36 @@ if __name__ == '__main__':
     runGaugeB               = False 
     runGaugeC               = False 
     runGaugeD               = False 
-    runGaugeDelta           = False 
-    default_der = args.deriv
+    runGaugeDelta           = False
+    print('Jobs chosen') 
+    
     ################### Define V potential ######################
     if(computeNuclearPotential):
-        if args.potential == 'point_charge':
+        V_tot = vp.FunctionTree(mra)
+        V_tot.setZero()
+        for atom, origin in coordinates.items():
+            atom = get_original_list_name(atom)
+            print("Atom:", atom)
+            fileObj = open("./Z.txt", "r")
+            charge = ""
+            for line in fileObj:
+                if not line.startswith("#"):
+                    line = line.strip().split()
+                    if len(line) == 2:
+                        if line[0] == atom:
+                            charge = float(line[1])
+                            print("Charge:", charge)
+            fileObj.close()
+            print("Origin:", origin)
+            print()  # Print an empty line for separation
+            f = lambda x: nucpot.point_charge(x, origin, charge)
             Peps = vp.ScalingProjector(mra,prec/10)
-            f = lambda x: nucpot.point_charge(x, origin, Z)
             V_tree = Peps(f)
-        elif args.potential == 'coulomb_HFYGB':
-            Peps = vp.ScalingProjector(mra,prec/10)
-            f = lambda x: nucpot.coulomb_HFYGB(x, origin, Z, prec)
-            V_tree = Peps(f)
-        elif args.potential == 'homogeneus_charge_sphere':
-            Peps = vp.ScalingProjector(mra,prec/10)
-            f = lambda x: nucpot.homogeneus_charge_sphere(x, origin, Z, atom)
-            V_tree = Peps(f)
-        elif args.potential == 'gaussian':
-            Peps = vp.ScalingProjector(mra,prec/10)
-            f = lambda x: nucpot.gaussian(x, origin, Z, atom)
-            V_tree = Peps(f)
+            V_tot += V_tree
+        
+            #Peps = vp.ScalingProjector(mra,prec/10)
+            #f = lambda x: nucpot.point_charge(x, origin, charge)
+            #V_tree = Peps(f)
         print('Define V Potential', args.potential, 'DONE')
     
     #############################START WITH CALCULATION###################################

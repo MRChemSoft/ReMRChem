@@ -2,7 +2,6 @@ import numpy as np
 import copy as cp
 from scipy.special import erf
 
-
 def point_charge(position, center , charge):
     d2 = ((position[0] - center[0])**2 +
           (position[1] - center[1])**2 +
