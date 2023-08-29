@@ -140,14 +140,23 @@ if __name__ == '__main__':
             fileObj.close()
             print("Origin:", origin)
             print()  # Print an empty line for separation
-            f = lambda x: nucpot.point_charge(x, origin, charge)
-            Peps = vp.ScalingProjector(mra,prec/10)
-            V_tree = Peps(f)
+            if args.potential == 'point_charge':
+                Peps = vp.ScalingProjector(mra,prec/10)
+                f = lambda x: nucpot.point_charge(x, origin, Z)
+                V_tree = Peps(f)
+            elif args.potential == 'coulomb_HFYGB':
+                Peps = vp.ScalingProjector(mra,prec/10)
+                f = lambda x: nucpot.coulomb_HFYGB(x, origin, Z, prec)
+                V_tree = Peps(f)
+            elif args.potential == 'homogeneus_charge_sphere':
+                Peps = vp.ScalingProjector(mra,prec/10)
+                f = lambda x: nucpot.homogeneus_charge_sphere(x, origin, Z, 
+                V_tree = Peps(f)
+            elif args.potential == 'gaussian':
+                Peps = vp.ScalingProjector(mra,prec/10)
+                f = lambda x: nucpot.gaussian(x, origin, Z, atom)
+                V_tree = Peps(f)
             V_tot += V_tree
-        
-            #Peps = vp.ScalingProjector(mra,prec/10)
-            #f = lambda x: nucpot.point_charge(x, origin, charge)
-            #V_tree = Peps(f)
         print('Define V Potential', args.potential, 'DONE')
     
     #############################START WITH CALCULATION###################################
