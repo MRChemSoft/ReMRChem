@@ -108,7 +108,8 @@ if __name__ == '__main__':
     ################## Jobs ##########################
     computeNuclearPotential = True
     readOrbitals            = True
-    runCoulomb              = False
+    runCoulomb1e            = False
+    runCoulomb2e            = False
     runCoulombGen           = False
     runKutzelnigg           = False
     runKutzSimple           = True
@@ -184,17 +185,23 @@ if __name__ == '__main__':
 
     length = 2 * args.box
 
+    if runD_1e:
+        spinorb1 = one_electron.gs_D_1e(spinorb1, V_tree, mra, prec)
+
+    if runD2_1e:
+        spinorb1 = one_electron.gs_1e_D2(spinorb1, V_tree, mra, prec)
+
     if runCoulombGen:
         spinorb1, spinorb2 = two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec)
-    
+
+    if runCoulomb2e:
+        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)
+
     if runKutzelnigg:
         spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, 'ABGV')
 
     if runKutzSimple:
         spinorb1, spinorb2 = two_electron.coulomb_2e_D2_J([spinorb1, spinorb2], V_tree, mra, prec, der = 'ABGV')
-
-    if runCoulomb:
-        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)
 
     if runGaunt:
         two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)
