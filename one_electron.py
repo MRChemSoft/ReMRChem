@@ -19,10 +19,10 @@ def gs_D_1e(spinorb1, potential, mra, prec, der):
     light_speed = spinorb1.light_speed
 
     while (error_norm > prec or compute_last_energy):
-        n_22 = spinorb1.overlap_density(spinorb1, prec)
+        n_11 = spinorb1.overlap_density(spinorb1, prec)
 
         # Definition of two electron operators
-        B22    = P(n_22.real) * (4 * np.pi)
+        B11    = P(n_11.real) * (4 * np.pi)
 
         # Definiton of Dirac Hamiltonian for spinorb 1
         hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der)
@@ -43,7 +43,7 @@ def gs_D_1e(spinorb1, potential, mra, prec, der):
             break
 
         mu = orb.calc_dirac_mu(eps, light_speed)
-        tmp = orb.apply_helmholtz(V1, mu, prec)
+        tmp = orb.apply_helmholtz(v_psi_1, mu, prec)
         new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der)
         new_orbital *= 0.5/light_speed**2
         print("============= Spinor before Helmholtz =============")
@@ -64,7 +64,7 @@ def gs_D_1e(spinorb1, potential, mra, prec, der):
     return spinorb1
 
 
-def gs_1e_D2(spinorb1, potential, mra, prec, der):
+def gs_D2_1e(spinorb1, potential, mra, prec, der):
     print('Hartree-Fock 1e D2')
 
     error_norm = 1.0
@@ -115,8 +115,7 @@ def gs_1e_D2(spinorb1, potential, mra, prec, der):
         new_spinorb1.normalize()
         print("crop")
         new_spinorb1.cropLargeSmall(prec)
-        new_spinorb1.append(new_spinorb1)
-        new_spinorb1.append(new_spinorb1.ktrs(prec))
+
         
         # Compute orbital error
         delta_psi = new_spinorb1 - spinorb1
