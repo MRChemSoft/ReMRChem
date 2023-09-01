@@ -134,7 +134,7 @@ class PotentialOperator(Operator):
         if(self.real):
             result = orb.apply_potential(1.0, self.potential, phi, self.prec)
         else:
-             result = orb.apply_complex_potential(1.0, self.potential, phi, self.prec)
+            result = orb.apply_complex_potential(1.0, self.potential, phi, self.prec)
         result.cropLargeSmall(self.prec)
         return result
         

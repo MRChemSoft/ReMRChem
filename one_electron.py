@@ -16,6 +16,7 @@ def gs_D_1e(spinorb1, potential, mra, prec, der):
     compute_last_energy = False
     
     P = vp.PoissonOperator(mra, prec)
+    #Vop = oper.PotentialOperator(mra, prec, potential)
     light_speed = spinorb1.light_speed
 
     while (error_norm > prec or compute_last_energy):
@@ -30,8 +31,8 @@ def gs_D_1e(spinorb1, potential, mra, prec, der):
         print("hd_11", hd_11)
 
         # Applying nuclear potential to spinorb 1 
-        v_psi_1 = orb.apply_potential(-1.0, potential, spinorb1, prec)
-        V1 = spinorb1.dot(v_psi_1)
+        Vpsi1 = orb.apply_potential(-1.0, potential, spinorb1, prec)
+        V1 = spinorb1.dot(Vpsi1)
 
         hd_V_11 = hd_11 + V1
 
@@ -43,7 +44,7 @@ def gs_D_1e(spinorb1, potential, mra, prec, der):
             break
 
         mu = orb.calc_dirac_mu(eps, light_speed)
-        tmp = orb.apply_helmholtz(v_psi_1, mu, prec)
+        tmp = orb.apply_helmholtz(Vpsi1, mu, prec)
         new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der)
         new_orbital *= 0.5/light_speed**2
         print("============= Spinor before Helmholtz =============")
