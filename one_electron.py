@@ -30,7 +30,8 @@ def gs_D_1e(spinorb1, potential, mra, prec, der):
         hd_11 = spinorb1.dot(hd_psi_1)
         print("hd_11", hd_11)
 
-        # Applying nuclear potential to spinorb 1 
+        # Applying nuclear potential to spinorb 1
+        print("Potential", potential)
         Vpsi1 = orb.apply_potential(-1.0, potential, spinorb1, prec)
         V1 = spinorb1.dot(Vpsi1)
 

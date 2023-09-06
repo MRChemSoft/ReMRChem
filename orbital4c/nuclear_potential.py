@@ -58,7 +58,7 @@ def pot(V_tree, coordinates, typenuc, mra, prec, der):
     for atom, origin in coordinates.items():
         atom = get_original_list_name(atom)
         print("Atom:", atom)
-        fileObj = open("/Users/cta018/vampyr-dev/ReMRChem/Z.txt", "r")
+        fileObj = open("Z.txt", "r")
         charge = ""
         for line in fileObj:
             if not line.startswith("#"):
