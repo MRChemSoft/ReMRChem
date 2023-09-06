@@ -83,15 +83,15 @@ if __name__ == '__main__':
 
 
     ################### Reading Atoms #########################
-    atomlist = '/Users/cta018/vampyr-dev/ReMRChem/atom_list.txt'  # Replace with the actual file name
+    atomlist = 'atom_list.txt'  # Replace with the actual file name
     coordinates, total_atom_lists = nucpot.read_file_with_named_lists(atomlist)
  
     ################### Define V potential ######################
+    V_tree = vp.FunctionTree(mra)
     if(computeNuclearPotential):
-        V_tree = vp.FunctionTree(mra)
         V_tree.setZero()
         typenuc = args.potential
-        V_tree = nucpot.pot(V_tree, coordinates, typenuc, mra, prec, der= 'BS')
+        nucpot.pot(V_tree, coordinates, typenuc, mra, prec, der= 'BS')
 
     ################### Define Center of Mass ###################
     if total_atom_lists >= 2:
