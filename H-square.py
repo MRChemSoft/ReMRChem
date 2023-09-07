@@ -138,7 +138,7 @@ while orbital_error > prec:
     new_orbital.normalize()
     delta_psi = new_orbital - spinor_H
     orbital_error = (delta_psi.dot(delta_psi)).real
-    print('Error',orbital_error, imag, flush = True)
+    print('Error',orbital_error)
     spinor_H = new_orbital
     
 hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = 'BS')
