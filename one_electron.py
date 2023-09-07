@@ -12,60 +12,37 @@ import sys, getopt
 def gs_D_1e(spinorb1, potential, mra, prec, der):
     print('Hartree-Fock 1e')
     
-    error_norm = 1
-    compute_last_energy = False
-    
-    P = vp.PoissonOperator(mra, prec)
-    #Vop = oper.PotentialOperator(mra, prec, potential)
+    orbital_error = 1
+    #compute_last_energy = False
+
     light_speed = spinorb1.light_speed
 
-    while (error_norm > prec or compute_last_energy):
-        n_11 = spinorb1.overlap_density(spinorb1, prec)
-
-        # Definition of two electron operators
-        B11    = P(n_11.real) * (4 * np.pi)
-
-        # Definiton of Dirac Hamiltonian for spinorb 1
-        hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der)
-        hd_11 = spinorb1.dot(hd_psi_1)
-        print("hd_11", hd_11)
-
-        # Applying nuclear potential to spinorb 1 
-        Vpsi1 = orb.apply_potential(-1.0, potential, spinorb1, prec)
-        V1 = spinorb1.dot(Vpsi1)
-
-        hd_V_11 = hd_11 + V1
-
-        eps = hd_V_11.real
-        
-        print('orbital energy', eps - light_speed**2)
-        
-        if(compute_last_energy):
-            break
-
-        mu = orb.calc_dirac_mu(eps, light_speed)
-        tmp = orb.apply_helmholtz(Vpsi1, mu, prec)
-        new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der)
-        new_orbital *= 0.5/light_speed**2
-        print("============= Spinor before Helmholtz =============")
-        print(spinorb1)
-        print("============= New spinor before crop  =============")
-        print(new_orbital)
+    while orbital_error > prec:
+        hd_psi = orb.apply_dirac_hamiltonian(spinorb1, prec, der = 'ABGV')
+        v_psi = orb.apply_potential(-1.0, potential, spinorb1, prec)
+        add_psi = hd_psi + v_psi
+        energy = spinorb1.dot(add_psi).real
+        print('Energy',energy - light_speed**2)
+        mu = orb.calc_dirac_mu(energy, light_speed)
+        tmp = orb.apply_helmholtz(v_psi, mu, prec)
+        tmp.crop(prec/10)
+        new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy, der = 'ABGV')
+        new_orbital.crop(prec/10)
         new_orbital.normalize()
-        new_orbital.cropLargeSmall(prec)       
-
-        # Compute orbital error
         delta_psi = new_orbital - spinorb1
-        deltasq = delta_psi.squaredNorm()
-        error_norm = np.sqrt(deltasq)
-        print('Orbital_Error norm', error_norm)
+        orbital_error = delta_psi.dot(delta_psi).real
+        print('Error',orbital_error)
         spinorb1 = new_orbital
-        if(error_norm < prec):
-            compute_last_energy = True
+    
+    hd_psi = orb.apply_dirac_hamiltonian(spinorb1, prec, der = 'ABGV')
+    v_psi = orb.apply_potential(-1.0, potential, spinorb1, prec)
+    add_psi = hd_psi + v_psi
+    energy = spinorb1.dot(add_psi).real
+    print('Final Energy',energy - light_speed**2)
     return spinorb1
 
 
-def gs_D2_1e(spinorb1, potential, mra, prec, der):
+def gs_D2_1e(spinorb1, potential, mra, prec, der = 'ABGV'):
     print('Hartree-Fock 1e D2')
 
     error_norm = 1.0

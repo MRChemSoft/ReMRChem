@@ -52,9 +52,11 @@ def calculate_center_of_mass(coordinates):
         center_of_mass[i] /= total_mass
     
     return center_of_mass
+    
 
-
-def pot(V_tree, coordinates, typenuc, mra, prec, der):
+def pot(coordinates, typenuc, mra, prec, der):
+    V_tree = vp.FunctionTree(mra)
+    V_tree.setZero()
     for atom, origin in coordinates.items():
         atom = get_original_list_name(atom)
         print("Atom:", atom)
@@ -88,6 +90,7 @@ def pot(V_tree, coordinates, typenuc, mra, prec, der):
             V = Peps(f)
         V_tree += V
     print('Define V Potential', typenuc, 'DONE')
+    return V_tree
 
 def point_charge(position, center , charge):
     d2 = ((position[0] - center[0])**2 +

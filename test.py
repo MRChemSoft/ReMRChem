@@ -35,7 +35,7 @@ if __name__ == '__main__':
                         help='put the precision')
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
-    parser.add_argument('-v', '--potential', dest='potential', type=str, default='coulomb_HFYGB',
+    parser.add_argument('-v', '--potential', dest='potential', type=str, default='point_charge',
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     args = parser.parse_args()
 
@@ -88,10 +88,9 @@ if __name__ == '__main__':
  
     ################### Define V potential ######################
     if(computeNuclearPotential):
-        V_tree = vp.FunctionTree(mra)
-        V_tree.setZero()
         typenuc = args.potential
-        V_tree = nucpot.pot(V_tree, coordinates, typenuc, mra, prec, der= 'BS')
+        V_tree = nucpot.pot(coordinates, typenuc, mra, prec, default_der)
+        print('V_tree', V_tree)
 
     ################### Define Center of Mass ###################
     if total_atom_lists >= 2:
@@ -119,25 +118,34 @@ if __name__ == '__main__':
             gauss_tree = vp.FunctionTree(mra)
             vp.advanced.build_grid(out=gauss_tree, inp=gauss)
             vp.advanced.project(prec=prec, out=gauss_tree, inp=gauss)
-            gauss_tree.normalize()
             gauss_tree_tot += gauss_tree
-        
-        gauss_tree_tot.normalize()
-        complexfc = cf.complex_fcn()
-        complexfc.copy_fcns(real=gauss_tree_tot)
-        spinorb1.copy_components(La=complexfc)
+            gauss_tree_tot.normalize()
+
+#        g_exp = vp.GaussExp()
+#        for atom, origin in coordinates.items():
+#            gauss = vp.GaussFunc(b_coeff, a_coeff, origin)
+#            g_exp.append(gauss)
+#       
+#        vp.advanced.build_grid(gauss_tree_tot, g_exp)
+#        vp.advanced.project(prec=prec, out=gauss_tree_tot, inp=gauss)
+#        gauss_tree_tot.normalize()
+
+        La_comp = cf.complex_fcn()
+        La_comp.copy_fcns(real = gauss_tree_tot)
+        spinorb1.copy_components(La = La_comp)
         spinorb1.init_small_components(prec/10)
         spinorb1.normalize()
         spinorb1.cropLargeSmall(prec)
+        # print('Spin1', spinorb1)
         spinorb2 = spinorb1.ktrs(prec) #does this go out of scope?
 
     length = 2 * args.box
 
     if runD_1e:
-        spinorb1 = one_electron.gs_D_1e(spinorb1, V_tree, mra, prec, der= 'BS')
+        spinorb1 = one_electron.gs_D_1e(spinorb1, V_tree, mra, prec, default_der)
 
     if runD2_1e:
-        spinorb1 = one_electron.gs_D2_1e(spinorb1, V_tree, mra, prec, der= 'BS')
+        spinorb1 = one_electron.gs_D2_1e(spinorb1, V_tree, mra, prec, default_der)
 
     if runCoulombGen:
         spinorb1, spinorb2 = two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec)
@@ -146,10 +154,10 @@ if __name__ == '__main__':
         spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)
 
     if runKutzelnigg:
-        spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, 'ABGV')
+        spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, default_der)
 
     if runKutzSimple:
-        spinorb1, spinorb2 = two_electron.coulomb_2e_D2_J([spinorb1, spinorb2], V_tree, mra, prec, der = 'ABGV')
+        spinorb1, spinorb2 = two_electron.coulomb_2e_D2_J([spinorb1, spinorb2], V_tree, mra, prec, default_der)
 
     if runGaunt:
         two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)
