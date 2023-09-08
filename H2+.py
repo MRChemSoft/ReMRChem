@@ -173,9 +173,9 @@ elif args.dtype == 'dirac2':
     anticom = (ap_psi.dot(v_psi)).real
     energy_kutzelnigg = cke + beta_pot + pot_sq/(2*mc2) + anticom/light_speed
     
-    print('Kutzelnigg =',cke, beta_pot, pot_sq/(2*mc2), anticom/light_speed, energy_kutzelnigg)
-    print('Quadratic approx =',energy_kutzelnigg - energy_kutzelnigg**2/(2*mc2))
-    print('Correct from Kutzelnigg =', mc2*(np.sqrt(1+2*energy_kutzelnigg/mc2)-1))
+    print('Kutzelnigg =',cke, beta_pot, pot_sq/(2*c2), anticom/light_speed, energy_kutzelnigg)
+    print('Quadratic approx =',energy_kutzelnigg - energy_kutzelnigg**2/(2*c2))
+    print('Correct from Kutzelnigg =', c2*(np.sqrt(1+2*energy_kutzelnigg/c2)-1))
     print('Final Energy =',energy - light_speed**2)
     
     energy_1s = analytic_1s(light_speed, n, k, Z)

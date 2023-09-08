@@ -448,5 +448,9 @@ def calc_kutzelnigg_mu(energy_sq, light_speed):
     return np.sqrt(-val)
 
 def calc_non_rel_mu(energy):
-    return np.sqrt(-2.0 * energy)
+    if energy > 0:
+        return np.sqrt(2.0 * energy)
+    elif energy < 0:
+        return np.sqrt(-2.0 * energy)
+    
     

@@ -9,15 +9,23 @@ import numpy as np
 import numpy.linalg as LA
 import sys, getopt
 
+def analytic_1s(light_speed, n, k, Z):
+    alpha = 1/light_speed
+    gamma = orb.compute_gamma(k,Z,alpha)
+    tmp1 = n - np.abs(k) + gamma
+    tmp2 = Z * alpha / tmp1
+    tmp3 = 1 + tmp2**2
+    return light_speed**2 / np.sqrt(tmp3)
+
 def gs_D_1e(spinorb1, potential, mra, prec, der):
     print('Hartree-Fock 1e')
     
-    orbital_error = 1
+    error_norm = 1
     #compute_last_energy = False
 
     light_speed = spinorb1.light_speed
 
-    while orbital_error > prec:
+    while error_norm > prec:
         hd_psi = orb.apply_dirac_hamiltonian(spinorb1, prec, der = 'ABGV')
         v_psi = orb.apply_potential(-1.0, potential, spinorb1, prec)
         add_psi = hd_psi + v_psi
@@ -30,8 +38,10 @@ def gs_D_1e(spinorb1, potential, mra, prec, der):
         new_orbital.crop(prec/10)
         new_orbital.normalize()
         delta_psi = new_orbital - spinorb1
-        orbital_error = delta_psi.dot(delta_psi).real
-        print('Error',orbital_error)
+        #orbital_error = delta_psi.dot(delta_psi).real
+        deltasq = delta_psi.squaredNorm()
+        error_norm = np.sqrt(deltasq)
+        print('Error', error_norm)
         spinorb1 = new_orbital
     
     hd_psi = orb.apply_dirac_hamiltonian(spinorb1, prec, der = 'ABGV')
@@ -46,15 +56,10 @@ def gs_D2_1e(spinorb1, potential, mra, prec, der = 'ABGV'):
     print('Hartree-Fock 1e D2')
 
     error_norm = 1.0
-    compute_last_energy = False
-
-    P = vp.PoissonOperator(mra, prec)
-
     light_speed = spinorb1.light_speed
-    c2 = light_speed**2
+    mc2 = light_speed**2
 
-    while(error_norm > prec):
-        print("Applying V")
+    while error_norm > prec:
         Vpsi = orb.apply_potential(-1.0, potential, spinorb1, prec)
         VVpsi = orb.apply_potential(-0.5/mc2, potential, Vpsi, prec)
         beta_Vpsi = Vpsi.beta2()
@@ -62,44 +67,32 @@ def gs_D2_1e(spinorb1, potential, mra, prec, der = 'ABGV'):
         ap_psi = spinorb1.alpha_p(prec, der)
         Vap_psi = orb.apply_potential(-1.0, potential, ap_psi, prec)
         anticom = apV_psi + Vap_psi
-        anticom *= 1.0 / (2.0 * light_speed)
         RHS = beta_Vpsi + VVpsi + anticom * (0.5/light_speed)
-
-        anticom.cropLargeSmall(prec)
-        beta_Vpsi.cropLargeSmall(prec)
-        VVpsi.cropLargeSmall(prec)
-
-        print("anticom")
-        print(anticom)
-        print("beta_Vpsi")
-        print(beta_Vpsi)
-        print("VV_psi")
-        print(VVpsi)
-        RHS = beta_Vpsi + anticom + VVpsi
-        RHS.cropLargeSmall(prec)
-        print("RHS")
-        print(RHS)
-
         cke = spinorb1.classicT()
         cpe = (spinorb1.dot(RHS)).real
-        print("Classic-like energies: ", cke, cpe, cke + cpe)
-        print("Orbital energy: ", c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2)))
-        mu = orb.calc_non_rel_mu(cke+cpe)
-        print("mu: ", mu)
         
+        VVpsi.cropLargeSmall(prec)
+        beta_Vpsi.cropLargeSmall(prec)
+        anticom.cropLargeSmall(prec)
+        RHS.cropLargeSmall(prec)
 
+        print("Classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", cke + cpe)
+        #print("Orbital energy =", c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2)))
+        
+        mu = orb.calc_non_rel_mu(cke+cpe)
+        print("mu =", mu)
+        
         new_spinorb1 = orb.apply_helmholtz(RHS, mu, prec)
-        print("normalization")
+        #print("normalization")
         new_spinorb1.normalize()
-        print("crop")
+        #print("crop")
         new_spinorb1.cropLargeSmall(prec)
 
-        
         # Compute orbital error
         delta_psi = new_spinorb1 - spinorb1
         deltasq = delta_psi.squaredNorm()
         error_norm = np.sqrt(deltasq)
-        print('Orbital_Error norm', error_norm)
+        print("Error =", error_norm)
         spinorb1 = new_spinorb1
 
     hd_psi = orb.apply_dirac_hamiltonian(spinorb1, prec, der)

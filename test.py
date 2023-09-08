@@ -121,15 +121,6 @@ if __name__ == '__main__':
             gauss_tree_tot += gauss_tree
             gauss_tree_tot.normalize()
 
-#        g_exp = vp.GaussExp()
-#        for atom, origin in coordinates.items():
-#            gauss = vp.GaussFunc(b_coeff, a_coeff, origin)
-#            g_exp.append(gauss)
-#       
-#        vp.advanced.build_grid(gauss_tree_tot, g_exp)
-#        vp.advanced.project(prec=prec, out=gauss_tree_tot, inp=gauss)
-#        gauss_tree_tot.normalize()
-
         La_comp = cf.complex_fcn()
         La_comp.copy_fcns(real = gauss_tree_tot)
         spinorb1.copy_components(La = La_comp)
