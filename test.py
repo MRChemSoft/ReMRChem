@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     assert args.coulgau in ['coulomb', 'gaunt', 'gaunt-test'], 'Please, specify coulgau in a rigth way: coulomb or gaunt'
 
-    assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
+    assert args.potential in ['point_charge', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
 
     assert args.deriv in ['PH', 'BS', 'ABGV'], 'Please, specify the type of derivative'
     

@@ -21,7 +21,7 @@ if __name__ == '__main__':
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     args = parser.parse_args()
 
-    assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
+    assert args.potential in ['point_charge', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
     assert args.dtype in ['dirac', 'dirac2'], 'Please, specify Dirac-type operator'
 
 def analytic_1s(light_speed, n, k, Z):
