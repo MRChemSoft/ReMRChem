@@ -60,14 +60,14 @@ if __name__ == '__main__':
     orb.orbital4c.mra = mra
     orb.orbital4c.light_speed = light_speed
     cf.complex_fcn.mra = mra
-    default_der = args.deriv
+    derivative = args.deriv
     print('call MRA DONE')
 
     ################## Jobs ##########################
     computeNuclearPotential = True
     readOrbitals            = False
-    runD_1e                 = True
-    runD2_1e                = False    
+    runD_1e                 = False
+    runD2_1e                = True    
     runCoulombGen           = False
     runCoulomb2e            = False    
     runKutzelnigg           = False
@@ -84,24 +84,21 @@ if __name__ == '__main__':
 
     ################### Reading Atoms #########################
     atomlist = 'atom_list.txt'  # Replace with the actual file name
-    coordinates, total_atom_lists = nucpot.read_file_with_named_lists(atomlist)
- 
+    coordinates = nucpot.read_file_with_named_lists(atomlist)
+
+    print(coordinates)
+    
     ################### Define V potential ######################
     V_tree = vp.FunctionTree(mra)
     if(computeNuclearPotential):
+        Peps = vp.ScalingProjector(mra, prec/10)
         typenuc = args.potential
-        V_tree = nucpot.pot(coordinates, typenuc, mra, prec, default_der)
+        f = lambda x: nucpot.nuclear_potential(x, coordinates, typenuc, mra, prec, derivative)
+        V_tree = Peps(f)
         print('V_tree', V_tree)
-
-    ################### Define Center of Mass ###################
-    if total_atom_lists >= 2:
-        # Calculate the center of mass
         com_coordinates = nucpot.calculate_center_of_mass(coordinates)
         print("Center of Mass (x, y, z):", com_coordinates)
-    else:
-        print("There are not enough atoms (less than 2) to calculate the center of mass.")
-        com_coordinates = coordinates
-    
+
     #############################START WITH CALCULATION###################################
     
     spinorb1 = orb.orbital4c()
@@ -114,13 +111,16 @@ if __name__ == '__main__':
         gauss_tree_tot.setZero()
         a_coeff = 3.0
         b_coeff = np.sqrt(a_coeff/np.pi)**3
-        for atom, origin in coordinates.items():
-            gauss = vp.GaussFunc(b_coeff, a_coeff, origin)
+        AO_list = []
+        for atom in coordinates.values():
+            gauss = vp.GaussFunc(b_coeff, a_coeff, [atom[2], atom[3], atom[4]])
             gauss_tree = vp.FunctionTree(mra)
             vp.advanced.build_grid(out=gauss_tree, inp=gauss)
             vp.advanced.project(prec=prec, out=gauss_tree, inp=gauss)
-            gauss_tree_tot += gauss_tree
-            gauss_tree_tot.normalize()
+            AO_list.append(gauss_tree)
+
+        gauss_tree_tot = AO_list[0] + AO_list[1]
+        gauss_tree_tot.normalize()
 
         La_comp = cf.complex_fcn()
         La_comp.copy_fcns(real = gauss_tree_tot)
@@ -131,13 +131,15 @@ if __name__ == '__main__':
         # print('Spin1', spinorb1)
         spinorb2 = spinorb1.ktrs(prec) #does this go out of scope?
 
+        print("spinorb1")
+        print(spinorb1)
     length = 2 * args.box
-
+    print("Using derivative ", derivative)
     if runD_1e:
-        spinorb1 = one_electron.gs_D_1e(spinorb1, V_tree, mra, prec, default_der)
+        spinorb1 = one_electron.gs_D_1e(spinorb1, V_tree, mra, prec, derivative)
 
     if runD2_1e:
-        spinorb1 = one_electron.gs_D2_1e(spinorb1, V_tree, mra, prec, default_der)
+        spinorb1 = one_electron.gs_D2_1e(spinorb1, V_tree, mra, prec, derivative)
 
     if runCoulombGen:
         spinorb1, spinorb2 = two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec)
@@ -146,10 +148,10 @@ if __name__ == '__main__':
         spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)
 
     if runKutzelnigg:
-        spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, default_der)
+        spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, derivative)
 
     if runKutzSimple:
-        spinorb1, spinorb2 = two_electron.coulomb_2e_D2_J([spinorb1, spinorb2], V_tree, mra, prec, default_der)
+        spinorb1, spinorb2 = two_electron.coulomb_2e_D2_J([spinorb1, spinorb2], V_tree, mra, prec, derivative)
 
     if runGaunt:
         two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)
