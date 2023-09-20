@@ -83,10 +83,11 @@ if __name__ == '__main__':
 
 
     ################### Reading Atoms #########################
-    atomlist = '/Users/cta018/vampyr-dev/ReMRChem/atom_list.txt'  # Replace with the actual file name
+    atomlist = 'atom_list.txt'  # Replace with the actual file name
     coordinates, total_atom_lists = nucpot.read_file_with_named_lists(atomlist)
  
     ################### Define V potential ######################
+    V_tree = vp.FunctionTree(mra)
     if(computeNuclearPotential):
         typenuc = args.potential
         V_tree = nucpot.pot(coordinates, typenuc, mra, prec, default_der)
