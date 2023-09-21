@@ -67,7 +67,11 @@ def gs_D2_1e(spinorb1, potential, mra, prec, derivative):
         ap_psi = spinorb1.alpha_p(prec, derivative)
         Vap_psi = orb.apply_potential(-1.0, potential, ap_psi, prec)
         anticom = apV_psi + Vap_psi
+        anticom.cropLargeSmall(prec)
+        #beta_v_psi.cropLargeSmall(prec)
+        vv_psi.cropLargeSmall(prec)
         RHS = beta_v_psi + vv_psi + anticom * (0.5/light_speed)
+        #RHS.cropLargeSmall(prec)
         cke = spinorb1.classicT()
         cpe = (spinorb1.dot(RHS)).real
         print("Classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", cke + cpe)
