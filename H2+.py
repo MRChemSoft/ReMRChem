@@ -21,7 +21,7 @@ if __name__ == '__main__':
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     args = parser.parse_args()
 
-    assert args.potential in ['point_charge', 'smoothing_HFYGB', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
+    assert args.potential in ['point_charge', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
     assert args.dtype in ['dirac', 'dirac2'], 'Please, specify Dirac-type operator'
 
 def analytic_1s(light_speed, n, k, Z):
@@ -106,15 +106,17 @@ spinor_H.copy_components(La = La_comp)
 spinor_H.init_small_components(prec/10)
 spinor_H.normalize()
 
+print("spinor_H")
+print(spinor_H)
 
-defult_der = 'BS'
+derivative = 'BS'
 
 error_norm = 1
 c2 = light_speed * light_speed
 
 if args.dtype == 'dirac':
     while error_norm > prec:
-        hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = defult_der)
+        hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = derivative)
         v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec)
         add_psi = hd_psi + v_psi
         energy = spinor_H.dot(add_psi).real
@@ -122,7 +124,7 @@ if args.dtype == 'dirac':
         mu = orb.calc_dirac_mu(energy, light_speed)
         tmp = orb.apply_helmholtz(v_psi, mu, prec)
         tmp.crop(prec/10)
-        new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy, der = defult_der)
+        new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, energy, der = derivative)
         new_orbital.crop(prec/10)
         new_orbital.normalize()
         delta_psi = new_orbital - spinor_H
@@ -131,7 +133,7 @@ if args.dtype == 'dirac':
         print('Error =', error_norm)
         spinor_H = new_orbital
         
-    hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = defult_der)
+    hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = derivative)
     v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec)
     add_psi = hd_psi + v_psi
     energy = spinor_H.dot(add_psi).real
@@ -142,8 +144,8 @@ elif args.dtype == 'dirac2':
         v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec) 
         vv_psi = orb.apply_potential(-0.5/c2, V_tree, v_psi, prec)
         beta_v_psi = v_psi.beta2()
-        apV_psi = v_psi.alpha_p(prec, defult_der)
-        ap_psi = spinor_H.alpha_p(prec, defult_der)
+        apV_psi = v_psi.alpha_p(prec, derivative)
+        ap_psi = spinor_H.alpha_p(prec, derivative)
         Vap_psi = orb.apply_potential(-1.0, V_tree, ap_psi, prec)
         anticom = apV_psi + Vap_psi
         RHS = beta_v_psi + vv_psi + anticom * (0.5/light_speed)
@@ -160,7 +162,7 @@ elif args.dtype == 'dirac2':
         print("Error =", error_norm)
         spinor_H = new_orbital
     
-    hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der)
+    hd_psi = orb.apply_dirac_hamiltonian(spinor_H, prec, der = derivative)
     v_psi = orb.apply_potential(-1.0, V_tree, spinor_H, prec)
     add_psi = hd_psi + v_psi
     energy = spinor_H.dot(add_psi).real
@@ -169,9 +171,9 @@ elif args.dtype == 'dirac2':
     beta_v_psi = v_psi.beta2()
     beta_pot = (beta_v_psi.dot(spinor_H)).real
     pot_sq  = (v_psi.dot(v_psi)).real
-    ap_psi = spinor_H.alpha_p(prec, der)
+    ap_psi = spinor_H.alpha_p(prec, derivative)
     anticom = (ap_psi.dot(v_psi)).real
-    energy_kutzelnigg = cke + beta_pot + pot_sq/(2*mc2) + anticom/light_speed
+    energy_kutzelnigg = cke + beta_pot + pot_sq/(2*c2) + anticom/light_speed
     
     print('Kutzelnigg =',cke, beta_pot, pot_sq/(2*c2), anticom/light_speed, energy_kutzelnigg)
     print('Quadratic approx =',energy_kutzelnigg - energy_kutzelnigg**2/(2*c2))
