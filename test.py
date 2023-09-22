@@ -82,8 +82,7 @@ if __name__ == '__main__':
 
     ################### Reading Atoms #########################
     atomlist = 'atom_list.txt'  # Replace with the actual file name
-    number = 1
-    coordinates, number = nucpot.read_file_with_named_lists(atomlist, number)
+    coordinates, number = nucpot.read_file_with_named_lists(atomlist)
 
     print("Number of Atoms = ", number)
     print(coordinates)
