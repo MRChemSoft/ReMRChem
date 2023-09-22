@@ -20,7 +20,9 @@ def read_file_with_named_lists(atomlist):
             charge = charge_list[terms[0]]
             atom_list[index] = [terms[0], charge, float(terms[1]), float(terms[2]), float(terms[3])]
             index += 1
-    return atom_list
+        number = len(atom_list)
+    return atom_list, number
+
 
 def calculate_center_of_mass(atoms_list):
     total_mass = 0.0

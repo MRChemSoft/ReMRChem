@@ -1,6 +1,6 @@
 ########## Define Enviroment #################
 from orbital4c import complex_fcn as cf
-from orbital4c import orbital as orb 
+from orbital4c import orbital as orb
 from orbital4c import nuclear_potential as nucpot
 from orbital4c import r3m as r3m
 from scipy.constants import hbar
@@ -44,7 +44,6 @@ if __name__ == '__main__':
     assert args.potential in ['point_charge', 'coulomb_HFYGB', 'homogeneus_charge_sphere', 'gaussian'], 'Please, specify V'
 
     assert args.deriv in ['PH', 'BS', 'ABGV'], 'Please, specify the type of derivative'
-    
 
     ################# Define Paramters ###########################
     light_speed = args.lux_speed
@@ -53,7 +52,7 @@ if __name__ == '__main__':
     l = 0
     n = 1
     m = 0.5
-    
+
     ################# Call MRA #######################
     mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order, max_depth = 30)
     prec = args.prec
@@ -67,27 +66,27 @@ if __name__ == '__main__':
     computeNuclearPotential = True
     readOrbitals            = False
     runD_1e                 = False
-    runD2_1e                = True    
+    runD2_1e                = False
     runCoulombGen           = False
-    runCoulomb2e            = False    
+    runCoulomb2e            = False
     runKutzelnigg           = False
-    runKutzSimple           = False
+    runKutzSimple           = True
     saveOrbitals            = False
-    runGaunt                = False 
-    runGaugeA               = False 
-    runGaugeB               = False 
-    runGaugeC               = False 
-    runGaugeD               = False 
+    runGaunt                = False
+    runGaugeA               = False
+    runGaugeB               = False
+    runGaugeC               = False
+    runGaugeD               = False
     runGaugeDelta           = False
-    print('Jobs chosen') 
-
+    print('Jobs chosen')
 
     ################### Reading Atoms #########################
     atomlist = 'atom_list.txt'  # Replace with the actual file name
-    coordinates = nucpot.read_file_with_named_lists(atomlist)
+    coordinates, number = nucpot.read_file_with_named_lists(atomlist)
 
+    print("Number of Atoms = ", number)
     print(coordinates)
-    
+
     ################### Define V potential ######################
     V_tree = vp.FunctionTree(mra)
     if(computeNuclearPotential):
@@ -95,12 +94,11 @@ if __name__ == '__main__':
         typenuc = args.potential
         f = lambda x: nucpot.nuclear_potential(x, coordinates, typenuc, mra, prec, derivative)
         V_tree = Peps(f)
-        print('V_tree', V_tree)
+        print("Define V", args.potential, "DONE")
         com_coordinates = nucpot.calculate_center_of_mass(coordinates)
         print("Center of Mass (x, y, z):", com_coordinates)
 
     #############################START WITH CALCULATION###################################
-    
     spinorb1 = orb.orbital4c()
     spinorb2 = orb.orbital4c()
     if readOrbitals:
@@ -118,8 +116,10 @@ if __name__ == '__main__':
             vp.advanced.build_grid(out=gauss_tree, inp=gauss)
             vp.advanced.project(prec=prec, out=gauss_tree, inp=gauss)
             AO_list.append(gauss_tree)
-
-        gauss_tree_tot = AO_list[0] + AO_list[1]
+        if number == 1:
+            gauss_tree_tot = AO_list[0]
+        elif number == 2:
+            gauss_tree_tot = AO_list[0] + AO_list[1]
         gauss_tree_tot.normalize()
 
         La_comp = cf.complex_fcn()
@@ -129,12 +129,14 @@ if __name__ == '__main__':
         spinorb1.normalize()
         spinorb1.cropLargeSmall(prec)
         # print('Spin1', spinorb1)
-        spinorb2 = spinorb1.ktrs(prec) #does this go out of scope?
+        spinorb2 = spinorb1.ktrs(prec)
 
-        print("spinorb1")
-        print(spinorb1)
+        #print("spinorb1")
+        #print(spinorb1)
+
     length = 2 * args.box
     print("Using derivative ", derivative)
+
     if runD_1e:
         spinorb1 = one_electron.gs_D_1e(spinorb1, V_tree, mra, prec, derivative)
 
@@ -155,7 +157,7 @@ if __name__ == '__main__':
 
     if runGaunt:
         two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)
-    
+
     if runGaugeA:
         two_electron.calcGaugePertA(spinorb1, spinorb2, mra, prec)
 
@@ -164,14 +166,13 @@ if __name__ == '__main__':
 
     if runGaugeC:
         two_electron.calcGaugePertC(spinorb1, spinorb2, mra, prec)
-        
+
     if runGaugeD:
         two_electron.calcGaugePertD(spinorb1, spinorb2, mra, prec)
-        
+
     if runGaugeDelta:
         two_electron.calcGaugeDelta(spinorb1, spinorb2, mra, prec)
-        
+
     if saveOrbitals:
         spinorb1.save("spinorb1")
         spinorb2.save("spinorb2")
-    
