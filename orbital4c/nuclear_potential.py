@@ -10,7 +10,7 @@ import numpy as np
 import numpy.linalg as LA
 import sys, getopt
 
-def read_file_with_named_lists(atomlist, number):
+def read_file_with_named_lists(atomlist):
     charge_list = {"H" : 1, "He": 2, "Pu": 94}
     atom_list = {}
     index = 0
