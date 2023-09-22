@@ -224,7 +224,12 @@ def coulomb_2e_D2_J(spinors, potential, mra, prec, der = 'ABGV'):
     cke = spinors[0].classicT()
     cpe = (spinors[0].dot(RHS)).real
     print("Final classic-like energies: ", cke, cpe, cke + cpe)
-    print("Final orbital energy: ", c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2)))
+    final_orbital_energy = c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2)))
+    Jorb = Jop(spinors[0])
+    Jenergy = (spinors[0].dot(Jorb)).real
+    final_total_energy = 2.0 * final_orbital_energy - 0.5 * Jenergy
+    print("Final orbital energies: ", final_orbital_energy, final_tital_energy)
+
     return spinors[0], spinors[1]
 
 def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
