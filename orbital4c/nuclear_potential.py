@@ -10,7 +10,7 @@ import numpy as np
 import numpy.linalg as LA
 import sys, getopt
 
-def read_file_with_named_lists(atomlist):
+def read_file_with_named_lists(atomlist, number):
     charge_list = {"H" : 1, "He": 2, "Pu": 94}
     atom_list = {}
     index = 0
@@ -20,7 +20,9 @@ def read_file_with_named_lists(atomlist):
             charge = charge_list[terms[0]]
             atom_list[index] = [terms[0], charge, float(terms[1]), float(terms[2]), float(terms[3])]
             index += 1
-    return atom_list
+        number = len(atom_list)
+    return atom_list, number
+
 
 def calculate_center_of_mass(atoms_list):
     total_mass = 0.0

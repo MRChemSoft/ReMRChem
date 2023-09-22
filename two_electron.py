@@ -13,7 +13,7 @@ import sys, getopt
 # Generic coulomb Dirac HF solver. Now works for 2e connected by KTRS.
 # It should be easy to extend it to more complicated cases
 #
-def coulomb_gs_gen(spinors, potential, mra, prec, der = 'ABGV'):
+def coulomb_gs_gen(spinors, potential, mra, prec, derivative):
     print('Hartree-Fock (Coulomb interaction) Generic 2e')
     error_norm = 1.0
     compute_last_energy = False
@@ -51,7 +51,7 @@ def coulomb_gs_gen(spinors, potential, mra, prec, der = 'ABGV'):
         mu = orb.calc_dirac_mu(Fmat[0][0].real, light_speed)
         tmp = orb.apply_helmholtz(RHS, mu, prec)
 
-        new_spinor = orb.apply_dirac_hamiltonian(tmp, prec, Fmat[0][0].real, der)
+        new_spinor = orb.apply_dirac_hamiltonian(tmp, prec, Fmat[0][0].real, der = derivative)
         new_spinor *= 0.5/light_speed**2
         new_spinor.normalize()
         new_spinor.cropLargeSmall(prec)
@@ -76,7 +76,7 @@ def coulomb_gs_gen(spinors, potential, mra, prec, der = 'ABGV'):
         print(Fmat[0][0] - light_speed ** 2)
     return spinors[0], spinors[1]
 
-def coulomb_2e_D2(spinors, potential, mra, prec, der = 'ABGV'):
+def coulomb_2e_D2(spinors, potential, mra, prec, derivative):
     print('Hartree-Fock (Coulomb interaction) 2e D2')
     error_norm = 1.0
     compute_last_energy = False
@@ -188,7 +188,7 @@ def coulomb_2e_D2(spinors, potential, mra, prec, der = 'ABGV'):
         print("total energy: ", total_energy)
     return spinors[0], spinors[1]
 
-def coulomb_2e_D2_J(spinors, potential, mra, prec, der = 'ABGV'):
+def coulomb_2e_D2_J(spinors, potential, mra, prec, derivative):
     print('Hartree-Fock (Coulomb interaction) 2e D2 J only')
     error_norm = 1.0
     compute_last_energy = False
@@ -201,16 +201,16 @@ def coulomb_2e_D2_J(spinors, potential, mra, prec, der = 'ABGV'):
         RHS = build_RHS_D2(Jop, Vop, spinors[0], prec, light_speed)
         cke = spinors[0].classicT()
         cpe = (spinors[0].dot(RHS)).real
-        print("Classic-like energies: ", cke, cpe, cke + cpe)
+        print("Classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", cke + cpe)
         print("Orbital energy: ", c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2)))
         mu = orb.calc_non_rel_mu(cke+cpe)
         new_spinor = orb.apply_helmholtz(RHS, mu, prec)
-        print("============= Spinor before Helmholtz =============")
-        print(spinors[0])
-        print("============= RHS before Helmholtz    =============")
-        print(RHS)
-        print("============= New spinor before crop  =============")
-        print(new_spinor)
+        #print("============= Spinor before Helmholtz =============")
+        #print(spinors[0])
+        #print("============= RHS before Helmh#oltz    =============")
+        #print(RHS)
+        #print("============= New spinor before crop  =============")
+        #print(new_spinor)
         new_spinor.cropLargeSmall(prec)
         new_spinor.normalize()
         delta_psi = new_spinor - spinors[0]
@@ -223,11 +223,16 @@ def coulomb_2e_D2_J(spinors, potential, mra, prec, der = 'ABGV'):
     RHS = build_RHS_D2(Jop, Vop, spinors[0], prec, light_speed)
     cke = spinors[0].classicT()
     cpe = (spinors[0].dot(RHS)).real
-    print("Final classic-like energies: ", cke, cpe, cke + cpe)
-    print("Final orbital energy: ", c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2)))
+    final_orbital_energy = c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2))
+    Jorb = Jop(spinors[0])
+    Jenergy = (spinors[0].dot(Jorb)).real
+    final_total_energy = 2.0 * final_orbital_energy - 0.5 * Jenergy
+    print("Final classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", cke + cpe)
+    print("Final orbital energy: ", final_orbital_energy)
+    print("Final Total energy: ", final_total_energy)
     return spinors[0], spinors[1]
 
-def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
+def coulomb_gs_2e(spinorb1, potential, mra, prec, derivative):
     print('Hartree-Fock (Coulomb interaction)')
     error_norm = 1
     compute_last_energy = False
@@ -241,7 +246,7 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
         B22    = P(n_22.real) * (4 * np.pi)
 
         # Definiton of Dirac Hamiltonian for spinorbit 1 that due to TRS is equal spinorbit 2
-        hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der)
+        hd_psi_1 = orb.apply_dirac_hamiltonian(spinorb1, prec, 0.0, der = derivative)
         hd_11 = spinorb1.dot(hd_psi_1)
         print("hd_11", hd_11)
         # Applying nuclear potential to spin orbit 1 and 2
@@ -270,7 +275,7 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, der = 'ABGV'):
 
         mu = orb.calc_dirac_mu(eps, light_speed)
         tmp = orb.apply_helmholtz(V_J_K_spinorb1, mu, prec)
-        new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der)
+        new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der = derivative)
         new_orbital *= 0.5/light_speed**2
         print("============= Spinor before Helmholtz =============")
         print(spinorb1)
@@ -405,7 +410,7 @@ def calcPerturbationValues(contributions, P, prec, testNorm):
 #
 # no delta terms from this expression
 #
-def calcGaugePertA(spinorb1, spinorb2, mra, prec, der):
+def calcGaugePertA(spinorb1, spinorb2, mra, prec, derivative):
     print("Gauge Perturbation Version A")
     projection_operator = vp.ScalingProjector(mra, prec)
     P = vp.PoissonOperator(mra, prec)
@@ -415,16 +420,16 @@ def calcGaugePertA(spinorb1, spinorb2, mra, prec, der):
     n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
 
 
-    div_n22 = cf.divergence(n22, prec, der)
-    div_n21 = cf.divergence(n21, prec, der)
+    div_n22 = cf.divergence(n22, prec, derivative)
+    div_n21 = cf.divergence(n21, prec, derivative)
     n11_dot_r = cf.vector_dot_r(n11, prec)
     n12_dot_r = cf.vector_dot_r(n12, prec)
 
     n22_r_mat = cf.vector_tensor_r(n22, prec)
     n21_r_mat = cf.vector_tensor_r(n21, prec)
 
-    grad_n11 = cf.vector_gradient(n11, der)
-    grad_n12 = cf.vector_gradient(n12, der)
+    grad_n11 = cf.vector_gradient(n11, derivative)
+    grad_n12 = cf.vector_gradient(n12, derivative)
 
     contributions = {
         "density":[n11_dot_r,
@@ -453,7 +458,7 @@ def calcGaugePertA(spinorb1, spinorb2, mra, prec, der):
     print("final Gauge A", result)
     return -0.5 * result.real
 
-def calcGaugePertB(spinorb1, spinorb2, mra, prec, der):
+def calcGaugePertB(spinorb1, spinorb2, mra, prec, derivative):
     print("Gauge Perturbation Version B")
 
     projection_operator = vp.ScalingProjector(mra, prec)
@@ -463,8 +468,8 @@ def calcGaugePertB(spinorb1, spinorb2, mra, prec, der):
     n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
     n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
 
-    div_n22 = cf.divergence(n22, prec, der)
-    div_n21 = cf.divergence(n21, prec, der)
+    div_n22 = cf.divergence(n22, prec, derivative)
+    div_n21 = cf.divergence(n21, prec, derivative)
     div_n22_r = cf.scalar_times_r(div_n22, prec)
     div_n21_r = cf.scalar_times_r(div_n21, prec)
     n11_dot_r = cf.vector_dot_r(n11, prec)
@@ -494,7 +499,7 @@ def calcGaugePertB(spinorb1, spinorb2, mra, prec, der):
 # same structure as Sun 2022
 # least efficeint method
 #
-def calcGaugePertC(spinorb1, spinorb2, mra, prec, der):
+def calcGaugePertC(spinorb1, spinorb2, mra, prec, derivative):
     print("Gauge Perturbation Version C (Sun 2022)")
     projection_operator = vp.ScalingProjector(mra, prec)
     P = vp.PoissonOperator(mra, prec)
@@ -503,8 +508,8 @@ def calcGaugePertC(spinorb1, spinorb2, mra, prec, der):
     n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
     n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
 
-    grad_n11 = cf.vector_gradient(n11, der)
-    grad_n12 = cf.vector_gradient(n12, der)
+    grad_n11 = cf.vector_gradient(n11, derivative)
+    grad_n12 = cf.vector_gradient(n12, derivative)
 
     grad_n11_r = [cf.vector_dot_r([grad_n11[i][0] for i in range(3)], prec),
                   cf.vector_dot_r([grad_n11[i][1] for i in range(3)], prec),
@@ -517,8 +522,8 @@ def calcGaugePertC(spinorb1, spinorb2, mra, prec, der):
     n21_r_mat = cf.vector_tensor_r(n21, prec)
     
     
-    div_n22 = cf.divergence(n22, prec, der)
-    div_n21 = cf.divergence(n21, prec, der)
+    div_n22 = cf.divergence(n22, prec, derivative)
+    div_n21 = cf.divergence(n21, prec, derivative)
     div_n22_r = cf.scalar_times_r(div_n22, prec)
     div_n21_r = cf.scalar_times_r(div_n21, prec)
     n11_dot_r = cf.vector_dot_r(n11, prec)
@@ -556,7 +561,7 @@ def calcGaugePertC(spinorb1, spinorb2, mra, prec, der):
 #
 # double delta term excluded
 #
-def calcGaugePertD(spinorb1, spinorb2, mra, prec, der):
+def calcGaugePertD(spinorb1, spinorb2, mra, prec, derivative):
     print("Gauge Perturbation Version D")
     projection_operator = vp.ScalingProjector(mra, prec)
     P = vp.PoissonOperator(mra, prec)
@@ -565,8 +570,8 @@ def calcGaugePertD(spinorb1, spinorb2, mra, prec, der):
     n21 = calcAlphaDensityVector(spinorb2, spinorb1, prec)
     n22 = calcAlphaDensityVector(spinorb2, spinorb2, prec)
 
-    grad_n11 = cf.vector_gradient(n11, der)
-    grad_n12 = cf.vector_gradient(n12, der)
+    grad_n11 = cf.vector_gradient(n11, derivative)
+    grad_n12 = cf.vector_gradient(n12, derivative)
         
     grad_n11_r = [cf.vector_dot_r([grad_n11[i][0] for i in range(3)], prec),
                   cf.vector_dot_r([grad_n11[i][1] for i in range(3)], prec),
@@ -576,8 +581,8 @@ def calcGaugePertD(spinorb1, spinorb2, mra, prec, der):
                   cf.vector_dot_r([grad_n12[i][1] for i in range(3)], prec),
                   cf.vector_dot_r([grad_n12[i][2] for i in range(3)], prec)]
 
-    div_n22 = cf.divergence(n22, prec, der)
-    div_n21 = cf.divergence(n21, prec, der)
+    div_n22 = cf.divergence(n22, prec, derivative)
+    div_n21 = cf.divergence(n21, prec, derivative)
 
     div_n22_r = cf.scalar_times_r(div_n22, prec)
     div_n21_r = cf.scalar_times_r(div_n21, prec)
