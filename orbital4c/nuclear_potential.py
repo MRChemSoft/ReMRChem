@@ -11,7 +11,7 @@ import numpy.linalg as LA
 import sys, getopt
 
 def read_file_with_named_lists(atomlist):
-    charge_list = {"H" : 1, "He": 2, "Pu": 94}
+    charge_list = {"H" : 1, "He": 2, "Ne": 10, "Ar": 18, "Kr": 36, "Xe": 54, "Rn": 86, "Th": 90, "U":92, "Pu": 94}
     atom_list = {}
     index = 0
     with open(atomlist, 'r') as file:
@@ -40,9 +40,8 @@ def calculate_center_of_mass(atoms_list):
     # Calculate the weighted average to get the center of mass
     for i in range(3):
         center_of_mass[i] /= total_mass
-    
+
     return center_of_mass
-    
 
 #def pot(coordinates, typenuc, mra, prec, der):
 #    atomic_potentials = []
@@ -96,11 +95,14 @@ def nuclear_potential(position, atoms_list, typenuc, mra, prec, der):
     potential = 0
     for atom in atoms_list.values():
         charge = atom[1]
+        atomname = atom[0]
         atom_coordinates = [atom[2], atom[3], atom[4]]
         if typenuc == 'point_charge':
             atomic_potential = point_charge(position, atom_coordinates, charge)
         elif typenuc == 'coulomb_HFYGB':
             atomic_potential = coulomb_HFYGB(position, atom_coordinates, charge, prec)
+        elif typenuc == 'gaussian':
+            atomic_potential = gaussian(position, atom_coordinates, charge, atomname)
         else:
             print("Potential not defined")
             exit(-1)
@@ -159,13 +161,13 @@ def homogeneus_charge_sphere(position, center, charge, RMS):
     return prec * factor
 
 
-def gaussian(position, center, charge, atom):
+def gaussian(position, center, charge, atomname):
     fileObj = open("./orbital4c/param_V.txt", "r")
     for line in fileObj:
         if not line.startswith("#"):
             line = line.strip().split()
             if len(line) == 3:
-               if line[0] == atom:
+               if line[0] == atomname:
                   epsilon = line[2]
             else:
                print("Data file not correclty formatted! Please check it!")

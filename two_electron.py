@@ -277,12 +277,12 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, derivative):
         tmp = orb.apply_helmholtz(V_J_K_spinorb1, mu, prec)
         new_orbital = orb.apply_dirac_hamiltonian(tmp, prec, eps, der = derivative)
         new_orbital *= 0.5/light_speed**2
-        print("============= Spinor before Helmholtz =============")
-        print(spinorb1)
-        print("============= RHS before Helmholtz    =============")
-        print(V_J_K_spinorb1)
-        print("============= New spinor before crop  =============")
-        print(new_orbital)
+        #print("============= Spinor before Helmholtz =============")
+        #print(spinorb1)
+        #print("============= RHS before Helmholtz    =============")
+        #print(V_J_K_spinorb1)
+        #print("============= New spinor before crop  =============")
+        #print(new_orbital)
         new_orbital.normalize()
         new_orbital.cropLargeSmall(prec)       
 
