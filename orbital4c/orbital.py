@@ -101,7 +101,7 @@ class orbital4c:
         largeNorm = np.sqrt(self.squaredLargeNorm())
         smallNorm = np.sqrt(self.squaredSmallNorm())
         precLarge = prec * largeNorm
-        precSmall = prec * largeNorm
+        precSmall = prec * smallNorm
 #        print('precisions', precLarge, precSmall)
         self['La'].crop(precLarge, True)
         self['Lb'].crop(precLarge, True)

@@ -64,13 +64,13 @@ if __name__ == '__main__':
 
     ################## Jobs ##########################
     computeNuclearPotential = True
-    readOrbitals            = False
+    readOrbitals            = True
     runD_1e                 = False
     runD2_1e                = False
     runCoulombGen           = False
-    runCoulomb2e            = False
+    runCoulomb2e            = False #Use it
     runKutzelnigg           = False
-    runKutzSimple           = True
+    runKutzSimple           = True #I will use it
     saveOrbitals            = False
     runGaunt                = False
     runGaugeA               = False
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     spinorb2 = orb.orbital4c()
     if readOrbitals:
         spinorb1.read("spinorb1")
-        spinorb2.read("spinorb2")
+        #spinorb2.read("spinorb2")
     else:
         gauss_tree_tot = vp.FunctionTree(mra)
         gauss_tree_tot.setZero()
@@ -144,10 +144,10 @@ if __name__ == '__main__':
         spinorb1 = one_electron.gs_D2_1e(spinorb1, V_tree, mra, prec, derivative)
 
     if runCoulombGen:
-        spinorb1, spinorb2 = two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec)
+        spinorb1, spinorb2 = two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec, derivative)
 
     if runCoulomb2e:
-        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec)
+        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec, derivative)
 
     if runKutzelnigg:
         spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, derivative)
@@ -175,4 +175,4 @@ if __name__ == '__main__':
 
     if saveOrbitals:
         spinorb1.save("spinorb1")
-        spinorb2.save("spinorb2")
+        #spinorb2.save("spinorb2")

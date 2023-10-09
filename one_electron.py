@@ -54,7 +54,6 @@ def gs_D_1e(spinorb1, potential, mra, prec, derivative):
 
 def gs_D2_1e(spinorb1, potential, mra, prec, derivative):
     print('Hartree-Fock 1e D2')
-
     error_norm = 1
     light_speed = spinorb1.light_speed
     c2 = light_speed * light_speed
@@ -109,26 +108,3 @@ def gs_D2_1e(spinorb1, potential, mra, prec, derivative):
     print('Difference 1 =',energy_1s - energy)
     print('Difference 2 =',energy_1s - energy_kutzelnigg - light_speed**2)
     return spinorb1
-
-#def build_RHS_D2_1e(Vop, spinor, prec, light_speed):
-#    c2 = light_speed**2
-#    Vpsi = Vop(spinor)
-#    VT_psi = -1.0 *  Vpsi
-#
-#    beta_VT_psi = VT_psi.beta2()
-#    beta_VT_psi.cropLargeSmall(prec)
-
-#    ap_VT_psi = VT_psi.alpha_p(prec)
-#    ap_psi = spinor.alpha_p(prec)
-#    VT_ap_psi =  -1.0 *  Vop(ap_psi)
-#    anticom = VT_ap_psi + ap_VT_psi
-#    anticom *= 1.0 / (2.0 * light_speed)
-#    anticom.cropLargeSmall(prec)
-
-#    VT_VT_psi = -1.0 * Vop(VT_psi)
-#    VT_VT_psi *= 1.0 / (2.0 * c2)
-#    VT_VT_psi.cropLargeSmall(prec)
-
-#    RHS = beta_VT_psi + anticom + VT_VT_psi
-#    RHS.cropLargeSmall(prec)
-#    return RHS 
