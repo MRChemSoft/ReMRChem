@@ -62,8 +62,8 @@ def gs_D2_1e(spinorb1, potential, mra, prec, derivative):
         v_psi = orb.apply_potential(-1.0, potential, spinorb1, prec) 
         vv_psi = orb.apply_potential(-0.5/c2, potential, v_psi, prec)
         beta_v_psi = v_psi.beta2()
-        apV_psi = v_psi.alpha_p(prec)
-        ap_psi = spinorb1.alpha_p(prec)
+        apV_psi = v_psi.alpha_p(prec, derivative)
+        ap_psi = spinorb1.alpha_p(prec, derivative)
         Vap_psi = orb.apply_potential(-1.0, potential, ap_psi, prec)
         anticom = apV_psi + Vap_psi
         anticom.cropLargeSmall(prec)
