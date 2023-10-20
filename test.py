@@ -21,6 +21,16 @@ import two_electron
 import importlib
 importlib.reload(orb)
 
+def read_step_file(filename):
+    steps = {}
+    with open(filename, 'r') as file:
+        for line in file:
+            terms = line.strip().split()
+            option = terms[0]
+            value = terms[1]
+            steps[option] = value
+    return steps
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
     parser.add_argument('-d', '--derivative', dest='deriv', type=str, default='ABGV',
@@ -62,30 +72,45 @@ if __name__ == '__main__':
     derivative = args.deriv
     print('call MRA DONE')
 
+    steplist = 'step_list.txt'
+    atomlist = 'atom_list.txt'
+    steps = read_step_file(steplist)
+    coordinates, number = nucpot.read_file_with_named_lists(atomlist)
+
     ################## Jobs ##########################
-    computeNuclearPotential = True
-    readOrbitals            = True
+    computeNuclearPotential = False
+    readOrbitals            = False
+    readPotential           = False
     runD_1e                 = False
     runD2_1e                = False
     runCoulombGen           = False
-    runCoulomb2e            = False #Use it
+    runCoulomb2e            = False
     runKutzelnigg           = False
-    runKutzSimple           = True #I will use it
+    runKutzSimple           = False
     saveOrbitals            = False
+    savePotential           = False
     runGaunt                = False
     runGaugeA               = False
     runGaugeB               = False
     runGaugeC               = False
     runGaugeD               = False
     runGaugeDelta           = False
-    print('Jobs chosen')
+
+    for key in steps:
+        flag = (steps[key] == 'True')
+        locals()[key] = flag
+        print(key, steps[key], locals()[key])
+
+    if(computeNuclearPotential): print("hello")
 
     ################### Reading Atoms #########################
-    atomlist = 'atom_list.txt'  # Replace with the actual file name
+    steplist = 'step_list.txt'
+    atomlist = 'atom_list.txt'
     coordinates, number = nucpot.read_file_with_named_lists(atomlist)
 
     print("Number of Atoms = ", number)
     print(coordinates)
+    exit(-1)
 
     ################### Define V potential ######################
     V_tree = vp.FunctionTree(mra)
@@ -176,3 +201,4 @@ if __name__ == '__main__':
     if saveOrbitals:
         spinorb1.save("spinorb1")
         #spinorb2.save("spinorb2")
+
