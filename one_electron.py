@@ -25,8 +25,8 @@ def gs_D_1e(spinorb1, potential, mra, prec, thr, derivative):
 
     light_speed = spinorb1.light_speed
     old_energy = 0
-    
-    while error_norm > thr:
+    delta_e = 1
+    while (error_norm > thr and delta_e > thr/1000):
         hd_psi = orb.apply_dirac_hamiltonian(spinorb1, prec, der = derivative)
         v_psi = orb.apply_potential(-1.0, potential, spinorb1, prec)
         add_psi = hd_psi + v_psi
@@ -45,7 +45,8 @@ def gs_D_1e(spinorb1, potential, mra, prec, thr, derivative):
         deltasq = delta_psi.squaredNorm()
         error_norm = np.sqrt(deltasq)
         print('Error', error_norm)
-        print('Delta E', energy - old_energy)
+        delta_e = np.abs(energy - old_energy)
+        print('Delta E', delta_e)
         print('Energy',energy - light_speed**2)
         old_energy = energy
         spinorb1 = new_orbital
@@ -65,10 +66,11 @@ def gs_D_1e(spinorb1, potential, mra, prec, thr, derivative):
 def gs_D2_1e(spinorb1, potential, mra, prec, thr, derivative):
     print('Hartree-Fock 1e D2')
     error_norm = 1
+    delta_e = 1
     light_speed = spinorb1.light_speed
     c2 = light_speed * light_speed
     old_energy = 0
-    while error_norm > thr:
+    while (error_norm > thr  and delta_e > thr/1000):
         v_psi = orb.apply_potential(-1.0, potential, spinorb1, prec) 
         vv_psi = orb.apply_potential(-0.5/c2, potential, v_psi, prec*c2)
         beta_v_psi = v_psi.beta2()
@@ -95,7 +97,8 @@ def gs_D2_1e(spinorb1, potential, mra, prec, thr, derivative):
         deltasq = delta_psi.squaredNorm()
         error_norm = np.sqrt(deltasq)
         print("Error =", error_norm)
-        print('Delta E', energy - old_energy)
+        delta_e = np.abs(energy - old_energy)
+        print('Delta E', delta_e)
         print('Energy',energy, old_energy)
         old_energy = energy
         spinorb1 = new_orbital
