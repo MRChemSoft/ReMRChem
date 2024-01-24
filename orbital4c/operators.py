@@ -130,7 +130,7 @@ class PotentialOperator(Operator):
         self.potential = potential
         self.real = real
 
-    def __call__(self, phi, prec_mod):
+    def __call__(self, phi, prec_mod = 1):
         if(self.real):
             result = orb.apply_potential(1.0, self.potential, phi, self.prec * prec_mod)
         else:

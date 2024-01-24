@@ -172,16 +172,18 @@ if __name__ == '__main__':
         spinorb1 = one_electron.gs_D2_1e(spinorb1, V_tree, mra, prec, thr, derivative)
 
     if runCoulombGen:
-        spinorb1, spinorb2 = two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec, derivative)
+        print("NOT ACTIVE")
+#        spinorb1, spinorb2 = two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec, derivative)
 
     if runCoulomb2e:
-        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec, derivative)
+        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec, thr, derivative)
 
     if runKutzelnigg:
-        spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, derivative)
+        print("NOT ACTIVE")
+#        spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, derivative)
 
     if runKutzSimple:
-        spinorb1, spinorb2 = two_electron.coulomb_2e_D2_J([spinorb1, spinorb2], V_tree, mra, prec, derivative)
+        spinorb1, spinorb2 = two_electron.coulomb_2e_D2_J([spinorb1, spinorb2], V_tree, mra, prec, thr, derivative)
 
     if runGaunt:
         two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)

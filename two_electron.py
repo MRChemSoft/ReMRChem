@@ -188,58 +188,63 @@ def coulomb_2e_D2(spinors, potential, mra, prec, derivative):
         print("total energy: ", total_energy)
     return spinors[0], spinors[1]
 
-def coulomb_2e_D2_J(spinors, potential, mra, prec, derivative):
+def coulomb_2e_D2_J(spinors, potential, mra, prec, thr, derivative):
     print('Hartree-Fock (Coulomb interaction) 2e D2 J only')
     error_norm = 1.0
+    delta_e = 1
+    old_energy = 0
     compute_last_energy = False
     P = vp.PoissonOperator(mra, prec)
     light_speed = spinors[0].light_speed
     c2 = light_speed**2
     Vop = oper.PotentialOperator(mra, prec, potential)
-    while(error_norm > prec):
+    while(error_norm > thr and delta_e > thr/1000):
         Jop = oper.CoulombDirectOperator(mra, prec, spinors)
         RHS = build_RHS_D2(Jop, Vop, spinors[0], prec, light_speed)
         cke = spinors[0].classicT()
         cpe = (spinors[0].dot(RHS)).real
         print("Classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", cke + cpe)
         print("Orbital energy: ", c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2)))
+        class_e = cke + cpe
+        delta_e = np.abs(class_e - old_energy)
         mu = orb.calc_non_rel_mu(cke+cpe)
+        print("mu = ", mu)
         new_spinor = orb.apply_helmholtz(RHS, mu, prec)
-        #print("============= Spinor before Helmholtz =============")
-        #print(spinors[0])
-        #print("============= RHS before Helmh#oltz    =============")
-        #print(RHS)
-        #print("============= New spinor before crop  =============")
-        #print(new_spinor)
         new_spinor.cropLargeSmall(prec)
         new_spinor.normalize()
         delta_psi = new_spinor - spinors[0]
         deltasq = delta_psi.squaredNorm()
         error_norm = np.sqrt(deltasq)
         print('Orbital_Error norm', error_norm)
+        print('delta_e', delta_e)
         spinors[0] = new_spinor
         spinors[1] = new_spinor.ktrs(prec)
+        old_energy = class_e
     Jop = oper.CoulombDirectOperator(mra, prec, spinors)
     RHS = build_RHS_D2(Jop, Vop, spinors[0], prec, light_speed)
     cke = spinors[0].classicT()
     cpe = (spinors[0].dot(RHS)).real
+    class_e = cke + cpe
+    delta_e = np.abs(class_e - old_energy)
     final_orbital_energy = c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2))
     Jorb = Jop(spinors[0])
     Jenergy = (spinors[0].dot(Jorb)).real
     final_total_energy = 2.0 * final_orbital_energy - 0.5 * Jenergy
-    print("Final classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", cke + cpe)
+    print("Final classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", cke + cpe, "delta_e", delta_e)
     print("Final orbital energy: ", final_orbital_energy)
     print("Final Total energy: ", final_total_energy)
     return spinors[0], spinors[1]
 
-def coulomb_gs_2e(spinorb1, potential, mra, prec, derivative):
+def coulomb_gs_2e(spinorb1, potential, mra, prec, thr, derivative):
     print('Hartree-Fock (Coulomb interaction)')
     error_norm = 1
+    delta_e = 1
     compute_last_energy = False
+    old_energy = 0
     P = vp.PoissonOperator(mra, prec)
     light_speed = spinorb1.light_speed
 #    for i in range(10):
-    while (error_norm > prec or compute_last_energy):
+    while ((error_norm > thr and delta_e > thr/1000) or compute_last_energy):
         n_22 = spinorb1.overlap_density(spinorb1, prec)
 
         # Definition of two electron operators
@@ -266,8 +271,13 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, derivative):
         eps = hd_V_11.real + JmK.real
         E_tot_JK =  2*eps - JmK.real
 
+        orbital_e = eps - light_speed**2
+        total_e = E_tot_JK - (2.0 *light_speed**2)
+        delta_e = np.abs(total_e - old_energy)
         print('orbital energy', eps - light_speed**2)
         print('total energy', E_tot_JK - (2.0 *light_speed**2))
+        print('delta_e', delta_e)
+
         if(compute_last_energy):
             break
 
@@ -293,8 +303,9 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, derivative):
         print('Orbital_Error norm', error_norm)
         spinorb1 = new_orbital
         spinorb2 = spinorb1.ktrs(prec)
-        if(error_norm < prec):
+        if(error_norm < thr and delta_e < thr/1000):
             compute_last_energy = True
+        old_energy = total_e
     return spinorb1, spinorb2
 
 #def coulomb_gs(potential, spinors, mra, prec, der = 'ABGV'):
@@ -653,7 +664,7 @@ def build_RHS_D2(Jop, Vop, spinor, prec, light_speed):
     anticom *= 1.0 / (2.0 * light_speed)
     anticom.cropLargeSmall(prec*light_speed)
 
-    VT_VT_psi = 0.5 * Jop(VT_psi*c2) - Vop(VT_psi*c2)
+    VT_VT_psi = 0.5 * Jop(VT_psi,c2) - Vop(VT_psi,c2)
     VT_VT_psi *= 1.0 / (2.0 * c2)
     VT_VT_psi.cropLargeSmall(prec*c2)
 
