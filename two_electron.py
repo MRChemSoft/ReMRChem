@@ -646,16 +646,16 @@ def build_RHS_D2(Jop, Vop, spinor, prec, light_speed):
     beta_VT_psi = VT_psi.beta2()
     beta_VT_psi.cropLargeSmall(prec)
 
-    ap_VT_psi = VT_psi.alpha_p(prec)
-    ap_psi = spinor.alpha_p(prec)
-    VT_ap_psi = 0.5 * Jop(ap_psi) - Vop(ap_psi)
+    ap_VT_psi = VT_psi.alpha_p(prec*light_speed)
+    ap_psi = spinor.alpha_p(prec*light_speed)
+    VT_ap_psi = 0.5 * Jop(ap_psi,light_speed) - Vop(ap_psi,light_speed)
     anticom = VT_ap_psi + ap_VT_psi
     anticom *= 1.0 / (2.0 * light_speed)
-    anticom.cropLargeSmall(prec)
+    anticom.cropLargeSmall(prec*light_speed)
 
-    VT_VT_psi = 0.5 * Jop(VT_psi) - Vop(VT_psi)
+    VT_VT_psi = 0.5 * Jop(VT_psi*c2) - Vop(VT_psi*c2)
     VT_VT_psi *= 1.0 / (2.0 * c2)
-    VT_VT_psi.cropLargeSmall(prec)
+    VT_VT_psi.cropLargeSmall(prec*c2)
 
     RHS = beta_VT_psi + anticom + VT_VT_psi
     RHS.cropLargeSmall(prec)

@@ -94,11 +94,11 @@ class CoulombDirectOperator(Operator):
         vp.advanced.add(self.prec, rho, rholist)
         self.potential = (4.0*np.pi) * self.poisson(rho).crop(self.prec)
 
-    def __call__(self, phi):
+    def __call__(self, phi, prec_mod = 1.0):
         complex_pot = cf.complex_fcn()
         complex_pot.real = self.potential
         complex_pot.imag.setZero()
-        out = orb.apply_complex_potential(1.0, complex_pot, phi, self.prec)
+        out = orb.apply_complex_potential(1.0, complex_pot, phi, self.prec * prec_mod)
         out.cropLargeSmall(self.prec)
         return out
 
@@ -108,20 +108,20 @@ class CoulombExchangeOperator(Operator):
         self.poisson = vp.PoissonOperator(mra=self.mra, prec=self.prec)
         self.potential = None
 
-    def __call__(self, phi):
+    def __call__(self, phi, prec_mod = 1):
         Kij_array = []
         coeff_array = []
         for i in range(0, len(self.Psi)):
             V_ij = cf.complex_fcn()
-            overlap_density = self.Psi[i].overlap_density(phi, self.prec)
-            V_ij.real = self.poisson(overlap_density.real).crop(self.prec)
-            V_ij.imag = self.poisson(overlap_density.imag).crop(self.prec)
-            tmp = orb.apply_complex_potential(1.0, V_ij, self.Psi[i], self.prec)
+            overlap_density = self.Psi[i].overlap_density(phi, self.prec * prec_mod)
+            V_ij.real = self.poisson(overlap_density.real).crop(self.prec * prec_mod)
+            V_ij.imag = self.poisson(overlap_density.imag).crop(self.prec * prec_mod)
+            tmp = orb.apply_complex_potential(1.0, V_ij, self.Psi[i], self.prec * prec_mod)
             Kij_array.append(tmp)
             coeff_array.append(1.0)
-        output = orb.add_vector(Kij_array, coeff_array, self.prec) 
+        output = orb.add_vector(Kij_array, coeff_array, self.prec * prec_mod) 
         output *= 4.0 * np.pi
-        output.cropLargeSmall(self.prec)
+        output.cropLargeSmall(self.prec * prec_mod)
         return output
 
 class PotentialOperator(Operator):
@@ -130,11 +130,11 @@ class PotentialOperator(Operator):
         self.potential = potential
         self.real = real
 
-    def __call__(self, phi):
+    def __call__(self, phi, prec_mod):
         if(self.real):
-            result = orb.apply_potential(1.0, self.potential, phi, self.prec)
+            result = orb.apply_potential(1.0, self.potential, phi, self.prec * prec_mod)
         else:
-            result = orb.apply_complex_potential(1.0, self.potential, phi, self.prec)
+            result = orb.apply_complex_potential(1.0, self.potential, phi, self.prec * prec_mod)
         result.cropLargeSmall(self.prec)
         return result
         
