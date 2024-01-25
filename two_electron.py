@@ -229,7 +229,7 @@ def coulomb_2e_D2_J(spinors, potential, mra, prec, thr, derivative):
     orbital_energy = c2 * ( -1.0 + np.sqrt(1 + 2 * (classical_energy) / c2))
     delta_e = np.abs(orbital_energy - old_energy)
     Jorb = Jop(spinors[0])
-    hd_psi = orb.apply_dirac_hamiltonian(spinorb1, prec, der = derivative)
+    hd_psi = orb.apply_dirac_hamiltonian(spinors[0], prec, der = derivative)
     Vorb = Vop(spinors[0])
     Jenergy = (spinors[0].dot(Jorb)).real
     hdenergy = (spinors[0].dot(hd_psi)).real
