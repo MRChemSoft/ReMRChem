@@ -203,10 +203,11 @@ def coulomb_2e_D2_J(spinors, potential, mra, prec, thr, derivative):
         RHS = build_RHS_D2(Jop, Vop, spinors[0], prec, light_speed)
         cke = spinors[0].classicT()
         cpe = (spinors[0].dot(RHS)).real
-        print("Classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", cke + cpe)
-        print("Orbital energy: ", c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2)))
-        class_e = cke + cpe
-        delta_e = np.abs(class_e - old_energy)
+        classical_energy = cke + cpe
+        orbital_energy = c2 * ( -1.0 + np.sqrt(1 + 2 * (classical_energy) / c2))
+        print("Classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", classical_energy)
+        print("Orbital energy: ", orbital_energy)
+        delta_e = np.abs(orbital_energy - old_energy)
         mu = orb.calc_non_rel_mu(cke+cpe)
         print("mu = ", mu)
         new_spinor = orb.apply_helmholtz(RHS, mu, prec)
@@ -219,20 +220,28 @@ def coulomb_2e_D2_J(spinors, potential, mra, prec, thr, derivative):
         print('delta_e', delta_e)
         spinors[0] = new_spinor
         spinors[1] = new_spinor.ktrs(prec)
-        old_energy = class_e
+        old_energy = orbital_energy
     Jop = oper.CoulombDirectOperator(mra, prec, spinors)
     RHS = build_RHS_D2(Jop, Vop, spinors[0], prec, light_speed)
     cke = spinors[0].classicT()
     cpe = (spinors[0].dot(RHS)).real
-    class_e = cke + cpe
-    delta_e = np.abs(class_e - old_energy)
-    final_orbital_energy = c2 * ( -1.0 + np.sqrt(1 + 2 * (cpe + cke) / c2))
+    classical_energy = cke + cpe
+    orbital_energy = c2 * ( -1.0 + np.sqrt(1 + 2 * (classical_energy) / c2))
+    delta_e = np.abs(orbital_energy - old_energy)
     Jorb = Jop(spinors[0])
+    hd_psi = orb.apply_dirac_hamiltonian(spinorb1, prec, der = derivative)
+    Vorb = Vop(spinors[0])
     Jenergy = (spinors[0].dot(Jorb)).real
-    final_total_energy = 2.0 * final_orbital_energy - 0.5 * Jenergy
+    hdenergy = (spinors[0].dot(hd_psi)).real
+    Venergy = -(spinors[0].dot(Vorb)).real
+    orbital_energy_dirac = hdenergy + Jenergy + Venergy
+    total_energy = 2.0 * orbital_energy - 0.5 * Jenergy
     print("Final classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", cke + cpe, "delta_e", delta_e)
-    print("Final orbital energy: ", final_orbital_energy)
-    print("Final Total energy: ", final_total_energy)
+    print("Final orbital energy: ", orbital_energy)
+    print("Final orbital energy Dirac: ", orbital_energy_dirac)
+    print("Final Total energy: ", total_energy)
+    print("Final orbital energy difference: ", orbital_energy - old_energy)
+    print("Dirac - Kutzelnigg", orbital_energy - orbital_energy_dirac)
     return spinors[0], spinors[1]
 
 def coulomb_gs_2e(spinorb1, potential, mra, prec, thr, derivative):
