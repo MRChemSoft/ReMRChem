@@ -234,7 +234,8 @@ def coulomb_2e_D2_J(spinors, potential, mra, prec, thr, derivative):
     Jenergy = (spinors[0].dot(Jorb)).real
     hdenergy = (spinors[0].dot(hd_psi)).real
     Venergy = -(spinors[0].dot(Vorb)).real
-    orbital_energy_dirac = hdenergy + Jenergy + Venergy
+    print("hd J V", hdenergy - c2, Jenergy, Venergy)
+    orbital_energy_dirac = hdenergy + 0.5*Jenergy + Venergy - c2
     total_energy = 2.0 * orbital_energy - 0.5 * Jenergy
     print("Final classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", cke + cpe, "delta_e", delta_e)
     print("Final orbital energy: ", orbital_energy)
@@ -315,6 +316,7 @@ def coulomb_gs_2e(spinorb1, potential, mra, prec, thr, derivative):
         if(error_norm < thr and delta_e < thr/1000):
             compute_last_energy = True
         old_energy = total_e
+    print("hd J V", hd_11 - light_speed**2, JmK, V1)        
     return spinorb1, spinorb2
 
 #def coulomb_gs(potential, spinors, mra, prec, der = 'ABGV'):
