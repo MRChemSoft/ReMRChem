@@ -203,6 +203,8 @@ def coulomb_2e_D2_J(spinors, potential, mra, prec, thr, derivative):
         RHS = build_RHS_D2(Jop, Vop, spinors[0], prec, light_speed)
         cke = spinors[0].classicT()
         cpe = (spinors[0].dot(RHS)).real
+        cpe_alt = pot_exp_val_D2(Jop, Vop, spinor, prec, light_speed)
+        print("CPE and alt", cpe, cpe_alt)
         classical_energy = cke + cpe
         orbital_energy = c2 * ( -1.0 + np.sqrt(1 + 2 * (classical_energy) / c2))
         print("Classic-like energies:", "cke =", cke,"cpe =", cpe,"cke + cpe =", classical_energy)
@@ -682,3 +684,22 @@ def build_RHS_D2(Jop, Vop, spinor, prec, light_speed):
     RHS = beta_VT_psi + anticom + VT_VT_psi
     RHS.cropLargeSmall(prec)
     return RHS 
+
+def pot_exp_val_D2(Jop, Vop, spinor, prec, light_speed):
+    c2 = light_speed**2
+    Jpsi = Jop(spinor)
+    Vpsi = Vop(spinor)
+    VT_psi = 0.5 * Jpsi - Vpsi
+
+    beta_VT_psi = VT_psi.beta2()
+    beta_VT_psi.cropLargeSmall(prec)
+
+    ap_psi = spinor.alpha_p(prec*light_speed)
+    ap_psi.cropLargeSmall(prec)
+
+    exp1 = spinor.dot(beta_VT_psi).real
+    exp2 = ap_psi.dot(VT_psi).real
+    exp3 = VT_psi.dot(VT_psi).real
+    
+    return exp1 + exp2/light_speed + exp3/(2*c2)
+
