@@ -136,3 +136,5 @@ dmypy.json
 *.out
 *.prof
 *.txt
+*.err
+*.tree

@@ -21,21 +21,33 @@ import two_electron
 import importlib
 importlib.reload(orb)
 
+def read_step_file(filename):
+    steps = {}
+    with open(filename, 'r') as file:
+        for line in file:
+            terms = line.strip().split()
+            option = terms[0]
+            value = terms[1]
+            steps[option] = value
+    return steps
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Collecting all data tostart the program.')
     parser.add_argument('-d', '--derivative', dest='deriv', type=str, default='ABGV',
                         help='put the type of derivative')
-    parser.add_argument('-b', '--box', dest='box', type=int, default=60,
+    parser.add_argument('-b', '--box', dest='box', type=int, default=100,
                         help='put the box dimension')
     parser.add_argument('-l', '--light_speed', dest='lux_speed', type=float, default=137.03599913900001,
                         help='light of speed')
-    parser.add_argument('-o', '--order', dest='order', type=int, default=6,
+    parser.add_argument('-o', '--order', dest='order', type=int, default=10,
                         help='put the order of Polinomial')
     parser.add_argument('-p', '--prec', dest='prec', type=float, default=1e-4,
                         help='put the precision')
+    parser.add_argument('-t', '--threshold', dest='thr', type=float, default=1e-4,
+                        help='put the orbital threshold')
     parser.add_argument('-e', '--coulgau', dest='coulgau', type=str, default='coulomb',
                         help='put the coulomb or gaunt')
-    parser.add_argument('-v', '--potential', dest='potential', type=str, default='point_charge',
+    parser.add_argument('-v', '--potential', dest='potential', type=str, default='coulomb_HFYGB',
                         help='tell me wich model for V you want to use point_charge, coulomb_HFYGB, homogeneus_charge_sphere, gaussian')
     args = parser.parse_args()
 
@@ -56,36 +68,49 @@ if __name__ == '__main__':
     ################# Call MRA #######################
     mra = vp.MultiResolutionAnalysis(box=[-args.box,args.box], order=args.order, max_depth = 30)
     prec = args.prec
+    thr = args.thr
     orb.orbital4c.mra = mra
     orb.orbital4c.light_speed = light_speed
     cf.complex_fcn.mra = mra
     derivative = args.deriv
     print('call MRA DONE')
 
+    steplist = 'step_list.txt'
+    atomlist = 'atom_list.txt'
+    steps = read_step_file(steplist)
+    coordinates, number = nucpot.read_file_with_named_lists(atomlist)
+
     ################## Jobs ##########################
-    computeNuclearPotential = True
-    readOrbitals            = True
+    computeNuclearPotential = False
+    readOrbitals            = False
+    readPotential           = False
     runD_1e                 = False
     runD2_1e                = False
     runCoulombGen           = False
-    runCoulomb2e            = False #Use it
+    runCoulomb2e            = False
     runKutzelnigg           = False
-    runKutzSimple           = True #I will use it
+    runKutzSimple           = False
     saveOrbitals            = False
+    savePotential           = False
     runGaunt                = False
     runGaugeA               = False
     runGaugeB               = False
     runGaugeC               = False
     runGaugeD               = False
     runGaugeDelta           = False
-    print('Jobs chosen')
+
+    for key in steps:
+        flag = (steps[key] == 'True')
+        locals()[key] = flag
+        print(key, steps[key], locals()[key])
+
+    if(computeNuclearPotential): print("hello")
 
     ################### Reading Atoms #########################
-    atomlist = 'atom_list.txt'  # Replace with the actual file name
+    steplist = 'step_list.txt'
+    atomlist = 'atom_list.txt'
     coordinates, number = nucpot.read_file_with_named_lists(atomlist)
 
-    print("Number of Atoms = ", number)
-    print(coordinates)
 
     ################### Define V potential ######################
     V_tree = vp.FunctionTree(mra)
@@ -96,14 +121,21 @@ if __name__ == '__main__':
         V_tree = Peps(f)
         print("Define V", args.potential, "DONE")
         com_coordinates = nucpot.calculate_center_of_mass(coordinates)
-        print("Center of Mass (x, y, z):", com_coordinates)
+    if(savePotential):
+        V_tree.saveTree(f"potential")
+        
+    if(readPotential):
+        V_tree.loadTree(f"potential")
+
+    print("Number of Atoms = ", number)
+    print(coordinates)
 
     #############################START WITH CALCULATION###################################
     spinorb1 = orb.orbital4c()
     spinorb2 = orb.orbital4c()
     if readOrbitals:
         spinorb1.read("spinorb1")
-        #spinorb2.read("spinorb2")
+        spinorb2 = spinorb1.ktrs(prec)
     else:
         gauss_tree_tot = vp.FunctionTree(mra)
         gauss_tree_tot.setZero()
@@ -128,32 +160,30 @@ if __name__ == '__main__':
         spinorb1.init_small_components(prec/10)
         spinorb1.normalize()
         spinorb1.cropLargeSmall(prec)
-        # print('Spin1', spinorb1)
         spinorb2 = spinorb1.ktrs(prec)
-
-        #print("spinorb1")
-        #print(spinorb1)
 
     length = 2 * args.box
     print("Using derivative ", derivative)
 
     if runD_1e:
-        spinorb1 = one_electron.gs_D_1e(spinorb1, V_tree, mra, prec, derivative)
+        spinorb1 = one_electron.gs_D_1e(spinorb1, V_tree, mra, prec, thr, derivative)
 
     if runD2_1e:
-        spinorb1 = one_electron.gs_D2_1e(spinorb1, V_tree, mra, prec, derivative)
+        spinorb1 = one_electron.gs_D2_1e(spinorb1, V_tree, mra, prec, thr, derivative)
 
     if runCoulombGen:
-        spinorb1, spinorb2 = two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec, derivative)
+        print("NOT ACTIVE")
+#        spinorb1, spinorb2 = two_electron.coulomb_gs_gen([spinorb1, spinorb2], V_tree, mra, prec, derivative)
 
     if runCoulomb2e:
-        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec, derivative)
+        spinorb1, spinorb2 = two_electron.coulomb_gs_2e(spinorb1, V_tree, mra, prec, thr, derivative)
 
     if runKutzelnigg:
-        spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, derivative)
+        print("NOT ACTIVE")
+#        spinorb1, spinorb2 = two_electron.coulomb_2e_D2([spinorb1, spinorb2], V_tree, mra, prec, derivative)
 
     if runKutzSimple:
-        spinorb1, spinorb2 = two_electron.coulomb_2e_D2_J([spinorb1, spinorb2], V_tree, mra, prec, derivative)
+        spinorb1, spinorb2 = two_electron.coulomb_2e_D2_J([spinorb1, spinorb2], V_tree, mra, prec, thr, derivative)
 
     if runGaunt:
         two_electron.calcGauntPert(spinorb1, spinorb2, mra, prec)
@@ -176,3 +206,4 @@ if __name__ == '__main__':
     if saveOrbitals:
         spinorb1.save("spinorb1")
         #spinorb2.save("spinorb2")
+
