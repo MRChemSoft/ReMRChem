@@ -1,0 +1,2544 @@
+BOX_SIZE: 5
+POT_TYPE: coulomb_HFYGB
+TWOELECTRON: False
+READORB: False
+SAVEORB: False
+ORBNAME: spinorb1
+P_PREC: 4
+P_THR: 3
+ORDER: 7
+ATOM: Ne
+CHARGE: 10
+XPOS: 0.0
+YPOS: 0.0
+ZPOS: 0.0
+RADIUS: 0.0001
+EXPONENT: 357222173.0
+D1_OR_D2: False
+READPOT: False
+SAVEPOT: True
+COMPPOT: True
+DERIVATIVE: BS
+INDEX: 0
+output_name: output-0.txt
+10 [0.0, 0.0, 0.0]
+Harrison potential
+Potential
+
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 7674.11
+  root scale: -2
+  order: 7
+  nodes: 1096
+  endNodes: 960
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+    scale=6  nodes=64
+    scale=7  nodes=64
+    scale=8  nodes=64
+    scale=9  nodes=64
+    scale=10  nodes=64
+    scale=11  nodes=64
+    scale=12  nodes=64
+    scale=13  nodes=64
+    scale=14  nodes=64
+    scale=15  nodes=64
+
+Using derivative  BS
+One-electron calculations 0.0001
+calc_dirac_mu 100.15201967928093 18728.722104819233 137.035999139
+Error 0.0011010164643532898
+Delta E 18728.722104819233
+Energy -50.142955204777536
+Converged?  0.0011010164643532898  >  0.001   ----   18728.722104819233  >  1e-05   ----  iteration 0
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998669
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 4.01188e-18
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 4.01188e-18
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 4.01188e-18
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000443528
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000443528
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000443528
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00479649122863 18728.795913350295 137.035999139
+Error 0.0004278224120718559
+Delta E 0.07380853106224095
+Energy -50.069146673715295
+Converged?  0.0004278224120718559  >  0.001   ----   0.07380853106224095  >  1e-05   ----  iteration 1
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998668
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 2.35429e-16
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 2.35429e-16
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 2.35429e-16
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000443932
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000443932
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000443932
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00811522075041 18728.79424954935 137.035999139
+Error 0.0001693486219423944
+Delta E 0.0016638009437883738
+Energy -50.07081047465908
+Converged?  0.0001693486219423944  >  0.001   ----   0.0016638009437883738  >  1e-05   ----  iteration 2
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998668
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61946e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61946e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61946e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.00044415
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.00044415
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.00044415
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00818185731136 18728.794216141996 137.035999139
+Error 9.210295817906534e-05
+Delta E 3.340735565871e-05
+Energy -50.07084388201474
+Converged?  9.210295817906534e-05  >  0.001   ----   3.340735565871e-05  >  1e-05   ----  iteration 3
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.58714e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.58714e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.58714e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444261
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444261
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444261
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00820480913998 18728.7942046354 137.035999139
+Error 4.884694620156261e-05
+Delta E 1.1506595910759643e-05
+Energy -50.07085538861065
+Converged?  4.884694620156261e-05  >  0.001   ----   1.1506595910759643e-05  >  1e-05   ----  iteration 4
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61313e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61313e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61313e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444318
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444318
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444318
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00820986801382 18728.7942020992 137.035999139
+Error 2.5447606658260972e-05
+Delta E 2.5361987354699522e-06
+Energy -50.07085792480939
+Converged?  2.5447606658260972e-05  >  0.001   ----   2.5361987354699522e-06  >  1e-05   ----  iteration 5
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61498e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61498e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61498e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444346
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444346
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444346
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821169364812 18728.794201183944 137.035999139
+Error 1.3096052785529658e-05
+Delta E 9.152572602033615e-07
+Energy -50.07085884006665
+Converged?  1.3096052785529658e-05  >  0.001   ----   9.152572602033615e-07  >  1e-05   ----  iteration 6
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61558e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61558e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61558e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.00044436
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.00044436
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.00044436
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821245796678 18728.794200800763 137.035999139
+Error 6.683247346916536e-06
+Delta E 3.8318103179335594e-07
+Energy -50.07085922324768
+Converged?  6.683247346916536e-06  >  0.001   ----   3.8318103179335594e-07  >  1e-05   ----  iteration 7
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61585e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61585e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61585e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444367
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444367
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444367
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821280479282 18728.794200626886 137.035999139
+Error 3.39116698156732e-06
+Delta E 1.7387719708494842e-07
+Energy -50.07085939712488
+Converged?  3.39116698156732e-06  >  0.001   ----   1.7387719708494842e-07  >  1e-05   ----  iteration 8
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61599e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61599e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61599e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444371
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444371
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444371
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821296901069 18728.79420054456 137.035999139
+Error 1.7140566252757329e-06
+Delta E 8.232746040448546e-08
+Energy -50.07085947945234
+Converged?  1.7140566252757329e-06  >  0.001   ----   8.232746040448546e-08  >  1e-05   ----  iteration 9
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61605e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61605e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61605e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444372
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444372
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444372
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821304864387 18728.794200504635 137.035999139
+Error 8.640968762614571e-07
+Delta E 3.992317942902446e-08
+Energy -50.07085951937552
+Converged?  8.640968762614571e-07  >  0.001   ----   3.992317942902446e-08  >  1e-05   ----  iteration 10
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61609e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61609e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61609e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444373
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444373
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444373
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821308772568 18728.79420048504 137.035999139
+Error 4.34831546760069e-07
+Delta E 1.9594153854995966e-08
+Energy -50.07085953896967
+Converged?  4.34831546760069e-07  >  0.001   ----   1.9594153854995966e-08  >  1e-05   ----  iteration 11
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.6161e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.6161e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.6161e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821310726182 18728.794200475248 137.035999139
+Error 2.1856870883680098e-07
+Delta E 9.793438948690891e-09
+Energy -50.07085954876311
+Converged?  2.1856870883680098e-07  >  0.001   ----   9.793438948690891e-09  >  1e-05   ----  iteration 12
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61611e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61611e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61611e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.0082131169553 18728.794200470387 137.035999139
+Error 1.0977637237617293e-07
+Delta E 4.8603396862745285e-09
+Energy -50.07085955362345
+Converged?  1.0977637237617293e-07  >  0.001   ----   4.8603396862745285e-09  >  1e-05   ----  iteration 13
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821312180204 18728.794200467957 137.035999139
+Error 5.5105909222448724e-08
+Delta E 2.4301698431372643e-09
+Energy -50.07085955605362
+Converged?  5.5105909222448724e-08  >  0.001   ----   2.4301698431372643e-09  >  1e-05   ----  iteration 14
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821312427144 18728.79420046672 137.035999139
+Error 2.7652466464816207e-08
+Delta E 1.2369127944111824e-09
+Energy -50.07085955729053
+Converged?  2.7652466464816207e-08  >  0.001   ----   1.2369127944111824e-09  >  1e-05   ----  iteration 15
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821312550296 18728.7942004661 137.035999139
+Error 1.3872841766913942e-08
+Delta E 6.184563972055912e-10
+Energy -50.07085955790899
+Converged?  1.3872841766913942e-08  >  0.001   ----   6.184563972055912e-10  >  1e-05   ----  iteration 16
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821312598224 18728.79420046586 137.035999139
+Error 6.958392143350944e-09
+Delta E 2.4010660126805305e-10
+Energy -50.070859558149095
+Converged?  6.958392143350944e-09  >  0.001   ----   2.4010660126805305e-10  >  1e-05   ----  iteration 17
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821312633774 18728.794200465683 137.035999139
+Error 3.4900941204868376e-09
+Delta E 1.7826096154749393e-10
+Energy -50.070859558327356
+Converged?  3.4900941204868376e-09  >  0.001   ----   1.7826096154749393e-10  >  1e-05   ----  iteration 18
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+calc_dirac_mu 100.00821312640439 18728.79420046565 137.035999139
+Error 1.750145570944906e-09
+Delta E 3.2741809263825417e-11
+Energy -50.0708595583601
+Converged?  1.750145570944906e-09  >  0.001   ----   3.2741809263825417e-11  >  1e-05   ----  iteration 19
+Large components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.998667
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 3.61612e-21
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+ Small components
+ alpha
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0
+  root scale: -2
+  order: 7
+  nodes: 8
+  endNodes: 8
+  nodes per scale: 
+    scale=-2  nodes=8
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+ beta
+Real part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+ Imag part 
+*FunctionTree: nn
+  genNodes: 0
+  square norm: 0.000444374
+  root scale: -2
+  order: 7
+  nodes: 456
+  endNodes: 400
+  nodes per scale: 
+    scale=-2  nodes=8
+    scale=-1  nodes=64
+    scale=0  nodes=64
+    scale=1  nodes=64
+    scale=2  nodes=64
+    scale=3  nodes=64
+    scale=4  nodes=64
+    scale=5  nodes=64
+
+Classic-like energies: cke = 50.52947961731555 cpe = -100.51588985100338 cke + cpe = -49.98641023368783
+Exact Energy =  -50.06674201684291
+Dirac Energy =  -50.070859558385564
+Kutze Energy =  -50.053115926655934
+Error Kutze  =  0.01362609018542571
+Error Dirac  =  -0.00411754154265509
+Delta Energy =  -2.546585164964199e-11
+Dirac - Kutzelnigg =  -0.0177436317280808

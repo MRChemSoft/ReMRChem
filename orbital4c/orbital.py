@@ -101,7 +101,7 @@ class orbital4c:
         largeNorm = np.sqrt(self.squaredLargeNorm())
         smallNorm = np.sqrt(self.squaredSmallNorm())
         precLarge = prec * largeNorm
-        precSmall = prec * smallNorm
+        precSmall = prec * largeNorm / 100
 #        print('precisions', precLarge, precSmall)
         self['La'].crop(precLarge, True)
         self['Lb'].crop(precLarge, True)
@@ -328,6 +328,18 @@ class orbital4c:
             result += component
         return result
 
+def print_expectation_value_VV(psi, V, prec):
+    v_psi = apply_potential(-1.0, V, psi, prec)
+    vv_psi = apply_potential(-1.0, V, v_psi, prec)
+    V2 = V * V
+    v2_psi = apply_potential(1.0, V2, psi, prec)
+    exp1 = v_psi.dot(v_psi).real
+    exp2 = psi.dot(vv_psi).real
+    exp3 = psi.dot(v2_psi).real
+    print("<v_psi |  v_psi> = ", exp1) 
+    print("<  psi | vv_psi> = ", exp2) 
+    print("<  psi | v2_psi> = ", exp3) 
+
 def apply_dirac_hamiltonian(orbital, prec, shift = 0.0, der = 'ABGV'):
     beta_phi = orbital.beta(shift)
     grad_phi = orbital.gradient(der)
@@ -440,7 +452,10 @@ def alpha_gradient(orbital, prec):
     return out
 
 def calc_dirac_mu(energy, light_speed):
-    return np.sqrt((light_speed**4-energy**2)/light_speed**2)
+    val = (light_speed**4-energy**2)/light_speed**2
+    print("calc_dirac_mu", val, energy, light_speed)
+    mu = np.sqrt(val)
+    return mu
 
 def calc_kutzelnigg_mu(energy_sq, light_speed):
     c2 = light_speed**2
@@ -448,9 +463,11 @@ def calc_kutzelnigg_mu(energy_sq, light_speed):
     return np.sqrt(-val)
 
 def calc_non_rel_mu(energy):
-    if energy > 0:
-        return np.sqrt(2.0 * energy)
-    elif energy < 0:
+    if energy < 0:
         return np.sqrt(-2.0 * energy)
+    else:
+        print("Positive energy")
+        exit(-1)
+
     
     
